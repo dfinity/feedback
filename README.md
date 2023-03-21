@@ -1,4 +1,4 @@
-# Developer Feedback Board
+# DX Feedback Board (name TBD)
 
 > #### An IC developer feedback dapp powered by Motoko.
 
