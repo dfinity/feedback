@@ -1,7 +1,7 @@
 import React from 'react';
 import 'twin.macro';
 // @ts-ignore
-import icpLogo from '../assets/icp.png?webp&height=32';
+import icpLogo from '../assets/icp.png?webp&height=24';
 import { Link } from 'react-router-dom';
 
 function NavItem({ to, children }) {
