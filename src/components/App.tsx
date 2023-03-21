@@ -1,11 +1,19 @@
 import React from 'react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import FeedbackPage from './pages/FeedbackPage';
+import LoginPage from './pages/LoginPage';
+import Navbar from './Navbar';
 
 export default function App() {
   return (
     <>
-      <div className="d-flex w-full h-screen">
-        <h1>Hello!</h1>
-      </div>
+      <Navbar />
+      <Router>
+        <Routes>
+          <Route path="/" element={<FeedbackPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </Router>
     </>
   );
 }
