@@ -9,7 +9,7 @@ actor class Main() {
   };
 
   // Increment the count by one
-  public func inc() {
+  public func inc() : async () {
     counter += 1;
   };
 };
