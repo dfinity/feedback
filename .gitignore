@@ -28,3 +28,6 @@ yarn-error.log*
 # package managers
 .vessel
 .mops
+
+# declarations
+/src/declarations

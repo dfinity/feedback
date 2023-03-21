@@ -5,18 +5,20 @@
   "private": true,
   "scripts": {
     "setup": "npm install && dfx canister create backend && dfx generate backend && dfx deploy",
-    "dfx": "dfx start --clean",
-    "start": "run-p dfx frontend backend",
+    "start": "run-p frontend backend",
     "frontend": "vite --port 3000",
     "backend": "mo-dev --generate --deploy -y",
     "build:frontend": "vite build",
     "build": "npm run build:frontend",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy": "npm run test && npm run build && netlify deploy --dir=dist",
+    "deploy": "npm run test && dfx deploy",
     "deploy:prod": "npm run test && npm run build && netlify deploy --dir=dist --prod",
+    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\" \"backend/**/*.mo\"",
     "prepare": "husky install",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "sources": "mops sources",
+    "postinstall": "mops install"
   },
   "dependencies": {
     "classnames": "2.3.2",

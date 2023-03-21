@@ -1,0 +1,5 @@
+service : {
+  add: (nat) -> () oneway;
+  get: () -> (nat) query;
+  inc: () -> () oneway;
+}
