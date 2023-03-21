@@ -25,6 +25,7 @@ export default function Navbar() {
           <img src={icpLogo} alt="Internet Computer" />
         </a>
         <NavItem to="/">Feedback</NavItem>
+        <NavItem to="/history">History</NavItem>
       </div>
       <NavItem to="/login">Login</NavItem>
     </div>
