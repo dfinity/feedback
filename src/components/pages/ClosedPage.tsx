@@ -8,7 +8,11 @@ export default function FeedbackPage() {
   return (
     <>
       <div className="d-flex w-full h-screen">
-        <FeedbackList items={items.filter((item) => item.status === 'open')} />
+        <FeedbackList
+          items={items.filter(
+            (item) => item.status === 'completed' || item.status === 'closed',
+          )}
+        />
       </div>
     </>
   );
