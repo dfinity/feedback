@@ -1,4 +1,5 @@
 import React from 'react';
+import 'twin.macro';
 import { FeedbackItem } from '../stores/feedbackStore';
 
 export interface FeedbackItemProps {
@@ -12,5 +13,5 @@ export default function FeedbackItemView({
   expanded,
   onChangeExpanded,
 }: FeedbackItemProps) {
-  return <div>{item.name}</div>;
+  return <div tw="p-2">{item.name}</div>;
 }

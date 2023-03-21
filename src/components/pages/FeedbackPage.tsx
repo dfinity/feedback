@@ -1,12 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useFeedbackStore } from '../../stores/feedbackStore';
+import FeedbackList from '../FeedbackList';
 
 export default function FeedbackPage() {
+  const feedbackState = useFeedbackStore();
+
   return (
     <>
       <div className="d-flex w-full h-screen">
-        <h1>Hello!</h1>
-        <Link to="/login">Login</Link>
+        <FeedbackList state={feedbackState} />
       </div>
     </>
   );
