@@ -1,6 +1,6 @@
 // Placeholder
 
-actor {
+actor class Main() {
   stable var counter = 0;
 
   // Get the current count

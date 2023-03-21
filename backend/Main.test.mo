@@ -1,5 +1,5 @@
-// import Main "./Main";
+import { Main } "./Main";
 
-// assert (await Main.get()) == 0;
+let service = await Main();
 
-assert true;
+assert (await service.get()) == 0;
