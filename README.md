@@ -25,11 +25,15 @@ When ready, run `dfx deploy` to build and deploy your application.
 
 ## Technology Stack
 
+**Front-end Webapp:**
+- [TypeScript](https://www.typescriptlang.org/): JavaScript extended with syntax for types
 - [Vite](https://vitejs.dev/): high-performance tooling for front-end web development
 - [React](https://reactjs.org/): a component-based UI library
-- [TypeScript](https://www.typescriptlang.org/): JavaScript extended with syntax for types
+- [Zustand](https://www.npmjs.com/package/zustand): a simple, clean state management library
 - [Sass](https://sass-lang.com/): an extended syntax for CSS stylesheets
 - [Prettier](https://prettier.io/): code formatting for a wide range of supported languages
+
+**Back-end Service:**
 - [Motoko](https://github.com/dfinity/motoko#readme): a safe and simple programming language for the Internet Computer
 - [mo-dev](https://github.com/dfinity/motoko-dev-server#readme): a live reload development server for Motoko
 - [MOPS](https://j4mwm-bqaaa-aaaam-qajbq-cai.ic0.app/): an on-chain community package manager for Motoko

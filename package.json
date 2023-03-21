@@ -22,10 +22,14 @@
     "postinstall": "mops install"
   },
   "dependencies": {
+    "@dfinity/agent": "^0.15.4",
+    "@dfinity/candid": "^0.15.4",
+    "@dfinity/principal": "^0.15.4",
     "classnames": "2.3.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-icons": "4.8.0"
+    "react-icons": "4.8.0",
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@netlify/functions": "1.4.0",
