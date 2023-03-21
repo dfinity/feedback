@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { FeedbackState } from '../stores/feedbackStore';
+import { FeedbackItem } from '../stores/feedbackStore';
 import FeedbackItemView from './FeedbackItemView';
 
 export interface FeedbackListProps {
-  state: FeedbackState;
+  items: FeedbackItem[];
 }
 
-export default function FeedbackList({ state }: FeedbackListProps) {
+export default function FeedbackList({ items }: FeedbackListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
   return (
     <div>
-      {state.items.map((item) => (
+      {items.map((item) => (
         <FeedbackItemView
+          key={item.id}
           item={item}
           expanded={item.id === expandedId}
           onChangeExpanded={(expanded) =>

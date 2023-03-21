@@ -1,7 +1,7 @@
 import React from 'react';
 import 'twin.macro';
 // @ts-ignore
-import icpLogo from '../assets/icp.png?webp&height=32';
+import icpLogo from '../assets/icp.png?webp&height=24';
 import { Link } from 'react-router-dom';
 
 function NavItem({ to, children }) {
@@ -25,6 +25,7 @@ export default function Navbar() {
           <img src={icpLogo} alt="Internet Computer" />
         </a>
         <NavItem to="/">Feedback</NavItem>
+        <NavItem to="/history">History</NavItem>
       </div>
       <NavItem to="/login">Login</NavItem>
     </div>
