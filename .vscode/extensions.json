@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+      "dfinity-foundation.vscode-motoko",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "lightyen.tailwindcss-intellisense-twin"
+    ]
+  }
+  
