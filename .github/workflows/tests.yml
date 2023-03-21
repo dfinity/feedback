@@ -22,6 +22,10 @@ jobs:
       matrix:
         node-version: [18.x]
         # TODO: determine Node.js version based on Netlify environment
+    
+    env:
+      DFX_VERSION: 0.13.1
+      VESSEL_VERSION: 0.6.5
 
     steps:
     - uses: actions/checkout@v3
@@ -33,8 +37,6 @@ jobs:
     - name: Install dfx
       run: |
         echo y | DFX_VERSION=$DFX_VERSION bash -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
-        wget https://github.com/chenyan2002/ic-repl/releases/download/$IC_REPL_VERSION/ic-repl-linux64
-        cp ./ic-repl-linux64 /usr/local/bin/ic-repl
         chmod a+x /usr/local/bin/ic-repl
         wget https://github.com/dfinity/vessel/releases/download/$VESSEL_VERSION/vessel-linux64
         cp ./vessel-linux64 /usr/local/bin/vessel
