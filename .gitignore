@@ -25,9 +25,10 @@ yarn-error.log*
 # local Netlify folder
 .netlify
 
-# package managers
+# cache directories
 .vessel
 .mops
+.dfx
 
 # declarations
 /src/declarations

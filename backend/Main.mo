@@ -12,9 +12,4 @@ actor {
   public func inc() {
     counter += 1;
   };
-
-  // Add `n` to the current count
-  public func add(n : Nat) {
-    counter += n;
-  };
 };

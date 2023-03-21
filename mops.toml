@@ -1,1 +1,4 @@
+# Motoko dependencies (https://mops.one/)
+
+[dependencies]
 base = "https://github.com/dfinity/motoko-base"
