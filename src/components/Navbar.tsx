@@ -14,7 +14,7 @@ function NavItem({ to, children }) {
 
 export default function Navbar() {
   return (
-    <div tw="w-full flex bg-gray-100 items-center">
+    <div tw="w-full flex items-center bg-gray-100 text-gray-800">
       <div tw="w-full flex items-center">
         <a
           tw="h-full px-5"
