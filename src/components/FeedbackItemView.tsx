@@ -22,16 +22,24 @@ export default function FeedbackItemView({
         <div tw="w-full">{item.name}</div>
       </div>
       {!!expanded && (
-        <div tw="p-2">
+        <div tw="pt-3 p-5">
           <div>
             {item.description || (
               <span tw="opacity-50">(No description provided)</span>
             )}
           </div>
+          {!!item.links.length && <hr tw="my-3" />}
           <div>
-            {item.links.map((i, link) => (
+            {item.links.map((link, i) => (
               <div key={i}>
-                <a href="link">{link}</a>
+                <a
+                  tw="text-blue-500"
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {link}
+                </a>
               </div>
             ))}
           </div>
