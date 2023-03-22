@@ -31,7 +31,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
   const updateItem = (item: FeedbackItem) =>
     set((state) => ({
       ...state,
-      items: [...state.items.filter((other) => item.id !== other.id)],
+      items: state.items.map((other) => (item.id === other.id ? item : other)),
     }));
 
   let nextId = 0; // temp
@@ -102,7 +102,11 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
       // TODO: call backend
     },
     async vote(item: FeedbackItem, vote: VoteStatus) {
-      updateItem({ ...item, votes: item.votes + vote, yourVote: vote });
+      updateItem({
+        ...item,
+        votes: item.votes + vote - item.yourVote,
+        yourVote: vote,
+      });
       // TODO: call backend
     },
     async changeStatus(item: FeedbackItem, state: FeedbackStatus) {

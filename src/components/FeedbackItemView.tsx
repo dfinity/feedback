@@ -1,13 +1,13 @@
 import React from 'react';
 import 'twin.macro';
-import { FeedbackItem } from '../stores/feedbackStore';
+import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 
 export interface FeedbackItemProps {
   item: FeedbackItem;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
-  onVote?(voted: boolean): void;
+  onVote?(voteStatus: VoteStatus): void;
 }
 
 export default function FeedbackItemView({
@@ -25,14 +25,17 @@ export default function FeedbackItemView({
         <>
           {!!onVote && (
             <div
-              tw="flex items-center gap-2 cursor-default"
+              tw="flex items-center gap-2 cursor-default select-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div>
-                <FaCaretUp tw="cursor-pointer" onClick={() => onVote?.(true)} />
+                <FaCaretUp
+                  tw="cursor-pointer"
+                  onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
+                />
                 <FaCaretDown
                   tw="cursor-pointer"
-                  onClick={() => onVote?.(false)}
+                  onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>
               <span tw="opacity-75">{item.votes}</span>

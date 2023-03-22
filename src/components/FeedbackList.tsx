@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { FeedbackItem } from '../stores/feedbackStore';
+import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
 import FeedbackItemView from './FeedbackItemView';
 import 'twin.macro';
 
 export interface FeedbackListProps {
   items: FeedbackItem[];
-  onVote?(item: FeedbackItem, voted: boolean): void;
+  onVote?(item: FeedbackItem, voteStatus: VoteStatus): void;
 }
 
 export default function FeedbackList({ items, onVote }: FeedbackListProps) {

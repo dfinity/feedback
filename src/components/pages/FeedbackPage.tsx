@@ -11,7 +11,7 @@ export default function FeedbackPage() {
       <div className="d-flex w-full h-screen">
         <FeedbackList
           items={items.filter((item) => item.status === 'open')}
-          onVote={(item, voted) => vote(item, voted)}
+          onVote={(item, voteStatus) => vote(item, voteStatus)}
         />
       </div>
     </>

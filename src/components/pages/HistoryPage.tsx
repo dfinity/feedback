@@ -11,7 +11,7 @@ export default function HistoryPage() {
       <div className="d-flex w-full h-screen">
         <FeedbackList
           items={items.filter((item) => item.status === 'completed')}
-          onVote={(item, voted) => vote(item, voted)}
+          onVote={(item, voteStatus) => vote(item, voteStatus)}
         />
       </div>
     </>
