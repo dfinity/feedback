@@ -11,7 +11,7 @@ export default function App() {
     <>
       <Router>
         <Navbar />
-        <div tw="max-w-[600px] mx-auto">
+        <div tw="max-w-[800px] mx-auto">
           <Routes>
             <Route path="/" element={<FeedbackPage />} />
             <Route path="/history" element={<HistoryPage />} />
