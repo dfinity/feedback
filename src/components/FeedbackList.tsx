@@ -5,9 +5,10 @@ import 'twin.macro';
 
 export interface FeedbackListProps {
   items: FeedbackItem[];
+  onVote?(item: FeedbackItem, voted: boolean): void;
 }
 
-export default function FeedbackList({ items }: FeedbackListProps) {
+export default function FeedbackList({ items, onVote }: FeedbackListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
   return (
@@ -20,6 +21,7 @@ export default function FeedbackList({ items }: FeedbackListProps) {
           onChangeExpanded={(expanded) =>
             setExpandedId(expanded ? item.id : undefined)
           }
+          onVote={onVote && ((voted) => onVote?.(item, voted))}
         />
       ))}
     </div>

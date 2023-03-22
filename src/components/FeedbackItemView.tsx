@@ -1,25 +1,45 @@
 import React from 'react';
 import 'twin.macro';
 import { FeedbackItem } from '../stores/feedbackStore';
+import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 
 export interface FeedbackItemProps {
   item: FeedbackItem;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
+  onVote?(voted: boolean): void;
 }
 
 export default function FeedbackItemView({
   item,
   expanded,
   onChangeExpanded,
+  onVote,
 }: FeedbackItemProps) {
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-xl flex rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-xl flex items-center gap-3 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
-        <div tw="w-full">{item.name}</div>
+        <>
+          {!!onVote && (
+            <div
+              tw="flex items-center gap-2 cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div>
+                <FaCaretUp tw="cursor-pointer" onClick={() => onVote?.(true)} />
+                <FaCaretDown
+                  tw="cursor-pointer"
+                  onClick={() => onVote?.(false)}
+                />
+              </div>
+              <span tw="opacity-75">{item.votes}</span>
+            </div>
+          )}
+          <div tw="w-full">{item.name}</div>
+        </>
       </div>
       {!!expanded && (
         <div tw="px-5 py-3">

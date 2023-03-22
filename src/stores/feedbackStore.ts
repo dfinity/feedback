@@ -2,31 +2,41 @@ import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
 
 export type FeedbackStatus = 'open' | 'completed' | 'closed';
-export interface FeedbackItem {
-  id: string;
-  owner: Principal;
+export type VoteStatus = 1 | 0 | -1;
+
+export interface FeedbackItemDetails {
   name: string;
   description: string;
   links: string[];
+}
+
+export interface FeedbackItem extends FeedbackItemDetails {
+  id: string;
+  owner: Principal;
   votes: number;
+  yourVote: VoteStatus;
   status: FeedbackStatus;
 }
 
 export interface FeedbackState {
   items: FeedbackItem[];
   loading: boolean;
-  nextId: number; // temp
+  create(details: FeedbackItemDetails): Promise<void>;
+  edit(item: FeedbackItem): Promise<void>; // backend could use `edit(id: Nat, details: FeedbackItemDetails)`
+  vote(item: FeedbackItem, vote: VoteStatus): Promise<void>;
+  changeStatus(item: FeedbackItem, state: FeedbackStatus): Promise<void>;
 }
 
-export const useFeedbackStore = create<FeedbackState>((set) => {
+export const useFeedbackStore = create<FeedbackState>((set, get) => {
   const updateItem = (item: FeedbackItem) =>
     set((state) => ({
       ...state,
       items: [...state.items.filter((other) => item.id !== other.id)],
     }));
 
+  let nextId = 0; // temp
+
   return {
-    // items: [],
     items: [
       {
         id: '0000',
@@ -35,6 +45,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         links: [],
         owner: Principal.anonymous(),
         votes: 0,
+        yourVote: 0,
         status: 'open',
       },
       {
@@ -44,6 +55,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         links: ['https://github.com/dfinity/feedback/issues/1'],
         owner: Principal.anonymous(),
         votes: 3,
+        yourVote: 0,
         status: 'open',
       },
       {
@@ -53,6 +65,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         links: [],
         owner: Principal.anonymous(),
         votes: 5,
+        yourVote: 0,
         status: 'completed',
       },
       {
@@ -62,34 +75,39 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         links: [],
         owner: Principal.anonymous(),
         votes: 0,
+        yourVote: 0,
         status: 'closed',
       },
     ],
     loading: false,
-    nextId: 0, // temp
-    create: (name: string, description: string, links: string[]) =>
+    async create(details: FeedbackItemDetails) {
       set((state) => ({
         ...state,
         items: [
           ...state.items,
           {
-            id: String(state.nextId++),
-            name,
-            description,
-            links,
+            ...details,
+            id: String(nextId++),
             owner: Principal.anonymous(),
             votes: 0,
+            yourVote: 0,
             status: 'open',
           },
         ],
-      })),
-    submit: (item: FeedbackItem) => updateItem(item), // TODO: call backend
-    edit: (item: FeedbackItem) => updateItem(item), // TODO: call backend
-    upvote: (item: FeedbackItem) =>
-      updateItem({ ...item, votes: item.votes + 1 }), // TODO: call backend
-    downvote: (item: FeedbackItem) =>
-      updateItem({ ...item, votes: item.votes + 1 }), // TODO: call backend
-    changeStatus: (item: FeedbackItem, state: FeedbackStatus) =>
-      updateItem({ ...item, status: state }), // TODO: call backend
+      }));
+      // TODO: call backend
+    },
+    async edit(item: FeedbackItem) {
+      updateItem(item);
+      // TODO: call backend
+    },
+    async vote(item: FeedbackItem, vote: VoteStatus) {
+      updateItem({ ...item, votes: item.votes + vote, yourVote: vote });
+      // TODO: call backend
+    },
+    async changeStatus(item: FeedbackItem, state: FeedbackStatus) {
+      updateItem({ ...item, status: state });
+      // TODO: call backend
+    },
   };
 });
