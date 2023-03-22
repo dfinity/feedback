@@ -22,7 +22,7 @@ export default function FeedbackItemView({
         <div tw="w-full">{item.name}</div>
       </div>
       {!!expanded && (
-        <div tw="pt-3 p-5">
+        <div tw="px-5 py-3">
           <div>
             {item.description || (
               <span tw="opacity-50">(No description provided)</span>
