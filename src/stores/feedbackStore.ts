@@ -14,6 +14,7 @@ export interface FeedbackItem {
 export interface FeedbackState {
   items: FeedbackItem[];
   loading: boolean;
+  nextId: number; // temp
 }
 
 export const useFeedbackStore = create<FeedbackState>((set) => {
@@ -27,7 +28,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
     // items: [],
     items: [
       {
-        id: '000',
+        id: '0000',
         name: 'Example item',
         links: [],
         owner: Principal.anonymous(),
@@ -35,7 +36,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         status: 'open',
       },
       {
-        id: '111',
+        id: '1111',
         name: 'Another example item',
         links: ['https://github.com/dfinity/feedback/issues/1'],
         owner: Principal.anonymous(),
@@ -43,7 +44,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         status: 'open',
       },
       {
-        id: '222',
+        id: '2222',
         name: 'Completed item',
         links: [],
         owner: Principal.anonymous(),
@@ -51,7 +52,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
         status: 'completed',
       },
       {
-        id: '222',
+        id: '3333',
         name: 'Closed item',
         links: [],
         owner: Principal.anonymous(),
@@ -60,6 +61,22 @@ export const useFeedbackStore = create<FeedbackState>((set) => {
       },
     ],
     loading: false,
+    nextId: 0, // temp
+    create: (name: string, links: string[]) =>
+      set((state) => ({
+        ...state,
+        items: [
+          ...state.items,
+          {
+            id: String(state.nextId++),
+            name,
+            links,
+            owner: Principal.anonymous(),
+            votes: 0,
+            status: 'open',
+          },
+        ],
+      })),
     submit: (item: FeedbackItem) => updateItem(item), // TODO: call backend
     edit: (item: FeedbackItem) => updateItem(item), // TODO: call backend
     upvote: (item: FeedbackItem) =>

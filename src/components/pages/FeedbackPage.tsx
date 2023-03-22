@@ -3,7 +3,7 @@ import { useFeedbackStore } from '../../stores/feedbackStore';
 import FeedbackList from '../FeedbackList';
 
 export default function FeedbackPage() {
-  const { items } = useFeedbackStore();
+  const items = useFeedbackStore((state) => state.items);
 
   return (
     <>
