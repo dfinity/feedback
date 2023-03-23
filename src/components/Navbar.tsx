@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
-import icpLogo from '../assets/icp.png?webp&height=24';
+import icpLogo from '../assets/icp.png?webp&height=48';
 import { LoginArea } from './LoginArea';
 
 interface NavItemProps {
@@ -27,7 +27,7 @@ export default function Navbar() {
           target="_blank"
           rel="noreferrer"
         >
-          <img src={icpLogo} alt="Internet Computer" />
+          <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
         </a>
         <NavItem to="/">Feedback</NavItem>
         <NavItem to="/history">History</NavItem>
