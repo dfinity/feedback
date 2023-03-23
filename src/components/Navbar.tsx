@@ -46,7 +46,7 @@ export default function Navbar() {
           <NavItem to="/">Feedback</NavItem>
           <NavItem to="/history">History</NavItem>
         </div>
-        {isMobile ? (
+        {isMobile || user ? (
           <Link to="/profile" tw="flex items-center">
             <LoginAreaButton>
               {user ? <FaUserCircle /> : <FaRegUserCircle />}

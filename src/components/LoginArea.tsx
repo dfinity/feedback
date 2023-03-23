@@ -1,15 +1,8 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import {
-  FaGithub,
-  FaGoogle,
-  FaSignOutAlt,
-  FaTwitter,
-  FaUserCircle,
-} from 'react-icons/fa';
+import { FaGithub, FaGoogle, FaTwitter } from 'react-icons/fa';
 import styled, { keyframes } from 'styled-components';
 import tw from 'twin.macro';
 // @ts-ignore
-import { Link } from 'react-router-dom';
 import astronautLogo from '../assets/astronaut.svg';
 import { useIdentityStore } from '../stores/identityStore';
 
@@ -34,10 +27,9 @@ export interface LoginAreaProps {
 
 export default function LoginArea({ label }: LoginAreaProps) {
   // TODO: refactor Auth0 logic into `identityStore`
-  const { loginWithRedirect, logout } = useAuth0();
-  const user = useIdentityStore((state) => state.user);
+  const { loginWithRedirect } = useAuth0();
+  // const user = useIdentityStore((state) => state.user);
   const loginII = useIdentityStore((state) => state.loginInternetIdentity);
-  const logoutII = useIdentityStore((state) => state.logout);
 
   const onLoginError = (err: any) => {
     // TODO: error banner UI
@@ -46,43 +38,21 @@ export default function LoginArea({ label }: LoginAreaProps) {
 
   return (
     <div tw="flex gap-1 items-center">
-      {user ? (
-        <>
-          <Link to="/profile">
-            <LoginAreaButton tw="flex gap-1 items-center">
-              <FaUserCircle />
-            </LoginAreaButton>
-          </Link>
-          <LoginAreaButton
-            tw="flex gap-1 items-center"
-            onClick={() =>
-              Promise.all([logout(), logoutII()]).catch(onLoginError)
-            }
-          >
-            <FaSignOutAlt />
-          </LoginAreaButton>
-        </>
-      ) : (
-        <>
-          <span tw="mr-3 uppercase font-bold opacity-60 select-none">
-            Login:
-          </span>
-          <LoginAreaButton
-            onClick={() => loginII().catch(onLoginError)}
-            tw="p-1 flex items-center justify-center w-[48px] h-[48px]"
-          >
-            <PulsingImage src={astronautLogo} alt="Internet Identity" />
-          </LoginAreaButton>
-          <LoginAreaButton
-            tw="flex gap-1 items-center"
-            onClick={() => loginWithRedirect().catch(onLoginError)}
-          >
-            <FaGoogle />
-            <FaGithub />
-            <FaTwitter />
-          </LoginAreaButton>
-        </>
-      )}
+      <span tw="mr-3 uppercase font-bold opacity-60 select-none">Login:</span>
+      <LoginAreaButton
+        onClick={() => loginII().catch(onLoginError)}
+        tw="p-1 flex items-center justify-center w-[48px] h-[48px]"
+      >
+        <PulsingImage src={astronautLogo} alt="Internet Identity" />
+      </LoginAreaButton>
+      <LoginAreaButton
+        tw="flex gap-1 items-center"
+        onClick={() => loginWithRedirect().catch(onLoginError)}
+      >
+        <FaGoogle />
+        <FaGithub />
+        <FaTwitter />
+      </LoginAreaButton>
     </div>
   );
 }
