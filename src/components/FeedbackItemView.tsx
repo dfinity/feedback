@@ -1,5 +1,8 @@
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
+import tw from 'twin.macro';
+
+const voteStyle = tw`text-orange-500`;
 
 export interface FeedbackItemProps {
   item: FeedbackItem;
@@ -29,10 +32,12 @@ export default function FeedbackItemView({
               <div>
                 <FaCaretUp
                   tw="cursor-pointer"
+                  css={[item.yourVote === 1 && voteStyle]}
                   onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
                   tw="cursor-pointer"
+                  css={[item.yourVote === -1 && voteStyle]}
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>
