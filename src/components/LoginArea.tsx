@@ -9,12 +9,19 @@ export function LoginArea() {
   const { loginWithRedirect } = useAuth0();
   const login = useIdentityStore((state) => state.login);
 
+  const onLoginError = (err: any) => {
+    // TODO: error banner UI
+    throw err;
+  };
+
   return (
     <div tw="flex gap-1 items-center">
-      <LoginButton onClick={() => login()}>Identity</LoginButton>
+      <LoginButton onClick={() => login().catch(onLoginError)}>
+        Identity
+      </LoginButton>
       <LoginButton
         tw="flex gap-1 items-center"
-        onClick={() => loginWithRedirect()}
+        onClick={() => loginWithRedirect().catch(onLoginError)}
       >
         <FaGoogle />
         <FaGithub />
