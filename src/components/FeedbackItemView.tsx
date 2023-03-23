@@ -18,13 +18,13 @@ export default function FeedbackItemView({
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-xl flex items-center gap-3 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
           {!!onVote && (
             <div
-              tw="flex items-center gap-3 cursor-default select-none"
+              tw="flex items-center gap-2 cursor-default select-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div>
@@ -34,12 +34,12 @@ export default function FeedbackItemView({
                   onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
-                  tw="cursor-pointer"
+                  tw="cursor-pointer -translate-y-1"
                   css={[item.yourVote === -1 && tw`text-red-500`]}
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>
-              <span tw="opacity-75">{item.votes}</span>
+              <span tw="opacity-60 text-lg font-bold">{item.votes}</span>
             </div>
           )}
           <div tw="w-full">{item.name}</div>

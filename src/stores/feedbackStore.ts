@@ -54,7 +54,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         links: ['https://github.com/dfinity/feedback/issues/1'],
         owner: Principal.anonymous(),
         votes: 3,
-        yourVote: 0,
+        yourVote: 1,
         status: 'open',
       },
       {
