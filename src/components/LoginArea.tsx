@@ -39,7 +39,7 @@ export default function LoginArea({ label }: LoginAreaProps) {
 
   return (
     <div tw="flex gap-1 items-center">
-      <span tw="mr-3 uppercase font-bold opacity-60 select-none">Login:</span>
+      <span tw="mr-3 font-semibold opacity-70 select-none">Sign in:</span>
       <Tooltip
         content="Internet Identity"
         // position="bottom"
