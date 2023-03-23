@@ -5,6 +5,7 @@ import tw from 'twin.macro';
 // @ts-ignore
 import astronautLogo from '../assets/astronaut.svg';
 import { useIdentityStore } from '../stores/identityStore';
+import Tooltip from './Tooltip';
 
 const pulseAnimation = keyframes`
   0% {
@@ -39,20 +40,34 @@ export default function LoginArea({ label }: LoginAreaProps) {
   return (
     <div tw="flex gap-1 items-center">
       <span tw="mr-3 uppercase font-bold opacity-60 select-none">Login:</span>
-      <LoginAreaButton
-        onClick={() => loginII().catch(onLoginError)}
-        tw="p-1 flex items-center justify-center w-[48px] h-[48px]"
+      <Tooltip
+        content="Internet Identity"
+        // position="bottom"
+        // trigger="mouseenter"
+        // animation="scale"
       >
-        <PulsingImage src={astronautLogo} alt="Internet Identity" />
-      </LoginAreaButton>
-      <LoginAreaButton
-        tw="flex gap-1 items-center"
-        onClick={() => loginWithRedirect().catch(onLoginError)}
+        <LoginAreaButton
+          onClick={() => loginII().catch(onLoginError)}
+          tw="p-1 flex items-center justify-center w-[48px] h-[48px]"
+        >
+          <PulsingImage src={astronautLogo} alt="Internet Identity" />
+        </LoginAreaButton>
+      </Tooltip>
+      <Tooltip
+        content="Social Login"
+        // position="bottom"
+        // trigger="mouseenter"
+        // animation="scale"
       >
-        <FaGoogle />
-        <FaGithub />
-        <FaTwitter />
-      </LoginAreaButton>
+        <LoginAreaButton
+          tw="flex gap-1 items-center"
+          onClick={() => loginWithRedirect().catch(onLoginError)}
+        >
+          <FaGoogle />
+          <FaGithub />
+          <FaTwitter />
+        </LoginAreaButton>
+      </Tooltip>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { Auth0Provider } from '@auth0/auth0-react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import 'twin.macro';
-
 import App from './components/App';
+
+import 'tippy.js/dist/tippy.css';
+import 'twin.macro';
 import './styles/index.scss';
 
 const rootElement = document.getElementById('root')!;
