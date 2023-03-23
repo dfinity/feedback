@@ -5,6 +5,11 @@ import { imagetools } from 'vite-imagetools';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  esbuild: {
+    jsxFactory: 'jsx',
+    jsxInject: 'import React from "react"; import "twin.macro"',
+    jsxImportSource: '@emotion/react',
+  },
   plugins: [
     react({
       babel: {

@@ -1,10 +1,8 @@
-import React from 'react';
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './Navbar';
 import FeedbackPage from './pages/FeedbackPage';
 import HistoryPage from './pages/HistoryPage';
 import LoginPage from './pages/LoginPage';
-import 'twin.macro';
 
 export default function App() {
   return (
