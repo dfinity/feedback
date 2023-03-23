@@ -61,11 +61,13 @@ export default function Navbar() {
           <NavItem to="/history">History</NavItem>
         </div>
         {isMobile || user ? (
-          <Link to="/profile" tw="flex items-center">
-            <LoginAreaButton>
-              {user ? <FaUserCircle /> : <FaRegUserCircle />}
-            </LoginAreaButton>
-          </Link>
+          <Tooltip content="Profile">
+            <Link to="/profile" tw="flex items-center">
+              <LoginAreaButton>
+                {user ? <FaUserCircle /> : <FaRegUserCircle />}
+              </LoginAreaButton>
+            </Link>
+          </Tooltip>
         ) : (
           <LoginArea />
         )}

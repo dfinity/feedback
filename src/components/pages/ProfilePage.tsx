@@ -2,6 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { useIdentityStore } from '../../stores/identityStore';
 import LoginArea, { LoginAreaButton } from '../LoginArea';
+import Tooltip from '../Tooltip';
 
 export default function ProfilePage() {
   const user = useIdentityStore((state) => state.user);
@@ -23,19 +24,16 @@ export default function ProfilePage() {
               Logged in: <span tw="font-bold">[ {user.type} ]</span>
             </div>
             <div>
-              {/* <Link to="/profile">
-                <LoginAreaButton tw="flex gap-1 items-center">
-                  <FaUserCircle />
+              <Tooltip content="Sign out">
+                <LoginAreaButton
+                  tw="flex gap-1 items-center"
+                  onClick={() =>
+                    Promise.all([logout(), logoutII()]).catch(onLogoutError)
+                  }
+                >
+                  <FaSignOutAlt />
                 </LoginAreaButton>
-              </Link> */}
-              <LoginAreaButton
-                tw="flex gap-1 items-center"
-                onClick={() =>
-                  Promise.all([logout(), logoutII()]).catch(onLogoutError)
-                }
-              >
-                <FaSignOutAlt />
-              </LoginAreaButton>
+              </Tooltip>
             </div>
           </>
         ) : (
