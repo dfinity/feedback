@@ -26,9 +26,13 @@ const PulsingImage = styled.img`
   animation: ${pulseAnimation} 2s ease-in-out infinite;
 `;
 
-const LoginAreaButton = tw.div`p-3 border-2 text-xl rounded-full cursor-pointer`;
+export const LoginAreaButton = tw.div`p-3 border-2 text-xl rounded-full cursor-pointer hover:bg-[rgba(0,0,0,.05)]`;
 
-export default function LoginArea() {
+export interface LoginAreaProps {
+  label?: boolean;
+}
+
+export default function LoginArea({ label }: LoginAreaProps) {
   // TODO: refactor Auth0 logic into `identityStore`
   const { loginWithRedirect, logout } = useAuth0();
   const user = useIdentityStore((state) => state.user);
@@ -60,7 +64,7 @@ export default function LoginArea() {
         </>
       ) : (
         <>
-          <span tw="mr-3 uppercase font-bold opacity-60 select-none hidden sm:block">
+          <span tw="mr-3 uppercase font-bold opacity-60 select-none">
             Login:
           </span>
           <LoginAreaButton

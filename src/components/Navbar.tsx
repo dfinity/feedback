@@ -2,9 +2,11 @@ import { ReactNode } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link, useLocation } from 'react-router-dom';
 // @ts-ignore
-import icpLogo from '../assets/icp.png?webp&height=48';
-import LoginArea from './LoginArea';
+import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
 import tw from 'twin.macro';
+import icpLogo from '../assets/icp.png?webp&height=48';
+import { useIdentityStore } from '../stores/identityStore';
+import LoginArea, { LoginAreaButton } from './LoginArea';
 
 interface NavItemProps {
   to: string;
@@ -27,21 +29,33 @@ function NavItem({ to, children }: NavItemProps) {
 }
 
 export default function Navbar() {
+  const user = useIdentityStore((state) => state.user);
+
   return (
-    <div tw="w-full flex gap-3 items-stretch bg-gray-100 text-gray-800 px-5">
-      <a
-        tw="flex items-center hover:scale-105"
-        href="https://internetcomputer.org"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
-      </a>
-      <div tw="flex-1 flex items-center">
-        <NavItem to="/">Feedback</NavItem>
-        <NavItem to="/history">History</NavItem>
+    <div tw="bg-gray-100 text-gray-800">
+      <div tw="flex gap-3 items-stretch px-5 max-w-[800px] mx-auto">
+        <a
+          tw="flex items-center hover:scale-105"
+          href="https://internetcomputer.org"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
+        </a>
+        <div tw="flex-1 flex items-center">
+          <NavItem to="/">Feedback</NavItem>
+          <NavItem to="/history">History</NavItem>
+        </div>
+        {isMobile ? (
+          <Link to="/profile" tw="flex items-center">
+            <LoginAreaButton>
+              {user ? <FaUserCircle /> : <FaRegUserCircle />}
+            </LoginAreaButton>
+          </Link>
+        ) : (
+          <LoginArea />
+        )}
       </div>
-      {isMobile ? <NavItem to="/login">Login</NavItem> : <LoginArea />}
     </div>
   );
 }
