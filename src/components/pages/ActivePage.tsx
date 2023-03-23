@@ -7,12 +7,10 @@ export default function ActivePage() {
 
   return (
     <>
-      <div className="d-flex w-full h-screen">
-        <FeedbackList
-          items={items.filter((item) => item.status === 'active')}
-          onVote={(item, voteStatus) => vote(item, voteStatus)}
-        />
-      </div>
+      <FeedbackList
+        items={items.filter((item) => item.status === 'active')}
+        onVote={(item, voteStatus) => vote(item, voteStatus)}
+      />
     </>
   );
 }
