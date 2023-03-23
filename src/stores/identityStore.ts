@@ -1,6 +1,5 @@
-import { create } from 'zustand';
-import {} from '@dfinity/identity';
 import { AuthClient } from '@dfinity/auth-client';
+import { create } from 'zustand';
 
 export interface BackendState {
   clientPromise: Promise<AuthClient>;
