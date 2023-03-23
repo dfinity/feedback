@@ -29,7 +29,6 @@ export default function FeedbackItemView({
               <div>
                 <FaCaretUp
                   tw="cursor-pointer"
-                  css={{ color: '#555' }}
                   onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
