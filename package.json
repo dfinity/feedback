@@ -10,6 +10,7 @@
     "backend": "mo-dev --generate --deploy -y",
     "build:frontend": "vite build",
     "build": "npm run build:frontend",
+    "preview": "vite preview",
     "test": "run-s test:mo test:ts",
     "test:mo": "mo-test",
     "test:ts": "vitest run",
