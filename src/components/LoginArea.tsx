@@ -1,17 +1,17 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import {
-  FaDoorOpen,
   FaGithub,
   FaGoogle,
-  FaPersonBooth,
+  FaSignOutAlt,
   FaTwitter,
+  FaUserCircle,
 } from 'react-icons/fa';
 import styled, { keyframes } from 'styled-components';
 import tw from 'twin.macro';
 // @ts-ignore
+import { Link } from 'react-router-dom';
 import astronautLogo from '../assets/astronaut.svg';
 import { useIdentityStore } from '../stores/identityStore';
-import { Link } from 'react-router-dom';
 
 const pulseAnimation = keyframes`
   0% {
@@ -40,15 +40,13 @@ export default function LoginArea() {
     throw err;
   };
 
-  console.log(user); ////
-
   return (
     <div tw="flex gap-1 items-center">
       {user ? (
         <>
           <Link to="/profile">
             <LoginAreaButton tw="flex gap-1 items-center">
-              <FaPersonBooth />
+              <FaUserCircle />
             </LoginAreaButton>
           </Link>
           <LoginAreaButton
@@ -57,7 +55,7 @@ export default function LoginArea() {
               Promise.all([logout(), logoutII()]).catch(onLoginError)
             }
           >
-            <FaDoorOpen />
+            <FaSignOutAlt />
           </LoginAreaButton>
         </>
       ) : (
