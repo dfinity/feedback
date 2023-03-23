@@ -13,7 +13,7 @@ interface NavItemProps {
 function NavItem({ to, children }: NavItemProps) {
   return (
     <Link to={to}>
-      <div tw="inline-block px-3 py-5 text-lg h-full hover:bg-gray-200">
+      <div tw="inline-block px-4 py-5 text-lg h-full hover:bg-gray-200">
         {children}
       </div>
     </Link>
@@ -29,7 +29,11 @@ export default function Navbar() {
         target="_blank"
         rel="noreferrer"
       >
-        <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
+        <img
+          src={icpLogo}
+          alt="Internet Computer"
+          tw="h-[24px] hover:scale-105"
+        />
       </a>
       <div tw="flex-1 flex items-center">
         <NavItem to="/">Feedback</NavItem>
