@@ -12,22 +12,22 @@ export type User =
 
 export interface IdentityState {
   user: User | null;
-  // actor
   loginInternetIdentity(): Promise<AuthClient>;
   logout(): Promise<void>;
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
+  if (window.indexedDB) {
+    AuthClient.create().then(async (client) => {
+      if (await client.isAuthenticated()) {
+        set({ user: { type: 'ii', client } });
+      }
+    });
+  }
+
   return {
-    // clientPromise: AuthClient.create()
-    // // .then((client) => set({ ...get(), client }))
-    // .catch((err) => {
-    //   // TODO: handle error
-    //   throw err;
-    // })
     user: null,
     async loginInternetIdentity() {
-      // const client = await get().clientPromise;
       const { user } = get();
       if (user?.type === 'ii') {
         return user.client;
