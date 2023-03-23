@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@testing-library/jest-dom"],
     "jsxImportSource": "@emotion/react"
   },
   "include": ["src", "types"]
