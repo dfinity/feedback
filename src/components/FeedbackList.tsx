@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
 import FeedbackItemView from './FeedbackItemView';
 

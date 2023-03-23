@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=48';
-import { LoginArea } from './LoginArea';
+import LoginArea from './LoginArea';
 
 interface NavItemProps {
   to: string;

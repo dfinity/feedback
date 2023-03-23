@@ -1,4 +1,4 @@
-import { LoginArea } from '../LoginArea';
+import LoginArea from '../LoginArea';
 
 export default function LoginPage() {
   return (
