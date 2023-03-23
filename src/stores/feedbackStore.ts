@@ -8,6 +8,7 @@ export interface FeedbackItemDetails {
   name: string;
   description: string;
   links: string[];
+  tags: string[];
 }
 
 export interface FeedbackItem extends FeedbackItemDetails {
@@ -42,6 +43,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Example item',
         description: 'Example description',
         links: [],
+        tags: ['Motoko'],
         owner: Principal.anonymous(),
         votes: 0,
         yourVote: 0,
@@ -52,6 +54,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Another example item',
         description: 'Another description',
         links: ['https://github.com/dfinity/feedback/issues/1'],
+        tags: ['Bug'],
         owner: Principal.anonymous(),
         votes: 3,
         yourVote: 1,
@@ -62,6 +65,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Item in progress',
         description: 'Active description',
         links: [],
+        tags: ['Feature'],
         owner: Principal.anonymous(),
         votes: 5,
         yourVote: 1,
@@ -72,6 +76,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Completed item',
         description: 'Completed description',
         links: [],
+        tags: ['SDK'],
         owner: Principal.anonymous(),
         votes: 5,
         yourVote: 0,
@@ -82,6 +87,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Closed item',
         description: 'Closed description',
         links: [],
+        tags: [],
         owner: Principal.anonymous(),
         votes: 0,
         yourVote: 0,
