@@ -26,7 +26,7 @@ export default function FeedbackItemView({
         <>
           {!!onVote && (
             <div
-              tw="flex items-center gap-2 cursor-default select-none"
+              tw="flex items-center gap-3 cursor-default select-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div>
@@ -41,7 +41,7 @@ export default function FeedbackItemView({
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>
-              <span tw="opacity-75 text-lg">{item.votes}</span>
+              <span tw="opacity-75">{item.votes}</span>
             </div>
           )}
           <div tw="w-full">{item.name}</div>
