@@ -17,11 +17,13 @@ export interface IdentityState {
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
-  AuthClient.create().then(async (client) => {
-    if (await client.isAuthenticated()) {
-      set({ user: { type: 'ii', client } });
-    }
-  });
+  if (window.indexedDB) {
+    AuthClient.create().then(async (client) => {
+      if (await client.isAuthenticated()) {
+        set({ user: { type: 'ii', client } });
+      }
+    });
+  }
 
   return {
     user: null,
