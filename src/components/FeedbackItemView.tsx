@@ -29,12 +29,12 @@ export default function FeedbackItemView({
             >
               <div>
                 <FaCaretUp
-                  tw="cursor-pointer"
+                  tw="cursor-pointer hover:opacity-75"
                   css={[item.yourVote === 1 && tw`text-orange-500`]}
                   onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
-                  tw="cursor-pointer -translate-y-1"
+                  tw="cursor-pointer -translate-y-1 hover:opacity-75"
                   css={[item.yourVote === -1 && tw`text-red-500`]}
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
