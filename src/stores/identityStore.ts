@@ -17,11 +17,11 @@ export const useIdentityStore = create<BackendState>((set, get) => {
         throw err;
       }),
     async login() {
-      const client = await this.clientPromise;
+      const client = await get().clientPromise;
       await client.login();
     },
     async logout() {
-      const client = await this.clientPromise;
+      const client = await get().clientPromise;
       await client.logout();
     },
   };
