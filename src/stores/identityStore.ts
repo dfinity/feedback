@@ -4,7 +4,7 @@ import { create } from 'zustand';
 export interface BackendState {
   client: AuthClient | null;
   // actor
-  login(): Promise<void>;
+  login(): Promise<AuthClient>;
   logout(): Promise<void>;
 }
 
