@@ -33,6 +33,7 @@ export default function Navbar() {
         <NavItem to="/history">History</NavItem>
       </div>
       {/* <NavItem to="/login">Login</NavItem> */}
+      <span tw="mr-3 uppercase font-bold opacity-60 select-none">Login:</span>
       <LoginArea />
     </div>
   );
