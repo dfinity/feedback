@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link, useLocation } from 'react-router-dom';
-// @ts-ignore
 import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
 import tw from 'twin.macro';
+// @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=48';
 import { useIdentityStore } from '../stores/identityStore';
 import LoginArea, { LoginAreaButton } from './LoginArea';
