@@ -48,8 +48,8 @@ export default function FeedbackItemView({
           <div tw="flex-1">{item.name}</div>
           {item.tags.length > 0 && (
             <div tw="flex gap-1 items-center">
-              {item.tags.slice(0, maxPreviewTags).map((tag) => (
-                <Tag>{tag}</Tag>
+              {item.tags.slice(0, maxPreviewTags).map((tag, i) => (
+                <Tag key={i}>{tag}</Tag>
               ))}
               {item.tags.length > maxPreviewTags && (
                 <Tag>
@@ -74,8 +74,8 @@ export default function FeedbackItemView({
               <hr tw="my-3" />
               <div tw="flex gap-2 items-center">
                 <span tw="font-bold opacity-70">Tags:</span>
-                {item.tags.map((tag) => (
-                  <Tag>{tag}</Tag>
+                {item.tags.map((tag, i) => (
+                  <Tag key={i}>{tag}</Tag>
                 ))}
               </div>
             </>
