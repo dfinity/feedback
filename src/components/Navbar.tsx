@@ -1,5 +1,3 @@
-import React from 'react';
-import 'twin.macro';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore

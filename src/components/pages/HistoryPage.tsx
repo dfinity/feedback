@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFeedbackStore } from '../../stores/feedbackStore';
 import FeedbackList from '../FeedbackList';
 

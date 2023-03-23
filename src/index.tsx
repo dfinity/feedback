@@ -1,5 +1,6 @@
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import 'twin.macro';
 
 import App from './components/App';
 import './styles/index.scss';
