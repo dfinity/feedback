@@ -51,6 +51,7 @@
     "esbuild": "^0.17.12",
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
+    "fake-indexeddb": "^4.0.1",
     "husky": "^8.0.3",
     "ic-mops": "^0.8.7",
     "jsdom": "^21.1.1",
