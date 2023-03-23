@@ -8,15 +8,8 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [
-          [
-            'babel-plugin-twin',
-            {
-              exclude: ['\x00'], // Fix build error
-            },
-          ],
-          'babel-plugin-macros',
-        ],
+        plugins: ['babel-plugin-twin', 'babel-plugin-macros'],
+        ignore: ['\x00commonjsHelpers.js'], // Fix build error (ben-rogerson/babel-plugin-twin#9)
       },
     }),
     imagetools(),
