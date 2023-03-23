@@ -9,7 +9,12 @@ export default defineConfig({
     react({
       babel: {
         plugins: [
-          'babel-plugin-twin',
+          [
+            'babel-plugin-twin',
+            {
+              exclude: ['\x00'], // Fix build error
+            },
+          ],
           'babel-plugin-macros',
         ],
       },
