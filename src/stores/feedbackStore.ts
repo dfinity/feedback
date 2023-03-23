@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
 
-export type FeedbackStatus = 'open' | 'completed' | 'closed';
+export type FeedbackStatus = 'open' | 'active' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
 
 export interface FeedbackItemDetails {
@@ -59,6 +59,16 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
       },
       {
         id: '2222',
+        name: 'Item in progress',
+        description: 'Active description',
+        links: [],
+        owner: Principal.anonymous(),
+        votes: 5,
+        yourVote: 1,
+        status: 'active',
+      },
+      {
+        id: '3333',
         name: 'Completed item',
         description: 'Completed description',
         links: [],
@@ -68,7 +78,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         status: 'completed',
       },
       {
-        id: '3333',
+        id: '4444',
         name: 'Closed item',
         description: 'Closed description',
         links: [],

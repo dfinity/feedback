@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { Link, useLocation } from 'react-router-dom';
 import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
 import tw from 'twin.macro';
@@ -54,7 +54,10 @@ export default function Navbar() {
           </a>
         </Tooltip>
         <div tw="flex-1 flex items-center">
-          <NavItem to="/">Feedback</NavItem>
+          <NavItem to="/">Requests</NavItem>
+          {!(isMobile || isTablet) /* TEMP */ && (
+            <NavItem to="/active">In Progress</NavItem>
+          )}
           <NavItem to="/history">History</NavItem>
         </div>
         {isMobile || user ? (
