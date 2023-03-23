@@ -2,6 +2,10 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=24';
+import tw from 'twin.macro';
+import { FaGithub, FaGoogle, FaTwitter } from 'react-icons/fa';
+
+const LoginButton = tw.div`p-3 border-2 text-xl rounded-full cursor-pointer`;
 
 interface NavItemProps {
   to: string;
@@ -31,7 +35,13 @@ export default function Navbar() {
         <NavItem to="/">Feedback</NavItem>
         <NavItem to="/history">History</NavItem>
       </div>
-      <NavItem to="/login">Login</NavItem>
+      {/* <NavItem to="/login">Login</NavItem> */}
+      <LoginButton></LoginButton>
+      <LoginButton tw="flex gap-1">
+        <FaGoogle />
+        <FaGithub />
+        <FaTwitter />
+      </LoginButton>
     </div>
   );
 }
