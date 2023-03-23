@@ -21,11 +21,19 @@ export default defineConfig({
     }),
     imagetools(),
   ],
+  server: {
+    // Local IC replica proxy
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:4943',
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
-  }
+  },
 });
