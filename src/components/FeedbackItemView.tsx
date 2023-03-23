@@ -1,7 +1,6 @@
-import React from 'react';
-import 'twin.macro';
-import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
+import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
+import tw from 'twin.macro';
 
 export interface FeedbackItemProps {
   item: FeedbackItem;
@@ -25,16 +24,18 @@ export default function FeedbackItemView({
         <>
           {!!onVote && (
             <div
-              tw="flex items-center gap-2 cursor-default select-none"
+              tw="flex items-center gap-3 cursor-default select-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div>
                 <FaCaretUp
                   tw="cursor-pointer"
+                  css={[item.yourVote === 1 && tw`text-orange-500`]}
                   onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
                   tw="cursor-pointer"
+                  css={[item.yourVote === -1 && tw`text-red-500`]}
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>

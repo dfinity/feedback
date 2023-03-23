@@ -1,10 +1,14 @@
-import React from 'react';
-import 'twin.macro';
+import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=24';
-import { Link } from 'react-router-dom';
 
-function NavItem({ to, children }) {
+interface NavItemProps {
+  to: string;
+  children?: ReactNode;
+}
+
+function NavItem({ to, children }: NavItemProps) {
   return (
     <Link to={to}>
       <div tw="inline-block p-5 text-lg h-full">{children}</div>
