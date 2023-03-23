@@ -2,7 +2,7 @@ import { AuthClient } from '@dfinity/auth-client';
 import { create } from 'zustand';
 
 export interface BackendState {
-  clientPromise: Promise<AuthClient>;
+  client: AuthClient | null;
   // actor
   login(): Promise<void>;
   logout(): Promise<void>;
@@ -10,19 +10,31 @@ export interface BackendState {
 
 export const useIdentityStore = create<BackendState>((set, get) => {
   return {
-    clientPromise: AuthClient.create()
-      // .then((client) => set({ ...get(), client }))
-      .catch((err) => {
-        // TODO: handle error
-        throw err;
-      }),
+    // clientPromise: AuthClient.create()
+    // // .then((client) => set({ ...get(), client }))
+    // .catch((err) => {
+    //   // TODO: handle error
+    //   throw err;
+    // })
+    client: null,
     async login() {
-      const client = await get().clientPromise;
-      await client.login();
+      // const client = await get().clientPromise;
+      const { client } = get();
+      if (client) {
+        return client;
+      } else {
+        const client = await AuthClient.create();
+        set({ client });
+        await client.login();
+        return client;
+      }
     },
     async logout() {
-      const client = await get().clientPromise;
-      await client.logout();
+      const { client } = get();
+      if (client) {
+        await client.logout();
+        set({ client: null });
+      }
     },
   };
 });
