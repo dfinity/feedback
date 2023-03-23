@@ -41,7 +41,7 @@ export default function FeedbackItemView({
                   onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
                 />
               </div>
-              <span tw="opacity-75">{item.votes}</span>
+              <span tw="opacity-75 text-lg">{item.votes}</span>
             </div>
           )}
           <div tw="w-full">{item.name}</div>
