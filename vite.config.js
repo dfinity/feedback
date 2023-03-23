@@ -21,4 +21,11 @@ export default defineConfig({
     }),
     imagetools(),
   ],
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
+  }
 });
