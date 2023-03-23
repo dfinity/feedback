@@ -1,14 +1,23 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { create } from 'zustand';
 
-export interface BackendState {
-  client: AuthClient | null;
+export type User =
+  | {
+      type: 'ii';
+      client: AuthClient;
+    }
+  | {
+      type: 'auth0';
+    };
+
+export interface IdentityState {
+  user: User | null;
   // actor
-  login(): Promise<AuthClient>;
+  loginInternetIdentity(): Promise<AuthClient>;
   logout(): Promise<void>;
 }
 
-export const useIdentityStore = create<BackendState>((set, get) => {
+export const useIdentityStore = create<IdentityState>((set, get) => {
   return {
     // clientPromise: AuthClient.create()
     // // .then((client) => set({ ...get(), client }))
@@ -16,25 +25,30 @@ export const useIdentityStore = create<BackendState>((set, get) => {
     //   // TODO: handle error
     //   throw err;
     // })
-    client: null,
-    async login() {
+    user: null,
+    async loginInternetIdentity() {
       // const client = await get().clientPromise;
-      const { client } = get();
-      if (client) {
-        return client;
+      const { user } = get();
+      if (user?.type === 'ii') {
+        return user.client;
       } else {
         const client = await AuthClient.create();
-        set({ client });
+        set({
+          user: {
+            type: 'ii',
+            client,
+          },
+        });
         await client.login();
         return client;
       }
     },
     async logout() {
-      const { client } = get();
-      if (client) {
-        await client.logout();
-        set({ client: null });
+      const { user } = get();
+      if (user?.type === 'ii') {
+        await user.client.logout();
       }
+      set({ user: null });
     },
   };
 });
