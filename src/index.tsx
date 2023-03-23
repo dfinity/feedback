@@ -1,3 +1,4 @@
+import { Auth0Provider } from '@auth0/auth0-react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import 'twin.macro';
@@ -10,6 +11,14 @@ const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <App />
+    <Auth0Provider
+      domain="dev-1t7t4gyh7n17hil2.us.auth0.com"
+      clientId="fAwyAXet0Z3cuJPx2nS0GWnsXN6pVFEi"
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+      }}
+    >
+      <App />
+    </Auth0Provider>
   </StrictMode>,
 );

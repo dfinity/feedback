@@ -11,12 +11,11 @@
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitReturns": true,
-    "noUnusedParameters": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@testing-library/jest-dom"],
     "jsxImportSource": "@emotion/react"
   },
   "include": ["src", "types"]

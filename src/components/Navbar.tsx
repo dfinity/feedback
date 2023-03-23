@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=48';
+import LoginArea from './LoginArea';
 
 interface NavItemProps {
   to: string;
@@ -31,7 +32,8 @@ export default function Navbar() {
         <NavItem to="/">Feedback</NavItem>
         <NavItem to="/history">History</NavItem>
       </div>
-      <NavItem to="/login">Login</NavItem>
+      {/* <NavItem to="/login">Login</NavItem> */}
+      <LoginArea />
     </div>
   );
 }

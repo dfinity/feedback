@@ -30,7 +30,6 @@ export interface FeedbackState {
 export const useFeedbackStore = create<FeedbackState>((set, get) => {
   const updateItem = (item: FeedbackItem) =>
     set((state) => ({
-      ...state,
       items: state.items.map((other) => (item.id === other.id ? item : other)),
     }));
 
@@ -82,7 +81,6 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
     loading: false,
     async create(details: FeedbackItemDetails) {
       set((state) => ({
-        ...state,
         items: [
           ...state.items,
           {

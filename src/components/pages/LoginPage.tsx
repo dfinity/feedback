@@ -1,8 +1,11 @@
+import LoginArea from '../LoginArea';
+
 export default function LoginPage() {
   return (
     <>
-      <div className="d-flex w-full h-screen">
-        <h1>Login!</h1>
+      <div tw="flex flex-col items-center mt-10">
+        {/* <LoginButton onClick={() => loginWithRedirect()}>Login</LoginButton> */}
+        <LoginArea />
       </div>
     </>
   );
