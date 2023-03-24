@@ -70,7 +70,7 @@ export default function TopicView({
               <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
             </div>
           )}
-          <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden">
+          <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden select-none">
             {topic.title}
           </div>
           {topic.tags.length > 0 && (
