@@ -1,5 +1,5 @@
 // Adapted from: https://github.com/tailwindlabs/tailwindcss-typography/blob/master/src/styles.js
-// Hotfix for an Emotion SSR rendering issue
+// Hotfix for an SSR rendering issue in `@tailwindcss/typography`
 
 const colors = require('tailwindcss/colors');
 
