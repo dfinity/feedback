@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
-import FeedbackItemView from './FeedbackItemView';
+import FeedbackListItem from './FeedbackListItem';
 
 export interface FeedbackListProps {
   items: FeedbackItem[];
@@ -10,10 +10,14 @@ export interface FeedbackListProps {
 export default function FeedbackList({ items, onVote }: FeedbackListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
+  const sortedItems = [...items].sort(
+    (a, b) => b.createTime.getTime() - a.createTime.getTime(),
+  );
+
   return (
     <div tw="flex flex-col gap-3">
-      {items.map((item) => (
-        <FeedbackItemView
+      {sortedItems.map((item) => (
+        <FeedbackListItem
           key={item.id}
           item={item}
           expanded={item.id === expandedId}

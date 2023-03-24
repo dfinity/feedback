@@ -5,6 +5,7 @@ import ActivePage from './pages/ActivePage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import RequestsPage from './pages/RequestsPage';
+import SubmitPage from './pages/SubmitPage';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="/active" element={<ActivePage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/submit" element={<SubmitPage />} />
             </Routes>
           </Suspense>
         </div>
