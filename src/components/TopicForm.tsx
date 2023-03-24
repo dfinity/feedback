@@ -7,8 +7,8 @@ const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
 
   label {
-    ${tw`block text-xl font-semibold`}
-    * {
+    ${tw`flex flex-col gap-1 w-full text-xl font-semibold`}
+    > * {
       ${tw`text-lg font-normal`}
     }
   }

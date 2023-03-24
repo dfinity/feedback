@@ -26,7 +26,7 @@ export default function ProfilePage() {
         {/* <LoginButton onClick={() => loginWithRedirect()}>Login</LoginButton> */}
         {user ? (
           <>
-            <div tw="pb-5 text-lg text-gray-600">
+            <div tw="pb-4 text-lg text-gray-600">
               {user.type === 'auth0' && user.auth0 ? (
                 <>
                   Logged in as{' '}

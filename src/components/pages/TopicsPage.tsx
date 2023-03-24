@@ -5,11 +5,11 @@ import TopicList from '../TopicList';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-const filterStatuses: TopicStatus[] = ['open', 'active', 'completed', 'closed'];
+const filterStatuses: TopicStatus[] = ['open', 'next', 'completed', 'closed'];
 
 const defaultFilterStates: Record<TopicStatus, boolean> = {
   open: true,
-  active: true,
+  next: true,
   completed: false,
   closed: false,
 };

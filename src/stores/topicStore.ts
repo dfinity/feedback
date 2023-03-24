@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
 
-export type TopicStatus = 'open' | 'active' | 'completed' | 'closed';
+export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
 
 export interface TopicInfo {
@@ -71,13 +71,13 @@ export const useTopicStore = create<TopicState>((set, get) => {
       {
         id: '2222',
         title: 'Feature in progress',
-        description: 'Active description',
+        description: 'In-progress description',
         links: [],
         tags: ['Agent-JS', 'P0', 'Feature'],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 5,
-        status: 'active',
+        status: 'next',
         owned: true,
         yourVote: 1,
       },
