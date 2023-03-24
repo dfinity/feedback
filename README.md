@@ -6,7 +6,7 @@
 
 ## Context
 
-This application is indended as a realistic full-stack dapp with a Motoko backend. 
+This application demonstrates a realistic full-stack dapp with a Motoko backend. 
 
 ## Local Development
 
@@ -21,7 +21,7 @@ npm run setup # Install packages, deploy canisters, and generate type bindings
 npm start # Start the development server
 ```
 
-When ready, run `dfx deploy` to build and deploy your application.
+When ready, run `dfx deploy` to build and deploy the application.
 
 ## Technology Stack
 
