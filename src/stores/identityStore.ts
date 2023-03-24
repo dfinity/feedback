@@ -41,12 +41,14 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
             client,
           },
         });
-        await new Promise((onSuccess: any, onError) =>
-          client.login({
-            onSuccess,
-            onError,
-          }),
-        );
+        if (!(await client.isAuthenticated())) {
+          await new Promise((onSuccess: any, onError) =>
+            client.login({
+              onSuccess,
+              onError,
+            }),
+          );
+        }
         return client;
       }
     },
