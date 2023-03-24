@@ -16,15 +16,16 @@ export interface Topic extends TopicInfo {
   owner: Principal;
   createTime: Date;
   votes: number;
-  yourVote: VoteStatus;
   status: TopicStatus;
+  owned: boolean;
+  yourVote: VoteStatus;
 }
 
 export interface TopicState {
-  requests: Topic[];
+  topics: Topic[];
   loading: boolean;
   create(info: TopicInfo): Promise<void>;
-  edit(topic: Topic): Promise<void>; // backend could use `edit(id: Nat, info: TopicInfo)`
+  edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   changeStatus(topic: Topic, state: TopicStatus): Promise<void>;
 }
@@ -32,7 +33,7 @@ export interface TopicState {
 export const useTopicStore = create<TopicState>((set, get) => {
   const updateTopic = (topic: Topic) =>
     set((state) => ({
-      requests: state.requests.map((other) =>
+      topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
     }));
@@ -40,7 +41,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
   let nextId = 0; // temp
 
   return {
-    requests: [
+    topics: [
       {
         id: '0000',
         title: 'Example request',
@@ -50,8 +51,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 0,
-        yourVote: 0,
         status: 'open',
+        owned: true,
+        yourVote: 0,
       },
       {
         id: '1111',
@@ -62,8 +64,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 3,
-        yourVote: 1,
         status: 'open',
+        owned: true,
+        yourVote: 1,
       },
       {
         id: '2222',
@@ -74,8 +77,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 5,
-        yourVote: 1,
         status: 'active',
+        owned: true,
+        yourVote: 1,
       },
       {
         id: '3333',
@@ -86,8 +90,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 5,
-        yourVote: 0,
         status: 'completed',
+        owned: true,
+        yourVote: 0,
       },
       {
         id: '4444',
@@ -98,30 +103,35 @@ export const useTopicStore = create<TopicState>((set, get) => {
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 0,
-        yourVote: 0,
         status: 'closed',
+        owned: true,
+        yourVote: 0,
       },
     ],
     loading: false,
     async create(info: TopicInfo) {
       set((state) => ({
-        requests: [
-          ...state.requests,
+        topics: [
+          ...state.topics,
           {
             ...info,
             id: String(nextId++),
             owner: Principal.anonymous(),
             createTime: new Date(),
             votes: 0,
-            yourVote: 0,
             status: 'open',
+            owned: true,
+            yourVote: 0,
           },
         ],
       }));
       // TODO: call backend
     },
-    async edit(topic: Topic) {
-      updateTopic(topic);
+    async edit(id: string, info: TopicInfo) {
+      const topic = get().topics.find((topic) => topic.id === id);
+      if (topic) {
+        updateTopic({ ...topic, ...info });
+      }
       // TODO: call backend
     },
     async vote(topic: Topic, vote: VoteStatus) {

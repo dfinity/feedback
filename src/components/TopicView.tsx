@@ -1,11 +1,20 @@
-import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
-import { Topic, VoteStatus } from '../stores/topicStore';
-import tw from 'twin.macro';
-import Tag from './Tag';
+import { useState, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
+import { FaCaretDown, FaCaretUp, FaEdit } from 'react-icons/fa';
+import tw from 'twin.macro';
+import {
+  Topic,
+  TopicInfo,
+  VoteStatus,
+  useTopicStore,
+} from '../stores/topicStore';
 import Markdown from './Markdown';
+import Tag from './Tag';
+import TopicForm from './TopicForm';
 
 const maxPreviewTags = isMobile ? 1 : 2;
+
+const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
 export interface TopicViewProps {
   topic: Topic;
@@ -20,6 +29,20 @@ export default function TopicView({
   onChangeExpanded,
   onVote,
 }: TopicViewProps) {
+  const [editing, setEditing] = useState(false);
+  const edit = useTopicStore((state) => state.edit);
+
+  useEffect(() => {
+    if (!expanded) {
+      setEditing(false);
+    }
+  }, [expanded]);
+
+  const onSubmitEdit = (info: TopicInfo) => {
+    edit(topic.id, info);
+    setEditing(false);
+  };
+
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
@@ -68,39 +91,56 @@ export default function TopicView({
       </div>
       {!!expanded && (
         <div tw="px-5 py-3">
-          {topic.description && (
-            <div>
-              <Markdown>{topic.description}</Markdown>
-            </div>
-          )}
-          {topic.tags.length > 0 && (
+          {editing ? (
+            <TopicForm initial={topic} onSubmit={onSubmitEdit} />
+          ) : (
             <>
-              <hr tw="my-3" />
-              <div tw="flex flex-wrap gap-2 items-center">
-                <span tw="font-bold opacity-70">Tags:</span>
-                {topic.tags.map((tag, i) => (
-                  <Tag key={i}>{tag}</Tag>
-                ))}
-              </div>
-            </>
-          )}
-          {topic.links.length > 0 && (
-            <>
-              <hr tw="my-3" />
-              <div>
-                {topic.links.map((link, i) => (
-                  <div key={i}>
-                    <a
-                      tw="text-blue-500"
-                      href={link}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {link}
-                    </a>
+              {!!topic.description && (
+                <div>
+                  <Markdown>{topic.description}</Markdown>
+                </div>
+              )}
+              {topic.tags.length > 0 && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex flex-wrap gap-2 items-center">
+                    <span tw="font-bold opacity-70">Tags:</span>
+                    {topic.tags.map((tag, i) => (
+                      <Tag key={i}>{tag}</Tag>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+              {topic.links.length > 0 && (
+                <>
+                  <hr tw="my-3" />
+                  <div>
+                    {topic.links.map((link, i) => (
+                      <div key={i}>
+                        <a
+                          tw="text-blue-500"
+                          href={link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {link}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {!!topic.owned && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex">
+                    <OwnerButton onClick={() => setEditing(true)}>
+                      <FaEdit />
+                      Edit
+                    </OwnerButton>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
