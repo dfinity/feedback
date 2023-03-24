@@ -1,23 +1,24 @@
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
-import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
+import { Topic, VoteStatus } from '../stores/topicStore';
 import tw from 'twin.macro';
 import Tag from './Tag';
+import { isMobile } from 'react-device-detect';
 
-const maxPreviewTags = 2;
+const maxPreviewTags = isMobile ? 1 : 2;
 
-export interface FeedbackItemProps {
-  item: FeedbackItem;
+export interface TopicViewProps {
+  topic: Topic;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
   onVote?(voteStatus: VoteStatus): void;
 }
 
-export default function FeedbackListItem({
-  item,
+export default function TopicView({
+  topic: item,
   expanded,
   onChangeExpanded,
   onVote,
-}: FeedbackItemProps) {
+}: TopicViewProps) {
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
@@ -45,7 +46,9 @@ export default function FeedbackListItem({
               <span tw="opacity-60 text-lg font-bold">{item.votes}</span>
             </div>
           )}
-          <div tw="flex-1">{item.title}</div>
+          <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden">
+            {item.title}
+          </div>
           {item.tags.length > 0 && (
             <div tw="flex gap-1 items-center">
               {item.tags.slice(0, maxPreviewTags).map((tag, i) => (
@@ -72,7 +75,7 @@ export default function FeedbackListItem({
           {item.tags.length > 0 && (
             <>
               <hr tw="my-3" />
-              <div tw="flex gap-2 items-center">
+              <div tw="flex flex-wrap gap-2 items-center">
                 <span tw="font-bold opacity-70">Tags:</span>
                 {item.tags.map((tag, i) => (
                   <Tag key={i}>{tag}</Tag>

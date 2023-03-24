@@ -1,11 +1,9 @@
 import { Suspense } from 'react';
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './Navbar';
-import ActivePage from './pages/ActivePage';
-import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
-import RequestsPage from './pages/RequestsPage';
 import SubmitPage from './pages/SubmitPage';
+import TopicsPage from './pages/TopicsPage';
 
 export default function App() {
   return (
@@ -19,11 +17,9 @@ export default function App() {
             }
           >
             <Routes>
-              <Route path="/" element={<RequestsPage />} />
-              <Route path="/active" element={<ActivePage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/" element={<TopicsPage />} />
               <Route path="/submit" element={<SubmitPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Suspense>
         </div>

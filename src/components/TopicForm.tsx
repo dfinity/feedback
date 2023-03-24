@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
-import { FeedbackItemDetails } from '../stores/feedbackStore';
+import { TopicInfo } from '../stores/topicStore';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -52,12 +52,12 @@ const Form = styled.form`
 //   );
 // }
 
-export interface FeedbackFormProps {
-  initial?: FeedbackItemDetails;
-  onSubmit?(details: FeedbackItemDetails): void;
+export interface TopicFormProps {
+  initial?: TopicInfo;
+  onSubmit?(details: TopicInfo): void;
 }
 
-export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
+export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   const [details, setDetails] = useState(
     () =>
       initial || {
@@ -77,7 +77,7 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
     return details.title.length > 1;
   };
 
-  const patch = (partialDetails: Partial<FeedbackItemDetails>) =>
+  const patch = (partialDetails: Partial<TopicInfo>) =>
     setDetails({ ...details, ...partialDetails });
 
   return (

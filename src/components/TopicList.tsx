@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
-import FeedbackListItem from './FeedbackListItem';
+import { Topic, VoteStatus } from '../stores/topicStore';
+import TopicView from './TopicView';
 
-export interface FeedbackListProps {
-  items: FeedbackItem[];
-  onVote?(item: FeedbackItem, voteStatus: VoteStatus): void;
+export interface TopicListProps {
+  topics: Topic[];
+  onVote?(topic: Topic, voteStatus: VoteStatus): void;
 }
 
-export default function FeedbackList({ items, onVote }: FeedbackListProps) {
+export default function TopicList({ topics: items, onVote }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
   const sortedItems = [...items].sort(
@@ -17,9 +17,9 @@ export default function FeedbackList({ items, onVote }: FeedbackListProps) {
   return (
     <div tw="flex flex-col gap-3">
       {sortedItems.map((item) => (
-        <FeedbackListItem
+        <TopicView
           key={item.id}
-          item={item}
+          topic={item}
           expanded={item.id === expandedId}
           onChangeExpanded={(expanded) =>
             setExpandedId(expanded ? item.id : undefined)

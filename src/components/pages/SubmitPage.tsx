@@ -1,17 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  FeedbackItemDetails,
-  useFeedbackStore,
-} from '../../stores/feedbackStore';
+import { TopicInfo, useTopicStore } from '../../stores/topicStore';
 import { useIdentityStore } from '../../stores/identityStore';
-import FeedbackForm from '../FeedbackForm';
+import TopicForm from '../TopicForm';
 
 export default function SubmitPage() {
   const user = useIdentityStore((state) => state.user);
-  const create = useFeedbackStore((state) => state.create);
+  const create = useTopicStore((state) => state.create);
   const navigate = useNavigate();
 
-  const onSubmit = (details: FeedbackItemDetails) => {
+  const onSubmit = (details: TopicInfo) => {
     create(details).catch((err) => {
       // TODO: handle errors
       throw err;
@@ -22,7 +19,7 @@ export default function SubmitPage() {
   return user ? (
     <>
       <div tw="flex flex-col items-center px-10 py-8 bg-white rounded-xl">
-        <FeedbackForm onSubmit={onSubmit} />
+        <TopicForm onSubmit={onSubmit} />
       </div>
     </>
   ) : (
