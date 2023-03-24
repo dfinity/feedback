@@ -1,5 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { create } from 'zustand';
+import { type User as Auth0User } from '@auth0/auth0-react';
 
 export type User =
   | {
@@ -8,26 +9,27 @@ export type User =
     }
   | {
       type: 'auth0';
+      auth0User: Auth0User;
     };
 
 export interface IdentityState {
   user: User | null;
-  // actor
   loginInternetIdentity(): Promise<AuthClient>;
   logout(): Promise<void>;
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
+  if (window.indexedDB) {
+    AuthClient.create().then(async (client) => {
+      if (await client.isAuthenticated()) {
+        set({ user: { type: 'ii', client } });
+      }
+    });
+  }
+
   return {
-    // clientPromise: AuthClient.create()
-    // // .then((client) => set({ ...get(), client }))
-    // .catch((err) => {
-    //   // TODO: handle error
-    //   throw err;
-    // })
     user: null,
     async loginInternetIdentity() {
-      // const client = await get().clientPromise;
       const { user } = get();
       if (user?.type === 'ii') {
         return user.client;
@@ -39,7 +41,12 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
             client,
           },
         });
-        await client.login();
+        await new Promise((onSuccess: any, onError) =>
+          client.login({
+            onSuccess,
+            onError,
+          }),
+        );
         return client;
       }
     },

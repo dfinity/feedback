@@ -11,7 +11,7 @@ export default function FeedbackList({ items, onVote }: FeedbackListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
   return (
-    <div tw="flex flex-col gap-3 py-5">
+    <div tw="flex flex-col gap-3">
       {items.map((item) => (
         <FeedbackItemView
           key={item.id}
