@@ -7,7 +7,6 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 concurrency: 
   group: ${{ github.head_ref || github.run_id }}
@@ -25,7 +24,6 @@ jobs:
     
     env:
       DFX_VERSION: 0.13.1
-      VESSEL_VERSION: 0.6.5
 
     steps:
     - uses: actions/checkout@v3
@@ -37,10 +35,6 @@ jobs:
     - name: Install dfx
       run: |
         echo y | DFX_VERSION=$DFX_VERSION bash -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
-        wget https://github.com/dfinity/vessel/releases/download/v$VESSEL_VERSION/vessel-linux64
-        cp ./vessel-linux64 /usr/local/bin/vessel
-        chmod a+x /usr/local/bin/vessel
-        sudo apt-get install -y binaryen
     - name: Start dfx
       run: |
         dfx cache install

@@ -1,32 +1,74 @@
-import React from 'react';
-import 'twin.macro';
+import { ReactNode } from 'react';
+import { isMobile } from 'react-device-detect';
+import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
+import { Link, useLocation } from 'react-router-dom';
+import tw from 'twin.macro';
 // @ts-ignore
-import icpLogo from '../assets/icp.png?webp&height=32';
-import { Link } from 'react-router-dom';
+import icpLogo from '../assets/icp.png?webp&height=48';
+import { useIdentityStore } from '../stores/identityStore';
+import LoginArea, { LoginAreaButton } from './LoginArea';
+import Tooltip from './Tooltip';
 
-function NavItem({ to, children }) {
+interface NavItemProps {
+  to: string;
+  children?: ReactNode;
+}
+
+function NavItem({ to, children }: NavItemProps) {
+  const location = useLocation();
+
   return (
-    <Link to={to}>
-      <div tw="inline-block p-5 text-lg h-full">{children}</div>
+    <Link to={to} tw="block">
+      <div
+        tw="px-4 py-3 text-lg box-border hover:bg-gray-200 [border: 4px solid transparent]"
+        css={[location.pathname === to && tw`border-b-background`]}
+      >
+        {children}
+      </div>
     </Link>
   );
 }
 
 export default function Navbar() {
+  const user = useIdentityStore((state) => state.user);
+
   return (
-    <div tw="w-full flex items-center bg-gray-100 text-gray-800">
-      <div tw="w-full flex items-center">
-        <a
-          tw="h-full px-5"
-          href="https://internetcomputer.org"
-          target="_blank"
-          rel="noreferrer"
+    <div tw="bg-gray-100 text-gray-800">
+      <div tw="flex gap-3 items-stretch px-5 max-w-[800px] mx-auto">
+        <Tooltip
+          content={
+            <div tw="text-center">
+              Powered by the
+              <br />
+              <span tw="text-green-300">Internet Computer</span>
+            </div>
+          }
         >
-          <img src={icpLogo} alt="Internet Computer" />
-        </a>
-        <NavItem to="/">Feedback</NavItem>
+          <a
+            tw="flex items-center hover:scale-105"
+            href="https://internetcomputer.org"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
+          </a>
+        </Tooltip>
+        <div tw="flex-1 flex items-center">
+          <NavItem to="/">Browse</NavItem>
+          <NavItem to="/submit">Submit</NavItem>
+        </div>
+        {isMobile || user ? (
+          <Tooltip content="Profile">
+            <Link to="/profile" tw="flex items-center">
+              <LoginAreaButton>
+                {user ? <FaUserCircle /> : <FaRegUserCircle />}
+              </LoginAreaButton>
+            </Link>
+          </Tooltip>
+        ) : (
+          <LoginArea />
+        )}
       </div>
-      <NavItem to="/login">Login</NavItem>
     </div>
   );
 }
