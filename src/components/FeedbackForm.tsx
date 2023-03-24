@@ -1,9 +1,7 @@
-import { ReactNode, useState } from 'react';
-import { FaMinus, FaPlus } from 'react-icons/fa';
+import { useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { FeedbackItemDetails } from '../stores/feedbackStore';
-import Tooltip from './Tooltip';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -18,41 +16,41 @@ const Form = styled.form`
   }
 `;
 
-const ArrayEditorButton = tw.div`cursor-pointer inline-block p-2 text-sm rounded-full border-2 hover:bg-[rgba(0,0,0,.05)]`;
+// const ArrayEditorButton = tw.div`cursor-pointer inline-block p-2 text-sm rounded-full border-2 hover:bg-[rgba(0,0,0,.05)]`;
 
-interface ArrayEditorProps<T> {
-  array: T[];
-  onChange(newArray: T[]): void;
-  onCreate(): T;
-  children(item: T, i: number): ReactNode;
-  newTooltip?: ReactNode;
-}
+// interface ArrayEditorProps<T> {
+//   array: T[];
+//   onChange(newArray: T[]): void;
+//   onCreate(): T;
+//   children(item: T, i: number): ReactNode;
+//   newTooltip?: ReactNode;
+// }
 
-function ArrayEditor<T>({
-  array: value,
-  onChange,
-  onCreate: createItem,
-  children,
-  newTooltip,
-}: ArrayEditorProps<T>) {
-  return (
-    <div>
-      {value.map((item, i) => (
-        <div tw="flex">
-          <ArrayEditorButton>
-            <FaMinus />
-          </ArrayEditorButton>
-          <div tw="flex-1">{children(item, i)}</div>
-        </div>
-      ))}
-      <Tooltip content={newTooltip}>
-        <ArrayEditorButton onClick={() => onChange([...value, createItem()])}>
-          <FaPlus />
-        </ArrayEditorButton>
-      </Tooltip>
-    </div>
-  );
-}
+// function ArrayEditor<T>({
+//   array: value,
+//   onChange,
+//   onCreate: createItem,
+//   children,
+//   newTooltip,
+// }: ArrayEditorProps<T>) {
+//   return (
+//     <div>
+//       {value.map((item, i) => (
+//         <div tw="flex">
+//           <ArrayEditorButton>
+//             <FaMinus />
+//           </ArrayEditorButton>
+//           <div tw="flex-1">{children(item, i)}</div>
+//         </div>
+//       ))}
+//       <Tooltip content={newTooltip}>
+//         <ArrayEditorButton onClick={() => onChange([...value, createItem()])}>
+//           <FaPlus />
+//         </ArrayEditorButton>
+//       </Tooltip>
+//     </div>
+//   );
+// }
 
 export interface FeedbackFormProps {
   initial?: FeedbackItemDetails;
@@ -69,6 +67,11 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
         tags: [],
       },
   );
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm();
 
   const isValid = () => {
     return details.title.length > 1;
@@ -86,24 +89,24 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
         }
       }}
     >
-      <div>
-        <label>Title</label>
+      <label>
+        Title
         <input
           type="text"
           value={details.title}
           onChange={(e) => patch({ title: e.target.value })}
         />
-      </div>
-      <div>
-        <label>Brief description</label>
+      </label>
+      <label>
+        Brief description
         <textarea
           value={details.description}
           onChange={(e) => patch({ description: e.target.value })}
         />
-      </div>
-      <div>
-        <label>Links</label>
-        <ArrayEditor
+      </label>
+      <label>
+        Links
+        {/* <ArrayEditor
           array={details.links}
           onChange={(links) => patch({ links })}
           onCreate={() => ''}
@@ -115,10 +118,33 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
               onChange={(e) => patch({ title: e.target.value })}
             />
           )}
-        </ArrayEditor>
-      </div>
+        </ArrayEditor> */}
+        <div tw="flex flex-col gap-2">
+          {[...details.links, ''].map((link, i) => (
+            <div key={i}>
+              <input
+                type="text"
+                placeholder="Paste URL here"
+                value={link}
+                onChange={(e) => {
+                  const newLink = e.target.value;
+                  const newLinks = [...details.links];
+                  if (newLink) {
+                    newLinks[i] = newLink;
+                  } else {
+                    newLinks.splice(i, 1);
+                  }
+                  patch({
+                    links: newLinks,
+                  });
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </label>
       <button
-        tw="w-full px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-xl rounded-xl"
+        tw="mt-5 w-full px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-xl rounded-xl"
         type="submit"
       >
         {initial ? 'Save Changes' : 'Submit'}
