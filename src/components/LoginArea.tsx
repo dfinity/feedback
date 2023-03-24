@@ -30,7 +30,6 @@ export interface LoginAreaProps {
 export default function LoginArea({ label }: LoginAreaProps) {
   // TODO: refactor Auth0 logic into `identityStore`
   const { user: auth0User, loginWithRedirect } = useAuth0();
-  // const user = useIdentityStore((state) => state.user);
   const loginII = useIdentityStore((state) => state.loginInternetIdentity);
 
   const onLoginError = (err: any) => {

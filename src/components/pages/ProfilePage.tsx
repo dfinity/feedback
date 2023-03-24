@@ -3,6 +3,7 @@ import { FaSignOutAlt } from 'react-icons/fa';
 import { useIdentityStore, User } from '../../stores/identityStore';
 import LoginArea, { LoginAreaButton } from '../LoginArea';
 import Tooltip from '../Tooltip';
+import useIdentity from '../../hooks/useIdentity';
 
 const userTypeLookup: Record<User['type'], string> = {
   ii: 'Internet Identity',
@@ -10,7 +11,7 @@ const userTypeLookup: Record<User['type'], string> = {
 };
 
 export default function ProfilePage() {
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
   const logoutII = useIdentityStore((state) => state.logout);
   const { logout } = useAuth0();
 
