@@ -9,7 +9,7 @@ export type User =
     }
   | {
       type: 'auth0';
-      auth0User: Auth0User;
+      auth0: Auth0User;
     };
 
 export interface IdentityState {

@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import useIdentity from '../../hooks/useIdentity';
 import { TopicInfo, useTopicStore } from '../../stores/topicStore';
-import { useIdentityStore } from '../../stores/identityStore';
 import TopicForm from '../TopicForm';
 
 export default function SubmitPage() {
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
   const create = useTopicStore((state) => state.create);
   const navigate = useNavigate();
 

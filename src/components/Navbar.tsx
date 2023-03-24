@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import tw from 'twin.macro';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=48';
-import { useIdentityStore } from '../stores/identityStore';
+import useIdentity from '../hooks/useIdentity';
 import LoginArea, { LoginAreaButton } from './LoginArea';
 import Tooltip from './Tooltip';
 
@@ -30,7 +30,7 @@ function NavItem({ to, children }: NavItemProps) {
 }
 
 export default function Navbar() {
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
 
   return (
     <div tw="bg-gray-100 text-gray-800">
@@ -61,7 +61,20 @@ export default function Navbar() {
           <Tooltip content="Profile">
             <Link to="/profile" tw="flex items-center">
               <LoginAreaButton>
-                {user ? <FaUserCircle /> : <FaRegUserCircle />}
+                {user ? (
+                  // user.type === 'auth0' && user.auth0.picture ? (
+                  //   <div
+                  //     tw="w-[20px] h-[20px] rounded-full bg-cover"
+                  //     css={{
+                  //       backgroundImage: `url(${user.auth0.picture})`,
+                  //     }}
+                  //   />
+                  // ) : (
+                  <FaUserCircle />
+                ) : (
+                  // )
+                  <FaRegUserCircle />
+                )}
               </LoginAreaButton>
             </Link>
           </Tooltip>
