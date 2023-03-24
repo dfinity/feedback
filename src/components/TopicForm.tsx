@@ -80,6 +80,8 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   const patch = (partialInfo: Partial<TopicInfo>) =>
     setInfo({ ...info, ...partialInfo });
 
+  // TODO: add form validation
+
   return (
     <Form
       onSubmit={(e) => {

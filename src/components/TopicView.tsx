@@ -90,7 +90,7 @@ export default function TopicView({
         </>
       </div>
       {!!expanded && (
-        <div tw="px-5 py-3">
+        <div tw="px-5 pt-3 pb-5">
           {editing ? (
             <TopicForm initial={topic} onSubmit={onSubmitEdit} />
           ) : (

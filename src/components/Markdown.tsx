@@ -1,9 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import tw from 'twin.macro';
 
-const ProseReactMarkdown = tw(
-  ReactMarkdown,
-)`prose [&>:first-child]:mt-0 [&>:last-child]:mb-0`;
+const ProseReactMarkdown = tw(ReactMarkdown)`prose [&>*]:my-0`;
 
 export interface MarkdownViewProps {
   children: string;
