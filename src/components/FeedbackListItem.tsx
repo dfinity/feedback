@@ -12,7 +12,7 @@ export interface FeedbackItemProps {
   onVote?(voteStatus: VoteStatus): void;
 }
 
-export default function FeedbackItemView({
+export default function FeedbackListItem({
   item,
   expanded,
   onChangeExpanded,
@@ -45,7 +45,7 @@ export default function FeedbackItemView({
               <span tw="opacity-60 text-lg font-bold">{item.votes}</span>
             </div>
           )}
-          <div tw="flex-1">{item.name}</div>
+          <div tw="flex-1">{item.title}</div>
           {item.tags.length > 0 && (
             <div tw="flex gap-1 items-center">
               {item.tags.slice(0, maxPreviewTags).map((tag, i) => (
