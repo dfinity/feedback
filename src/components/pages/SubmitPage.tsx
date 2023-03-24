@@ -26,7 +26,7 @@ export default function SubmitPage() {
       </div>
     </>
   ) : (
-    <div tw="text-xl text-center bg-white px-2 py-5 rounded-xl text-gray-800">
+    <div tw="text-xl text-center bg-white px-2 py-5 rounded-xl text-gray-600">
       Please sign in to submit feedback.
     </div>
   );
