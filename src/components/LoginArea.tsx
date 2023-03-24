@@ -21,7 +21,7 @@ const PulsingImage = styled.img`
   animation: ${pulseAnimation} 2s ease-in-out infinite;
 `;
 
-export const LoginAreaButton = tw.div`p-3 border-2 text-xl rounded-full cursor-pointer hover:bg-[rgba(0,0,0,.05)]`;
+export const LoginAreaButton = tw.div`p-3 border-2 text-xl rounded-full cursor-pointer bg-white hover:bg-gray-100`;
 
 export interface LoginAreaProps {
   label?: boolean;

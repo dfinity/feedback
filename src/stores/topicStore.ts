@@ -23,8 +23,8 @@ export interface Topic extends TopicInfo {
 export interface TopicState {
   requests: Topic[];
   loading: boolean;
-  create(details: TopicInfo): Promise<void>;
-  edit(topic: Topic): Promise<void>; // backend could use `edit(id: Nat, details: FeedbackItemDetails)`
+  create(info: TopicInfo): Promise<void>;
+  edit(topic: Topic): Promise<void>; // backend could use `edit(id: Nat, info: TopicInfo)`
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   changeStatus(topic: Topic, state: TopicStatus): Promise<void>;
 }
@@ -103,12 +103,12 @@ export const useTopicStore = create<TopicState>((set, get) => {
       },
     ],
     loading: false,
-    async create(details: TopicInfo) {
+    async create(info: TopicInfo) {
       set((state) => ({
         requests: [
           ...state.requests,
           {
-            ...details,
+            ...info,
             id: String(nextId++),
             owner: Principal.anonymous(),
             createTime: new Date(),

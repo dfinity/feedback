@@ -14,7 +14,7 @@ export interface TopicViewProps {
 }
 
 export default function TopicView({
-  topic: item,
+  topic,
   expanded,
   onChangeExpanded,
   onVote,
@@ -34,30 +34,30 @@ export default function TopicView({
               <div>
                 <FaCaretUp
                   tw="cursor-pointer hover:opacity-75"
-                  css={[item.yourVote === 1 && tw`text-orange-500`]}
-                  onClick={() => onVote?.(item.yourVote === 1 ? 0 : 1)}
+                  css={[topic.yourVote === 1 && tw`text-orange-500`]}
+                  onClick={() => onVote?.(topic.yourVote === 1 ? 0 : 1)}
                 />
                 <FaCaretDown
                   tw="cursor-pointer -translate-y-1 hover:opacity-75"
-                  css={[item.yourVote === -1 && tw`text-red-500`]}
-                  onClick={() => onVote?.(item.yourVote === -1 ? 0 : -1)}
+                  css={[topic.yourVote === -1 && tw`text-red-500`]}
+                  onClick={() => onVote?.(topic.yourVote === -1 ? 0 : -1)}
                 />
               </div>
-              <span tw="opacity-60 text-lg font-bold">{item.votes}</span>
+              <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
             </div>
           )}
           <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden">
-            {item.title}
+            {topic.title}
           </div>
-          {item.tags.length > 0 && (
+          {topic.tags.length > 0 && (
             <div tw="flex gap-1 items-center">
-              {item.tags.slice(0, maxPreviewTags).map((tag, i) => (
+              {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
                 <Tag key={i}>{tag}</Tag>
               ))}
-              {item.tags.length > maxPreviewTags && (
+              {topic.tags.length > maxPreviewTags && (
                 <Tag>
                   <span tw="opacity-50">
-                    +{item.tags.length - maxPreviewTags}
+                    +{topic.tags.length - maxPreviewTags}
                   </span>
                 </Tag>
               )}
@@ -68,26 +68,26 @@ export default function TopicView({
       {!!expanded && (
         <div tw="px-5 py-3">
           <div>
-            {item.description || (
+            {topic.description || (
               <span tw="opacity-50">(No description provided)</span>
             )}
           </div>
-          {item.tags.length > 0 && (
+          {topic.tags.length > 0 && (
             <>
               <hr tw="my-3" />
               <div tw="flex flex-wrap gap-2 items-center">
                 <span tw="font-bold opacity-70">Tags:</span>
-                {item.tags.map((tag, i) => (
+                {topic.tags.map((tag, i) => (
                   <Tag key={i}>{tag}</Tag>
                 ))}
               </div>
             </>
           )}
-          {item.links.length > 0 && (
+          {topic.links.length > 0 && (
             <>
               <hr tw="my-3" />
               <div>
-                {item.links.map((link, i) => (
+                {topic.links.map((link, i) => (
                   <div key={i}>
                     <a
                       tw="text-blue-500"

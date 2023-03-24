@@ -7,10 +7,10 @@ export interface TopicListProps {
   onVote?(topic: Topic, voteStatus: VoteStatus): void;
 }
 
-export default function TopicList({ topics: items, onVote }: TopicListProps) {
+export default function TopicList({ topics, onVote }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
-  const sortedItems = [...items].sort(
+  const sortedItems = [...topics].sort(
     (a, b) => b.createTime.getTime() - a.createTime.getTime(),
   );
 

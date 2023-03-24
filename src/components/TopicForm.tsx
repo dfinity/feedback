@@ -54,11 +54,11 @@ const Form = styled.form`
 
 export interface TopicFormProps {
   initial?: TopicInfo;
-  onSubmit?(details: TopicInfo): void;
+  onSubmit?(info: TopicInfo): void;
 }
 
 export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
-  const [details, setDetails] = useState(
+  const [info, setInfo] = useState(
     () =>
       initial || {
         title: '',
@@ -74,18 +74,18 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   // } = useForm();
 
   const isValid = () => {
-    return details.title.length > 1;
+    return info.title.length > 1;
   };
 
-  const patch = (partialDetails: Partial<TopicInfo>) =>
-    setDetails({ ...details, ...partialDetails });
+  const patch = (partialInfo: Partial<TopicInfo>) =>
+    setInfo({ ...info, ...partialInfo });
 
   return (
     <Form
       onSubmit={(e) => {
         e.preventDefault();
         if (isValid()) {
-          onSubmit?.(details);
+          onSubmit?.(info);
         }
       }}
     >
@@ -93,17 +93,29 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
         Title
         <input
           type="text"
-          value={details.title}
+          value={info.title}
           onChange={(e) => patch({ title: e.target.value })}
         />
       </label>
       <label>
         Brief description
+        {/* <Slate
+          editor={editor}
+          value={info.description}
+          onChange={(description) => patch({ description })}
+        >
+          <Editable />
+        </Slate> */}
         <textarea
-          value={details.description}
+          value={info.description}
           onChange={(e) => patch({ description: e.target.value })}
         />
       </label>
+      {/* {!!info.description && (
+        <div tw="p-3 border-2 rounded-xl">
+          <Markdown>{info.description}</Markdown>
+        </div>
+      )} */}
       <label>
         Links
         {/* <ArrayEditor
@@ -120,7 +132,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
           )}
         </ArrayEditor> */}
         <div tw="flex flex-col gap-2">
-          {[...details.links, ''].map((link, i) => (
+          {[...info.links, ''].map((link, i) => (
             <div key={i}>
               <input
                 type="text"
@@ -128,7 +140,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
                 value={link}
                 onChange={(e) => {
                   const newLink = e.target.value;
-                  const newLinks = [...details.links];
+                  const newLinks = [...info.links];
                   if (newLink) {
                     newLinks[i] = newLink;
                   } else {
