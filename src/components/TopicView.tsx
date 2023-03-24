@@ -12,7 +12,7 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
 
-const maxPreviewTags = isMobile ? 1 : 2;
+const maxPreviewTags = isMobile ? 0 : 2;
 
 const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -73,20 +73,19 @@ export default function TopicView({
           <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden select-none">
             {topic.title}
           </div>
-          {topic.tags.length > 0 && (
-            <div tw="flex gap-1 items-center">
-              {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
-                <Tag key={i}>{tag}</Tag>
-              ))}
-              {topic.tags.length > maxPreviewTags && (
-                <Tag>
-                  <span tw="opacity-50">
-                    +{topic.tags.length - maxPreviewTags}
-                  </span>
-                </Tag>
-              )}
-            </div>
-          )}
+          <div tw="flex gap-1 items-center">
+            <Tag color="#0001">{topic.status}</Tag>
+            {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
+              <Tag key={i}>{tag}</Tag>
+            ))}
+            {topic.tags.length > maxPreviewTags && (
+              <Tag>
+                <span tw="opacity-50">
+                  +{topic.tags.length - maxPreviewTags}
+                </span>
+              </Tag>
+            )}
+          </div>
         </>
       </div>
       {!!expanded && (
