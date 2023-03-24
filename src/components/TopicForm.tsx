@@ -158,7 +158,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
         </div>
       </label>
       <button
-        tw="mt-5 w-full px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-xl rounded-xl"
+        tw="mt-5 w-full px-8 py-3 border-2 bg-[#fff8] border-primary text-primary hover:bg-primary hover:text-white font-bold text-xl rounded-xl"
         type="submit"
       >
         {initial ? 'Save Changes' : 'Submit'}

@@ -14,7 +14,7 @@ import TopicForm from './TopicForm';
 
 const maxPreviewTags = isMobile ? 1 : 2;
 
-const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
+const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
 export interface TopicViewProps {
   topic: Topic;
