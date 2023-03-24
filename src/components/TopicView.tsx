@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { FaCaretDown, FaCaretUp, FaEdit } from 'react-icons/fa';
+import {
+  FaCaretDown,
+  FaCaretUp,
+  FaEdit,
+  FaRegCheckCircle,
+  FaRegDotCircle,
+  FaRegPlayCircle,
+  FaRegTimesCircle,
+} from 'react-icons/fa';
 import tw from 'twin.macro';
 import {
   Topic,
@@ -14,7 +22,7 @@ import TopicForm from './TopicForm';
 
 const maxPreviewTags = isMobile ? 0 : 2;
 
-const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
+const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
 export interface TopicViewProps {
   topic: Topic;
@@ -31,6 +39,7 @@ export default function TopicView({
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
+  const changeStatus = useTopicStore((state) => state.changeStatus);
 
   useEffect(() => {
     if (!expanded) {
@@ -46,7 +55,7 @@ export default function TopicView({
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg md:text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
@@ -132,11 +141,48 @@ export default function TopicView({
               {!!topic.owned && (
                 <>
                   <hr tw="my-3" />
-                  <div tw="flex">
+                  <div tw="flex gap-2">
                     <OwnerButton onClick={() => setEditing(true)}>
                       <FaEdit />
                       Edit
                     </OwnerButton>
+                    {topic.status === 'open' && (
+                      <OwnerButton
+                        tw="bg-status-next"
+                        onClick={() => changeStatus(topic.id, 'next')}
+                      >
+                        <FaRegPlayCircle />
+                        Start
+                      </OwnerButton>
+                    )}
+                    {topic.status === 'next' && (
+                      <OwnerButton
+                        tw="bg-status-completed"
+                        onClick={() => changeStatus(topic.id, 'completed')}
+                      >
+                        <FaRegCheckCircle />
+                        Complete
+                      </OwnerButton>
+                    )}
+                    {(topic.status === 'open' || topic.status === 'next') && (
+                      <OwnerButton
+                        tw="bg-status-closed"
+                        onClick={() => changeStatus(topic.id, 'closed')}
+                      >
+                        <FaRegTimesCircle />
+                        Close
+                      </OwnerButton>
+                    )}
+                    {topic.status === 'completed' ||
+                      (topic.status === 'closed' && (
+                        <OwnerButton
+                          tw="bg-status-open"
+                          onClick={() => changeStatus(topic.id, 'open')}
+                        >
+                          <FaRegDotCircle />
+                          Reopen
+                        </OwnerButton>
+                      ))}
                   </div>
                 </>
               )}

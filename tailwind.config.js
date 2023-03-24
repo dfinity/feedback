@@ -11,6 +11,10 @@ module.exports = {
       colors: {
         background: '#533398',
         primary: '#83C9F4',
+        'status-open': '#EEEEEE',
+        'status-next': '#EEEEEE',
+        'status-completed': '#EEEEEE',
+        'status-closed': '#EEEEEE',
       },
     },
   },
