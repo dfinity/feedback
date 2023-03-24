@@ -6,6 +6,7 @@ import tw from 'twin.macro';
 import astronautLogo from '../assets/astronaut.svg';
 import { useIdentityStore } from '../stores/identityStore';
 import Tooltip from './Tooltip';
+import { useEffect } from 'react';
 
 const pulseAnimation = keyframes`
   0% {
@@ -28,7 +29,7 @@ export interface LoginAreaProps {
 
 export default function LoginArea({ label }: LoginAreaProps) {
   // TODO: refactor Auth0 logic into `identityStore`
-  const { loginWithRedirect } = useAuth0();
+  const { user: auth0User, loginWithRedirect } = useAuth0();
   // const user = useIdentityStore((state) => state.user);
   const loginII = useIdentityStore((state) => state.loginInternetIdentity);
 
@@ -37,9 +38,17 @@ export default function LoginArea({ label }: LoginAreaProps) {
     throw err;
   };
 
+  useEffect(() => {
+    if (auth0User) {
+      console.log(auth0User); //
+
+      useIdentityStore.setState({ user: { type: 'auth0', auth0User } });
+    }
+  });
+
   return (
     <div tw="flex gap-1 items-center">
-      <span tw="mr-3 uppercase font-bold opacity-60 select-none">Login:</span>
+      <span tw="mr-3 font-semibold opacity-70 select-none">Sign in:</span>
       <Tooltip
         content="Internet Identity"
         // position="bottom"

@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
 
-export type FeedbackStatus = 'open' | 'completed' | 'closed';
+export type FeedbackStatus = 'open' | 'active' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
 
 export interface FeedbackItemDetails {
   name: string;
   description: string;
   links: string[];
+  tags: string[];
 }
 
 export interface FeedbackItem extends FeedbackItemDetails {
@@ -42,6 +43,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Example item',
         description: 'Example description',
         links: [],
+        tags: ['Motoko', 'Syntax'],
         owner: Principal.anonymous(),
         votes: 0,
         yourVote: 0,
@@ -52,6 +54,7 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
         name: 'Another example item',
         description: 'Another description',
         links: ['https://github.com/dfinity/feedback/issues/1'],
+        tags: ['Docs', 'Stable Memory', 'Rust', 'P1'],
         owner: Principal.anonymous(),
         votes: 3,
         yourVote: 1,
@@ -59,19 +62,32 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => {
       },
       {
         id: '2222',
+        name: 'Item in progress',
+        description: 'Active description',
+        links: [],
+        tags: ['Agent-JS', 'P0', 'Feature'],
+        owner: Principal.anonymous(),
+        votes: 5,
+        yourVote: 1,
+        status: 'active',
+      },
+      {
+        id: '3333',
         name: 'Completed item',
         description: 'Completed description',
         links: [],
+        tags: ['DFX', 'Config'],
         owner: Principal.anonymous(),
         votes: 5,
         yourVote: 0,
         status: 'completed',
       },
       {
-        id: '3333',
+        id: '4444',
         name: 'Closed item',
         description: 'Closed description',
         links: [],
+        tags: [],
         owner: Principal.anonymous(),
         votes: 0,
         yourVote: 0,

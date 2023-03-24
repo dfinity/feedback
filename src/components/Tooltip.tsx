@@ -12,6 +12,6 @@ export default function Tooltip({
       duration={duration ?? 100}
       hideOnClick={hideOnClick ?? true}
       {...others}
-    ></Tippy>
+    />
   );
 }

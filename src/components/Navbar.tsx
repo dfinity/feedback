@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { Link, useLocation } from 'react-router-dom';
 import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
 import tw from 'twin.macro';
@@ -7,6 +7,7 @@ import tw from 'twin.macro';
 import icpLogo from '../assets/icp.png?webp&height=48';
 import { useIdentityStore } from '../stores/identityStore';
 import LoginArea, { LoginAreaButton } from './LoginArea';
+import Tooltip from './Tooltip';
 
 interface NavItemProps {
   to: string;
@@ -34,24 +35,39 @@ export default function Navbar() {
   return (
     <div tw="bg-gray-100 text-gray-800">
       <div tw="flex gap-3 items-stretch px-5 max-w-[800px] mx-auto">
-        <a
-          tw="flex items-center hover:scale-105"
-          href="https://internetcomputer.org"
-          target="_blank"
-          rel="noreferrer"
+        <Tooltip
+          content={
+            <div tw="text-center">
+              Powered by the
+              <br />
+              <span tw="text-green-300">Internet Computer</span>
+            </div>
+          }
         >
-          <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
-        </a>
+          <a
+            tw="flex items-center hover:scale-105"
+            href="https://internetcomputer.org"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
+          </a>
+        </Tooltip>
         <div tw="flex-1 flex items-center">
-          <NavItem to="/">Feedback</NavItem>
+          <NavItem to="/">Requests</NavItem>
+          {!(isMobile || isTablet) /* TEMP */ && (
+            <NavItem to="/active">In Progress</NavItem>
+          )}
           <NavItem to="/history">History</NavItem>
         </div>
         {isMobile || user ? (
-          <Link to="/profile" tw="flex items-center">
-            <LoginAreaButton>
-              {user ? <FaUserCircle /> : <FaRegUserCircle />}
-            </LoginAreaButton>
-          </Link>
+          <Tooltip content="Profile">
+            <Link to="/profile" tw="flex items-center">
+              <LoginAreaButton>
+                {user ? <FaUserCircle /> : <FaRegUserCircle />}
+              </LoginAreaButton>
+            </Link>
+          </Tooltip>
         ) : (
           <LoginArea />
         )}

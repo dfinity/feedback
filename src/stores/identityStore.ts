@@ -1,5 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { create } from 'zustand';
+import { type User as Auth0User } from '@auth0/auth0-react';
 
 export type User =
   | {
@@ -8,6 +9,7 @@ export type User =
     }
   | {
       type: 'auth0';
+      auth0User: Auth0User;
     };
 
 export interface IdentityState {
@@ -39,7 +41,12 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
             client,
           },
         });
-        await client.login();
+        await new Promise((onSuccess: any, onError) =>
+          client.login({
+            onSuccess,
+            onError,
+          }),
+        );
         return client;
       }
     },

@@ -1,6 +1,9 @@
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 import { FeedbackItem, VoteStatus } from '../stores/feedbackStore';
 import tw from 'twin.macro';
+import Tag from './Tag';
+
+const maxPreviewTags = 2;
 
 export interface FeedbackItemProps {
   item: FeedbackItem;
@@ -42,7 +45,21 @@ export default function FeedbackItemView({
               <span tw="opacity-60 text-lg font-bold">{item.votes}</span>
             </div>
           )}
-          <div tw="w-full">{item.name}</div>
+          <div tw="flex-1">{item.name}</div>
+          {item.tags.length > 0 && (
+            <div tw="flex gap-1 items-center">
+              {item.tags.slice(0, maxPreviewTags).map((tag, i) => (
+                <Tag key={i}>{tag}</Tag>
+              ))}
+              {item.tags.length > maxPreviewTags && (
+                <Tag>
+                  <span tw="opacity-50">
+                    +{item.tags.length - maxPreviewTags}
+                  </span>
+                </Tag>
+              )}
+            </div>
+          )}
         </>
       </div>
       {!!expanded && (
@@ -52,21 +69,36 @@ export default function FeedbackItemView({
               <span tw="opacity-50">(No description provided)</span>
             )}
           </div>
-          {!!item.links.length && <hr tw="my-3" />}
-          <div>
-            {item.links.map((link, i) => (
-              <div key={i}>
-                <a
-                  tw="text-blue-500"
-                  href={link}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {link}
-                </a>
+          {item.tags.length > 0 && (
+            <>
+              <hr tw="my-3" />
+              <div tw="flex gap-2 items-center">
+                <span tw="font-bold opacity-70">Tags:</span>
+                {item.tags.map((tag, i) => (
+                  <Tag key={i}>{tag}</Tag>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
+          {item.links.length > 0 && (
+            <>
+              <hr tw="my-3" />
+              <div>
+                {item.links.map((link, i) => (
+                  <div key={i}>
+                    <a
+                      tw="text-blue-500"
+                      href={link}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

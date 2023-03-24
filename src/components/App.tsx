@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './Navbar';
-import FeedbackPage from './pages/FeedbackPage';
+import ActivePage from './pages/ActivePage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
+import RequestsPage from './pages/RequestsPage';
 
 export default function App() {
   return (
@@ -17,7 +18,8 @@ export default function App() {
             }
           >
             <Routes>
-              <Route path="/" element={<FeedbackPage />} />
+              <Route path="/" element={<RequestsPage />} />
+              <Route path="/active" element={<ActivePage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
