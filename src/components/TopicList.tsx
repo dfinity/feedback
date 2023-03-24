@@ -15,7 +15,7 @@ export default function TopicList({ topics, onVote }: TopicListProps) {
   );
 
   return (
-    <div tw="flex flex-col gap-3">
+    <div tw="flex flex-col gap-4">
       {sortedItems.map((item) => (
         <TopicView
           key={item.id}

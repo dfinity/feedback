@@ -43,7 +43,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     requests: [
       {
         id: '0000',
-        title: 'Example topic',
+        title: 'Example request',
         description: 'Example description',
         links: [],
         tags: ['Motoko', 'Syntax'],
@@ -79,7 +79,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       },
       {
         id: '3333',
-        title: 'Completed topic',
+        title: 'Completed feature',
         description: 'Completed description',
         links: [],
         tags: ['DFX', 'Config'],
@@ -91,7 +91,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       },
       {
         id: '4444',
-        title: 'Closed item',
+        title: 'Closed topic',
         description: 'Closed description',
         links: [],
         tags: [],

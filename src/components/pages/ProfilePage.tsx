@@ -25,9 +25,11 @@ export default function ProfilePage() {
         {/* <LoginButton onClick={() => loginWithRedirect()}>Login</LoginButton> */}
         {user ? (
           <>
-            <div tw="pb-3 text-lg">
+            <div tw="pb-3 text-lg text-gray-600">
               Logged in with{' '}
-              <span tw="">{userTypeLookup[user.type] ?? user.type}</span>
+              <span tw="font-bold">
+                {userTypeLookup[user.type] ?? user.type}
+              </span>
             </div>
             <div>
               <Tooltip content="Sign out">
