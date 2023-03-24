@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Link, useLocation } from 'react-router-dom';
+import { isMobile } from 'react-device-detect';
 import { FaRegUserCircle, FaUserCircle } from 'react-icons/fa';
+import { Link, useLocation } from 'react-router-dom';
 import tw from 'twin.macro';
 // @ts-ignore
 import icpLogo from '../assets/icp.png?webp&height=48';
@@ -54,11 +54,8 @@ export default function Navbar() {
           </a>
         </Tooltip>
         <div tw="flex-1 flex items-center">
-          <NavItem to="/">Requests</NavItem>
-          {!(isMobile || isTablet) /* TEMP */ && (
-            <NavItem to="/active">In Progress</NavItem>
-          )}
-          <NavItem to="/history">History</NavItem>
+          <NavItem to="/">Browse</NavItem>
+          <NavItem to="/submit">Submit</NavItem>
         </div>
         {isMobile || user ? (
           <Tooltip content="Profile">

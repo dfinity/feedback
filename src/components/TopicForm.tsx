@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
-import { FeedbackItemDetails } from '../stores/feedbackStore';
+import { TopicInfo } from '../stores/topicStore';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -52,13 +52,13 @@ const Form = styled.form`
 //   );
 // }
 
-export interface FeedbackFormProps {
-  initial?: FeedbackItemDetails;
-  onSubmit?(details: FeedbackItemDetails): void;
+export interface TopicFormProps {
+  initial?: TopicInfo;
+  onSubmit?(info: TopicInfo): void;
 }
 
-export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
-  const [details, setDetails] = useState(
+export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
+  const [info, setInfo] = useState(
     () =>
       initial || {
         title: '',
@@ -74,18 +74,20 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
   // } = useForm();
 
   const isValid = () => {
-    return details.title.length > 1;
+    return info.title.length > 1;
   };
 
-  const patch = (partialDetails: Partial<FeedbackItemDetails>) =>
-    setDetails({ ...details, ...partialDetails });
+  const patch = (partialInfo: Partial<TopicInfo>) =>
+    setInfo({ ...info, ...partialInfo });
+
+  // TODO: add form validation
 
   return (
     <Form
       onSubmit={(e) => {
         e.preventDefault();
         if (isValid()) {
-          onSubmit?.(details);
+          onSubmit?.(info);
         }
       }}
     >
@@ -93,17 +95,29 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
         Title
         <input
           type="text"
-          value={details.title}
+          value={info.title}
           onChange={(e) => patch({ title: e.target.value })}
         />
       </label>
       <label>
         Brief description
+        {/* <Slate
+          editor={editor}
+          value={info.description}
+          onChange={(description) => patch({ description })}
+        >
+          <Editable />
+        </Slate> */}
         <textarea
-          value={details.description}
+          value={info.description}
           onChange={(e) => patch({ description: e.target.value })}
         />
       </label>
+      {/* {!!info.description && (
+        <div tw="p-3 border-2 rounded-xl">
+          <Markdown>{info.description}</Markdown>
+        </div>
+      )} */}
       <label>
         Links
         {/* <ArrayEditor
@@ -120,7 +134,7 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
           )}
         </ArrayEditor> */}
         <div tw="flex flex-col gap-2">
-          {[...details.links, ''].map((link, i) => (
+          {[...info.links, ''].map((link, i) => (
             <div key={i}>
               <input
                 type="text"
@@ -128,7 +142,7 @@ export default function FeedbackForm({ initial, onSubmit }: FeedbackFormProps) {
                 value={link}
                 onChange={(e) => {
                   const newLink = e.target.value;
-                  const newLinks = [...details.links];
+                  const newLinks = [...info.links];
                   if (newLink) {
                     newLinks[i] = newLink;
                   } else {

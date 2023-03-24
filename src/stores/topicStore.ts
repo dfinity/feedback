@@ -1,137 +1,149 @@
 import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
 
-export type FeedbackStatus = 'open' | 'active' | 'completed' | 'closed';
+export type TopicStatus = 'open' | 'active' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
 
-export interface FeedbackItemDetails {
+export interface TopicInfo {
   title: string;
   description: string;
   links: string[];
   tags: string[];
 }
 
-export interface FeedbackItem extends FeedbackItemDetails {
+export interface Topic extends TopicInfo {
   id: string;
   owner: Principal;
   createTime: Date;
   votes: number;
+  status: TopicStatus;
+  owned: boolean;
   yourVote: VoteStatus;
-  status: FeedbackStatus;
 }
 
-export interface FeedbackState {
-  items: FeedbackItem[];
+export interface TopicState {
+  topics: Topic[];
   loading: boolean;
-  create(details: FeedbackItemDetails): Promise<void>;
-  edit(item: FeedbackItem): Promise<void>; // backend could use `edit(id: Nat, details: FeedbackItemDetails)`
-  vote(item: FeedbackItem, vote: VoteStatus): Promise<void>;
-  changeStatus(item: FeedbackItem, state: FeedbackStatus): Promise<void>;
+  create(info: TopicInfo): Promise<void>;
+  edit(id: string, info: TopicInfo): Promise<void>;
+  vote(topic: Topic, vote: VoteStatus): Promise<void>;
+  changeStatus(topic: Topic, state: TopicStatus): Promise<void>;
 }
 
-export const useFeedbackStore = create<FeedbackState>((set, get) => {
-  const updateItem = (item: FeedbackItem) =>
+export const useTopicStore = create<TopicState>((set, get) => {
+  const updateTopic = (topic: Topic) =>
     set((state) => ({
-      items: state.items.map((other) => (item.id === other.id ? item : other)),
+      topics: state.topics.map((other) =>
+        topic.id === other.id ? topic : other,
+      ),
     }));
 
   let nextId = 0; // temp
 
   return {
-    items: [
+    topics: [
       {
         id: '0000',
-        title: 'Example item',
+        title: 'Example request',
         description: 'Example description',
         links: [],
         tags: ['Motoko', 'Syntax'],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 0,
-        yourVote: 0,
         status: 'open',
+        owned: true,
+        yourVote: 0,
       },
       {
         id: '1111',
-        title: 'Another example item',
-        description: 'Another description',
+        title: 'Another example',
+        description: '## Markdown description\n\n\n\n> Quoted text',
         links: ['https://github.com/dfinity/feedback/issues/1'],
         tags: ['Docs', 'Stable Memory', 'Rust', 'P1'],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 3,
-        yourVote: 1,
         status: 'open',
+        owned: true,
+        yourVote: 1,
       },
       {
         id: '2222',
-        title: 'Item in progress',
+        title: 'Feature in progress',
         description: 'Active description',
         links: [],
         tags: ['Agent-JS', 'P0', 'Feature'],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 5,
-        yourVote: 1,
         status: 'active',
+        owned: true,
+        yourVote: 1,
       },
       {
         id: '3333',
-        title: 'Completed item',
+        title: 'Completed feature',
         description: 'Completed description',
         links: [],
         tags: ['DFX', 'Config'],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 5,
-        yourVote: 0,
         status: 'completed',
+        owned: true,
+        yourVote: 0,
       },
       {
         id: '4444',
-        title: 'Closed item',
+        title: 'Closed topic',
         description: 'Closed description',
         links: [],
         tags: [],
         owner: Principal.anonymous(),
         createTime: new Date(),
         votes: 0,
-        yourVote: 0,
         status: 'closed',
+        owned: true,
+        yourVote: 0,
       },
     ],
     loading: false,
-    async create(details: FeedbackItemDetails) {
+    async create(info: TopicInfo) {
       set((state) => ({
-        items: [
-          ...state.items,
+        topics: [
+          ...state.topics,
           {
-            ...details,
+            ...info,
             id: String(nextId++),
             owner: Principal.anonymous(),
             createTime: new Date(),
             votes: 0,
-            yourVote: 0,
             status: 'open',
+            owned: true,
+            yourVote: 0,
           },
         ],
       }));
       // TODO: call backend
     },
-    async edit(item: FeedbackItem) {
-      updateItem(item);
+    async edit(id: string, info: TopicInfo) {
+      const topic = get().topics.find((topic) => topic.id === id);
+      if (topic) {
+        updateTopic({ ...topic, ...info });
+      }
       // TODO: call backend
     },
-    async vote(item: FeedbackItem, vote: VoteStatus) {
-      updateItem({
-        ...item,
-        votes: item.votes + vote - item.yourVote,
+    async vote(topic: Topic, vote: VoteStatus) {
+      updateTopic({
+        ...topic,
+        votes: topic.votes + vote - topic.yourVote,
         yourVote: vote,
       });
       // TODO: call backend
     },
-    async changeStatus(item: FeedbackItem, state: FeedbackStatus) {
-      updateItem({ ...item, status: state });
+    async changeStatus(topic: Topic, state: TopicStatus) {
+      updateTopic({ ...topic, status: state });
       // TODO: call backend
     },
   };
