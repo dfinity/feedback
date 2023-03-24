@@ -3,6 +3,7 @@ import { Topic, VoteStatus } from '../stores/topicStore';
 import tw from 'twin.macro';
 import Tag from './Tag';
 import { isMobile } from 'react-device-detect';
+import Markdown from './Markdown';
 
 const maxPreviewTags = isMobile ? 1 : 2;
 
@@ -67,11 +68,11 @@ export default function TopicView({
       </div>
       {!!expanded && (
         <div tw="px-5 py-3">
-          <div>
-            {topic.description || (
-              <span tw="opacity-50">(No description provided)</span>
-            )}
-          </div>
+          {topic.description && (
+            <div>
+              <Markdown>{topic.description}</Markdown>
+            </div>
+          )}
           {topic.tags.length > 0 && (
             <>
               <hr tw="my-3" />

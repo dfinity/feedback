@@ -56,7 +56,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       {
         id: '1111',
         title: 'Another example',
-        description: 'Another description',
+        description: '## Markdown description\n\n\n\n> Quoted text',
         links: ['https://github.com/dfinity/feedback/issues/1'],
         tags: ['Docs', 'Stable Memory', 'Rust', 'P1'],
         owner: Principal.anonymous(),
