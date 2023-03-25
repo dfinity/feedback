@@ -1,10 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { FaCaretDown, FaCaretUp, FaEdit } from 'react-icons/fa';
+import {
+  FaCaretDown,
+  FaCaretUp,
+  FaEdit,
+  FaRegCheckCircle,
+  FaRegDotCircle,
+  FaRegPlayCircle,
+  FaRegTimesCircle,
+} from 'react-icons/fa';
 import tw from 'twin.macro';
 import {
   Topic,
   TopicInfo,
+  TopicStatus,
   VoteStatus,
   useTopicStore,
 } from '../stores/topicStore';
@@ -14,7 +23,14 @@ import TopicForm from './TopicForm';
 
 const maxPreviewTags = isMobile ? 0 : 2;
 
-const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-3 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
+const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
+
+const statusColors: Record<TopicStatus, string> = {
+  open: '#e8caf1',
+  next: '#bcdbef',
+  completed: '#c8ebd7',
+  closed: '#e9ddd3',
+};
 
 export interface TopicViewProps {
   topic: Topic;
@@ -31,6 +47,7 @@ export default function TopicView({
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
+  const changeStatus = useTopicStore((state) => state.changeStatus);
 
   useEffect(() => {
     if (!expanded) {
@@ -46,7 +63,7 @@ export default function TopicView({
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg md:text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
@@ -74,7 +91,7 @@ export default function TopicView({
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">
-            <Tag color="#0001">{topic.status}</Tag>
+            <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
             {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
               <Tag key={i}>{tag}</Tag>
             ))}
@@ -133,10 +150,51 @@ export default function TopicView({
                 <>
                   <hr tw="my-3" />
                   <div tw="flex">
-                    <OwnerButton onClick={() => setEditing(true)}>
-                      <FaEdit />
-                      Edit
-                    </OwnerButton>
+                    <div tw="flex flex-1">
+                      <OwnerButton onClick={() => setEditing(true)}>
+                        <FaEdit />
+                        Edit
+                      </OwnerButton>
+                    </div>
+                    <div tw="flex gap-2">
+                      {topic.status === 'open' && (
+                        <OwnerButton
+                          // css={{ background: statusColors.next }}
+                          onClick={() => changeStatus(topic.id, 'next')}
+                        >
+                          <FaRegPlayCircle />
+                          Start
+                        </OwnerButton>
+                      )}
+                      {topic.status === 'next' && (
+                        <OwnerButton
+                          // css={{ background: statusColors.completed }}
+                          onClick={() => changeStatus(topic.id, 'completed')}
+                        >
+                          <FaRegCheckCircle />
+                          Complete
+                        </OwnerButton>
+                      )}
+                      {(topic.status === 'open' || topic.status === 'next') && (
+                        <OwnerButton
+                          // css={{ background: statusColors.closed }}
+                          onClick={() => changeStatus(topic.id, 'closed')}
+                        >
+                          <FaRegTimesCircle />
+                          Close
+                        </OwnerButton>
+                      )}
+                      {topic.status === 'completed' ||
+                        (topic.status === 'closed' && (
+                          <OwnerButton
+                            // css={{ background: statusColors.open }}
+                            onClick={() => changeStatus(topic.id, 'open')}
+                          >
+                            <FaRegDotCircle />
+                            Reopen
+                          </OwnerButton>
+                        ))}
+                    </div>
                   </div>
                 </>
               )}

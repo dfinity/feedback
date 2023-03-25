@@ -10,7 +10,7 @@ export default function Tag({ color, children }: TagProps) {
   return (
     <div
       tw="px-3 py-1 rounded-full font-bold text-sm whitespace-nowrap lowercase"
-      css={{ background: color || '#d7cbf1' }}
+      css={{ background: color || '#e1dceb' }}
     >
       {children}
     </div>

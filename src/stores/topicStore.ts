@@ -27,7 +27,7 @@ export interface TopicState {
   create(info: TopicInfo): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
-  changeStatus(topic: Topic, state: TopicStatus): Promise<void>;
+  changeStatus(id: string, status: TopicStatus): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -142,8 +142,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
       });
       // TODO: call backend
     },
-    async changeStatus(topic: Topic, state: TopicStatus) {
-      updateTopic({ ...topic, status: state });
+    async changeStatus(id: string, status: TopicStatus) {
+      const topic = get().topics.find((topic) => topic.id === id);
+      if (topic) {
+        updateTopic({ ...topic, status });
+      }
       // TODO: call backend
     },
   };
