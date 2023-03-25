@@ -106,7 +106,7 @@ export default function TopicView({
         </>
       </div>
       {!!expanded && (
-        <div tw="px-5 pt-3 pb-5">
+        <div tw="px-5 pt-3 pb-4">
           {editing ? (
             <TopicForm initial={topic} onSubmit={onSubmitEdit} />
           ) : (
@@ -149,7 +149,7 @@ export default function TopicView({
               {!!topic.owned && (
                 <>
                   <hr tw="my-3" />
-                  <div tw="flex">
+                  <div tw="flex mt-4">
                     <div tw="flex flex-1">
                       <OwnerButton onClick={() => setEditing(true)}>
                         <FaEdit />
