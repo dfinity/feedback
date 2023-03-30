@@ -7,7 +7,10 @@ const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
 
   label {
-    ${tw`block opacity-75 font-semibold`}
+    ${tw`flex flex-col gap-1 w-full text-xl font-semibold`}
+    > * {
+      ${tw`text-lg font-normal`}
+    }
   }
 
   input[type='text'],
@@ -109,6 +112,8 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
           <Editable />
         </Slate> */}
         <textarea
+          tw="mb-0"
+          rows={5}
           value={info.description}
           onChange={(e) => patch({ description: e.target.value })}
         />

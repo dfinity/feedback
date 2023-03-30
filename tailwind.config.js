@@ -10,7 +10,8 @@ module.exports = {
     extend: {
       colors: {
         background: '#533398',
-        primary: '#83C9F4',
+        primary: '#83c9f4',
+        // upvote: '#F15A24',
       },
     },
   },
