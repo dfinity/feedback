@@ -1,52 +1,50 @@
 import TrieMap "mo:base/TrieMap";
 import Nat "mo:base/Nat";
 import List "mo:base/List";
-import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
 import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 
-type User = { #principal : Principal; #auth0 : Text };
-type Status = { #open; #next; #completed; #closed };
-type VoteStatus = { #up; #down; #none };
+actor class FeedbackBoard() {
+  type User = { #principal : Principal; #auth0 : Text };
+  type Status = { #open; #next; #completed; #closed };
+  type VoteStatus = { #up; #down; #none };
 
-type Info = {
-  title : Text;
-  description : Text;
-  links : [Text];
-  tags : [Text];
-};
+  type Info = {
+    title : Text;
+    description : Text;
+    links : [Text];
+    tags : [Text];
+  };
 
-type Metadata = {
-  owner : ?User;
-  createTime : Int;
-  upVoters : [User];
-  downVoters : [User];
-  status : Status;
-};
+  type Metadata = {
+    owner : ?User;
+    createTime : Int;
+    upVoters : List.List<User>;
+    downVoters : List.List<User>;
+    status : Status;
+  };
 
-type Topic = Info and Metadata;
+  type Topic = Info and Metadata;
 
-actor {
   let topics : TrieMap.TrieMap<Nat, Topic> = TrieMap.TrieMap<Nat, Topic>(Nat.equal, Hash.hash);
   stable var storedTopics : List.List<(Nat, Topic)> = null;
   stable var nextId : Nat = 1;
 
   // Post feedback
-  public shared ({ caller = owner }) func create(info : Info) : async () {
+  public shared ({ caller = owner }) func create(info : Info) : async Nat {
     let id = nextId;
     nextId += 1;
     let metadata = {
       owner = ?(#principal owner);
       createTime = Time.now();
-      upVoters = [];
-      downVoters = [];
+      upVoters = List.nil();
+      downVoters = List.nil();
       status = #open;
     };
     topics.put(id, { info and metadata });
-    // FIXME return id
+    return id;
   };
 
   public func edit(id : Nat, info : Info) : async () {
@@ -66,19 +64,17 @@ actor {
           case _ true;
         };
       };
-      var upVoters = Array.filter(topic.upVoters, notCaller);
-      var downVoters = Array.filter(topic.downVoters, notCaller);
+      var upVoters = List.filter(topic.upVoters, notCaller);
+      var downVoters = List.filter(topic.downVoters, notCaller);
 
       switch (status) {
         case (#up) {
-          upVoters := Array.append(upVoters, [user]);
+          upVoters := List.push(user, upVoters);
         };
         case (#down) {
-          downVoters := Array.append(downVoters, [user]);
+          downVoters := List.push(user, downVoters);
         };
-        case (#none) {
-
-        };
+        case _ {};
       };
       topics.put(id, { topic with upVoters; downVoters });
     };
