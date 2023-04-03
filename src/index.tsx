@@ -6,6 +6,8 @@ import App from './components/App';
 import 'tippy.js/dist/tippy.css';
 import 'twin.macro';
 import './styles/index.scss';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const rootElement = document.getElementById('root')!;
 const root = createRoot(rootElement);
@@ -19,6 +21,7 @@ root.render(
         redirect_uri: window.location.origin,
       }}
     >
+      <ToastContainer />
       <App />
     </Auth0Provider>
   </StrictMode>,
