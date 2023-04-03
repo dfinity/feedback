@@ -27,13 +27,21 @@ actor class FeedbackBoard() {
   };
 
   type Topic = Info and Metadata;
+  type Id = Nat;
 
-  let topics : TrieMap.TrieMap<Nat, Topic> = TrieMap.TrieMap<Nat, Topic>(Nat.equal, Hash.hash);
+  let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, func n { Nat32.fromNat(n % (1 << 32 - 1)) });
   stable var storedTopics : List.List<(Nat, Topic)> = null;
-  stable var nextId : Nat = 1;
+  stable var nextId : Id = 1;
+
+  // List all feedback (TODO: pagination)
+  public shared ({ caller = owner }) func fetch() : async [Topic] {
+    let entries = topics.entries();
+    let sorted = Iter.sort(entries, func((a : Id, _ : Topic), (b : Id, _ : Topic)) { Nat.compare(a, b) });
+    Iter.toArray(Iter.map(func(k : Id, v : Topic) { v }, sorted));
+  };
 
   // Post feedback
-  public shared ({ caller = owner }) func create(info : Info) : async Nat {
+  public shared ({ caller = owner }) func create(info : Info) : async Id {
     let id = nextId;
     nextId += 1;
     let metadata = {
@@ -47,14 +55,14 @@ actor class FeedbackBoard() {
     return id;
   };
 
-  public func edit(id : Nat, info : Info) : async () {
+  public func edit(id : Id, info : Info) : async () {
     ignore do ? {
       let topic : Metadata = topics.get(id)!;
       topics.put(id, { info and topic });
     };
   };
 
-  public shared ({ caller }) func vote(id : Nat, status : VoteStatus) : async () {
+  public shared ({ caller }) func vote(id : Id, status : VoteStatus) : async () {
     ignore do ? {
       let topic = topics.get(id)!;
       let user = #principal caller;
@@ -80,7 +88,7 @@ actor class FeedbackBoard() {
     };
   };
 
-  public func changeStatus(id : Nat, status : Status) : async () {
+  public func changeStatus(id : Id, status : Status) : async () {
     ignore do ? {
       let topic = topics.get(id)!;
       topics.put(id, { topic with status });
@@ -96,7 +104,7 @@ actor class FeedbackBoard() {
   system func postupgrade() : () {
     List.iterate(
       storedTopics,
-      func(entry : (Nat, Topic)) : () {
+      func(entry : (Id, Topic)) : () {
         let (id, topic) = entry;
         topics.put(id, topic);
       },
