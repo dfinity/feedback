@@ -34,7 +34,7 @@ export default function Navbar() {
 
   return (
     <div tw="bg-gray-100 text-gray-800">
-      <div tw="flex gap-3 items-stretch px-5 max-w-[800px] mx-auto">
+      <div tw="flex gap-3 px-5 items-stretch max-w-[800px] mx-auto">
         <Tooltip
           content={
             <div tw="text-center">

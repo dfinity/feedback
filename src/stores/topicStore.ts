@@ -1,5 +1,5 @@
-import { create } from 'zustand';
 import { Principal } from '@dfinity/principal';
+import { create } from 'zustand';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
@@ -24,6 +24,7 @@ export interface Topic extends TopicInfo {
 export interface TopicState {
   topics: Topic[];
   loading: boolean;
+  fetch(): Promise<void>;
   create(info: TopicInfo): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
@@ -126,6 +127,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ],
       }));
       // TODO: call backend
+    },
+    async fetch() {
+      // TODO
+      // handlePromise(backend.)
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
