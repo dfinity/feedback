@@ -5,6 +5,7 @@ import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";
+import Nat32 "mo:base/Nat32";
 
 actor class FeedbackBoard() {
   type User = { #principal : Principal; #auth0 : Text };
@@ -29,15 +30,14 @@ actor class FeedbackBoard() {
   type Topic = Info and Metadata;
   type Id = Nat;
 
-  let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, func n { Nat32.fromNat(n % (1 << 32 - 1)) });
+  let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
   stable var storedTopics : List.List<(Nat, Topic)> = null;
   stable var nextId : Id = 1;
 
   // List all feedback (TODO: pagination)
   public shared ({ caller = owner }) func fetch() : async [Topic] {
-    let entries = topics.entries();
-    let sorted = Iter.sort(entries, func((a : Id, _ : Topic), (b : Id, _ : Topic)) { Nat.compare(a, b) });
-    Iter.toArray(Iter.map(func(k : Id, v : Topic) { v }, sorted));
+    // TODO: sort by creation time (eventually also number of upvotes)
+    Iter.toArray(topics.vals())
   };
 
   // Post feedback
