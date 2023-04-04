@@ -43,7 +43,7 @@ export default defineConfig({
     imagetools(),
   ],
   define: {
-    global: 'window',
+    // global: 'window',
     'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     // Expose canister IDs provided by `dfx deploy`
     ...Object.fromEntries(
