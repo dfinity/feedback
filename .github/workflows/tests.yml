@@ -39,6 +39,7 @@ jobs:
       run: |
         dfx cache install
         dfx start --background
+        dfx deploy
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
