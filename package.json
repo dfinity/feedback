@@ -19,8 +19,8 @@
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\" \"backend/**/*.mo\"",
     "prepare": "husky install",
     "precommit": "lint-staged",
-    "sources": "mops sources",
-    "postinstall": "mops install"
+    "sources": "npx --no ic-mops sources",
+    "postinstall": "npx --no ic-mops install"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.0.1",

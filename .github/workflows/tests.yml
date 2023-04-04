@@ -20,8 +20,6 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        # TODO: determine Node.js version based on Netlify environment
-    
     env:
       DFX_VERSION: 0.13.1
 
