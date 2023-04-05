@@ -57,10 +57,11 @@ const Form = styled.form`
 
 export interface TopicFormProps {
   initial?: TopicInfo;
-  onSubmit?(info: TopicInfo): void;
+  onSubmit?(info: TopicInfo): void | Promise<void>;
 }
 
 export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
+  const [submitting, setSubmitting] = useState(false);
   const [info, setInfo] = useState(
     () =>
       initial || {
@@ -89,8 +90,12 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
     <Form
       onSubmit={(e) => {
         e.preventDefault();
-        if (isValid()) {
-          onSubmit?.(info);
+        if (!submitting && isValid()) {
+          const promise = onSubmit?.(info);
+          if (promise) {
+            setSubmitting(true);
+            promise.finally(() => setSubmitting(false));
+          }
         }
       }}
     >

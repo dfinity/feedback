@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import useIdentity from '../../hooks/useIdentity';
 import { TopicInfo, useTopicStore } from '../../stores/topicStore';
+import { handlePromise } from '../../utils/handlers';
 import TopicForm from '../TopicForm';
 
 export default function SubmitPage() {
@@ -8,11 +9,12 @@ export default function SubmitPage() {
   const create = useTopicStore((state) => state.create);
   const navigate = useNavigate();
 
-  const onSubmit = (info: TopicInfo) => {
-    create(info).catch((err) => {
-      // TODO: handle errors
-      throw err;
-    });
+  const onSubmit = async (info: TopicInfo) => {
+    await handlePromise(
+      create(info),
+      'Submitting...',
+      'Error while submitting!',
+    );
     navigate('/');
   };
 
