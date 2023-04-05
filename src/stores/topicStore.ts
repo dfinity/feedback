@@ -126,7 +126,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
         votes: result.upVoters.length - result.downVoters.length,
         status: Object.keys(result.status)[0] as TopicStatus,
         owned: true, // TODO
-        yourVote: 0, // TODO
+        yourVote: result.upVoters.length
+          ? 1
+          : result.downVoters.length
+          ? -1
+          : 0, // TODO
       }));
       set({ topics });
       console.log(topics); ///
