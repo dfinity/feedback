@@ -189,16 +189,16 @@ export default function TopicView({
                           Close
                         </OwnerButton>
                       )}
-                      {topic.status === 'completed' ||
-                        (topic.status === 'closed' && (
-                          <OwnerButton
-                            // css={{ background: statusColors.open }}
-                            onClick={() => changeStatus(topic.id, 'open')}
-                          >
-                            <FaRegDotCircle />
-                            Reopen
-                          </OwnerButton>
-                        ))}
+                      {(topic.status === 'completed' ||
+                        topic.status === 'closed') && (
+                        <OwnerButton
+                          // css={{ background: statusColors.open }}
+                          onClick={() => changeStatus(topic.id, 'open')}
+                        >
+                          <FaRegDotCircle />
+                          Reopen
+                        </OwnerButton>
+                      )}
                     </div>
                   </div>
                 </>
