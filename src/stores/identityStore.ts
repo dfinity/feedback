@@ -1,6 +1,7 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { create } from 'zustand';
 import { type User as Auth0User } from '@auth0/auth0-react';
+import { useTopicStore } from './topicStore';
 
 export type User =
   | {
@@ -24,6 +25,14 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       if (await client.isAuthenticated()) {
         set({ user: { type: 'ii', client } });
       }
+
+      // Fetch topics after authenticating
+      useTopicStore.getState().fetch();
+      // handlePromise(
+      //    useTopicStore.getState().fetch(),
+      //   'Fetching...',
+      //   'Error while fetching topics!',
+      // );
     });
   }
 

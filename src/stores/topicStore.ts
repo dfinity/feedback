@@ -1,6 +1,5 @@
 import { Principal } from '@dfinity/principal';
 import { create } from 'zustand';
-import { handlePromise } from '../utils/handlers';
 import { backend } from '../declarations/backend';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
@@ -131,11 +130,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       // TODO: call backend
     },
     async fetch() {
-      const results = await handlePromise(
-        backend.fetch(),
-        'Fetching...',
-        'Error while fetching topics:',
-      );
+      const results = await backend.fetch();
       const topics: Topic[] = results.map((result) => ({
         ...result,
         id: String(result.id),
