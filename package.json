@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "setup": "npm install && dfx canister create backend && dfx generate backend && dfx deploy",
+    "setup": "npm ci && dfx canister create backend && dfx generate backend && dfx deploy",
     "start": "run-p frontend backend",
     "frontend": "vite --port 3000",
     "backend": "mo-dev --generate --deploy -y",
@@ -39,6 +39,7 @@
     "react-toastify": "^9.1.2",
     "styled-components": "^5.3.9",
     "twin.macro": "^3.1.0",
+    "usehooks-ts": "^2.9.1",
     "zustand": "^4.3.6"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "autoprefixer": "^10.4.14",
     "babel-plugin-twin": "^1.1.0",
     "cross-env": "^7.0.3",
+    "cross-fetch": "^3.1.5",
     "esbuild": "^0.17.12",
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",

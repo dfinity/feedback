@@ -20,8 +20,9 @@ actor class FeedbackBoard() {
   };
 
   type Metadata = {
+    id : Id;
     owner : ?User;
-    createTime : Int;
+    createTime : Int; // milliseconds since Unix epoch
     upVoters : List.List<User>;
     downVoters : List.List<User>;
     status : Status;
@@ -35,23 +36,24 @@ actor class FeedbackBoard() {
   stable var nextId : Id = 1;
 
   // List all feedback (TODO: pagination)
-  public shared ({ caller = owner }) func fetch() : async [Topic] {
+  public query ({ caller }) func fetch() : async [Topic] {
     // TODO: sort by creation time (eventually also number of upvotes)
-    Iter.toArray(topics.vals())
+    // TODO: return `TopicView` with computed number of votes, whether the caller owns the topic, etc.
+    Iter.toArray(topics.vals());
   };
 
   // Post feedback
-  public shared ({ caller = owner }) func create(info : Info) : async Id {
+  public shared ({ caller }) func create(info : Info) : async Id {
     let id = nextId;
     nextId += 1;
     let metadata = {
-      owner = ?(#principal owner);
-      createTime = Time.now();
+      owner = ?(#principal caller);
+      createTime = Time.now() / 1_000_000;
       upVoters = List.nil();
       downVoters = List.nil();
       status = #open;
     };
-    topics.put(id, { info and metadata });
+    topics.put(id, { info and metadata with id });
     return id;
   };
 
