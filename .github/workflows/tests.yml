@@ -39,5 +39,6 @@ jobs:
         dfx start --background
     - run: npm ci
     - run: dfx deploy
+    - run: dfx generate
     - run: npm run build --if-present
     - run: npm test
