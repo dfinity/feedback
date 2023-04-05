@@ -52,7 +52,11 @@ export default function TopicsPage() {
         onVote={(item, voteStatus) =>
           handlePromise(
             vote(item, voteStatus),
-            'Voting...',
+            voteStatus === 1
+              ? 'Upvoting...'
+              : voteStatus === -1
+              ? 'Downvoting...'
+              : 'Removing vote...',
             'Error occurred while voting!',
           )
         }
