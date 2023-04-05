@@ -121,6 +121,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         yourVote: 0, // TODO
       }));
       set({ topics });
+      console.log(topics); ///
       return topics;
     },
     async create(info: TopicInfo) {
@@ -135,7 +136,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         yourVote: 0,
       };
       set((state) => ({
-        topics: [...state.topics, topic],
+        topics: [topic, ...state.topics],
       }));
       // await get().fetch();
     },

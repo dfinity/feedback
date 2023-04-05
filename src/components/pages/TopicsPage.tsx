@@ -22,6 +22,8 @@ export default function TopicsPage() {
 
   const filter = (topic: Topic) => !!filterStates[topic.status];
 
+  const visibleTopics = topics.filter(filter);
+
   return (
     <>
       <div tw="flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold pb-5 sm:gap-4 text-white">
@@ -45,7 +47,7 @@ export default function TopicsPage() {
         ))}
       </div>
       <TopicList
-        topics={topics.filter(filter)}
+        topics={visibleTopics}
         onVote={(item, voteStatus) => vote(item, voteStatus)}
       />
     </>

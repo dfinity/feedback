@@ -22,7 +22,7 @@ actor class FeedbackBoard() {
   type Metadata = {
     id : Id;
     owner : ?User;
-    createTime : Int;
+    createTime : Int; // milliseconds since Unix epoch
     upVoters : List.List<User>;
     downVoters : List.List<User>;
     status : Status;
@@ -48,7 +48,7 @@ actor class FeedbackBoard() {
     nextId += 1;
     let metadata = {
       owner = ?(#principal caller);
-      createTime = Time.now();
+      createTime = Time.now() / 1000;
       upVoters = List.nil();
       downVoters = List.nil();
       status = #open;
