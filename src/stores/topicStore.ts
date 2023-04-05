@@ -133,7 +133,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
           : 0, // TODO
       }));
       set({ topics });
-      console.log(topics); ///
+      console.log(topics); // temporary
       return topics;
     },
     async create(info: TopicInfo) {
