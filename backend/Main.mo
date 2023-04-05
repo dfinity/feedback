@@ -48,7 +48,7 @@ actor class FeedbackBoard() {
     nextId += 1;
     let metadata = {
       owner = ?(#principal caller);
-      createTime = Time.now() / 1000;
+      createTime = Time.now() / 1_000_000;
       upVoters = List.nil();
       downVoters = List.nil();
       status = #open;
