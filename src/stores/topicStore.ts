@@ -153,7 +153,14 @@ export const useTopicStore = create<TopicState>((set, get) => {
         votes: topic.votes + vote - topic.yourVote,
         yourVote: vote,
       });
-      // TODO: call backend
+      await backend.vote(
+        BigInt(topic.id),
+        vote === 1
+          ? { up: null }
+          : vote === -1
+          ? { down: null }
+          : { none: null },
+      );
     },
     async changeStatus(id: string, status: TopicStatus) {
       const topic = get().topics.find((topic) => topic.id === id);

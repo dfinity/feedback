@@ -2,8 +2,8 @@ import { toast } from 'react-toastify';
 
 export function handlePromise<T>(
   promise: Promise<T>,
-  message: string,
-  errMessage?: string,
+  message?: string | undefined,
+  errMessage?: string | undefined,
 ): Promise<T> {
   toast.promise(
     promise.catch((err) => handleError(errMessage || err)),

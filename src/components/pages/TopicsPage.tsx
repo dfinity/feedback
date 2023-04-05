@@ -2,6 +2,7 @@ import { useState } from 'react';
 import 'twin.macro';
 import { Topic, TopicStatus, useTopicStore } from '../../stores/topicStore';
 import TopicList from '../TopicList';
+import { handlePromise } from '../../utils/handlers';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -48,7 +49,13 @@ export default function TopicsPage() {
       </div>
       <TopicList
         topics={visibleTopics}
-        onVote={(item, voteStatus) => vote(item, voteStatus)}
+        onVote={(item, voteStatus) =>
+          handlePromise(
+            vote(item, voteStatus),
+            'Voting...',
+            'Error occurred while voting!',
+          )
+        }
       />
     </>
   );
