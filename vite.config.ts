@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 
 import react from '@vitejs/plugin-react';
@@ -43,7 +44,7 @@ export default defineConfig({
     imagetools(),
   ],
   define: {
-    // global: 'window',
+    global: 'globalThis', // Patch CBOR library used in agent-js
     'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     // Expose canister IDs provided by `dfx deploy`
     ...Object.fromEntries(

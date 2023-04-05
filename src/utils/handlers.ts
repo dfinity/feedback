@@ -1,16 +1,17 @@
 import { toast } from 'react-toastify';
 
-export function handlePromise(
-  promise: Promise<any>,
+export function handlePromise<T>(
+  promise: Promise<T>,
   message: string,
   errMessage?: string,
-) {
+): Promise<T> {
   toast.promise(
     promise.catch((err) => handleError(errMessage || err)),
     {
       pending: message,
     },
   );
+  return promise;
 }
 
 export function handleError(err: Error | string) {

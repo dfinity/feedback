@@ -1,5 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import { create } from 'zustand';
+import { handlePromise } from '../utils/handlers';
+import { backend } from '../declarations/backend';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
@@ -13,8 +15,8 @@ export interface TopicInfo {
 
 export interface Topic extends TopicInfo {
   id: string;
-  owner: Principal;
-  createTime: Date;
+  // owner: Principal;
+  createTime: number;
   votes: number;
   status: TopicStatus;
   owned: boolean;
@@ -24,7 +26,7 @@ export interface Topic extends TopicInfo {
 export interface TopicState {
   topics: Topic[];
   loading: boolean;
-  fetch(): Promise<void>;
+  fetch(): Promise<Topic[]>;
   create(info: TopicInfo): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
@@ -50,7 +52,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         links: [],
         tags: ['Motoko', 'Syntax'],
         owner: Principal.anonymous(),
-        createTime: new Date(),
+        createTime: Date.now(),
         votes: 0,
         status: 'open',
         owned: true,
@@ -63,7 +65,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         links: ['https://github.com/dfinity/feedback/issues/1'],
         tags: ['Docs', 'Stable Memory', 'Rust', 'P1'],
         owner: Principal.anonymous(),
-        createTime: new Date(),
+        createTime: Date.now(),
         votes: 3,
         status: 'open',
         owned: true,
@@ -76,7 +78,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         links: [],
         tags: ['Agent-JS', 'P0', 'Feature'],
         owner: Principal.anonymous(),
-        createTime: new Date(),
+        createTime: Date.now(),
         votes: 5,
         status: 'next',
         owned: true,
@@ -89,7 +91,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         links: [],
         tags: ['DFX', 'Config'],
         owner: Principal.anonymous(),
-        createTime: new Date(),
+        createTime: Date.now(),
         votes: 5,
         status: 'completed',
         owned: true,
@@ -102,7 +104,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         links: [],
         tags: [],
         owner: Principal.anonymous(),
-        createTime: new Date(),
+        createTime: Date.now(),
         votes: 0,
         status: 'closed',
         owned: true,
@@ -118,7 +120,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
             ...info,
             id: String(nextId++),
             owner: Principal.anonymous(),
-            createTime: new Date(),
+            createTime: Date.now(),
             votes: 0,
             status: 'open',
             owned: true,
@@ -129,8 +131,22 @@ export const useTopicStore = create<TopicState>((set, get) => {
       // TODO: call backend
     },
     async fetch() {
-      // TODO
-      // handlePromise(backend.)
+      const results = await handlePromise(
+        backend.fetch(),
+        'Fetching...',
+        'Error while fetching topics:',
+      );
+      const topics: Topic[] = results.map((result) => ({
+        ...result,
+        id: String(result.id),
+        createTime: Number(result.createTime),
+        votes: result.upVoters.length - result.downVoters.length,
+        status: Object.keys(result.status)[0] as TopicStatus,
+        owned: true, // TODO
+        yourVote: 0, // TODO
+      }));
+      set({ topics });
+      return topics;
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);

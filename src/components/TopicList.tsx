@@ -10,9 +10,7 @@ export interface TopicListProps {
 export default function TopicList({ topics, onVote }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
 
-  const sortedItems = [...topics].sort(
-    (a, b) => b.createTime.getTime() - a.createTime.getTime(),
-  );
+  const sortedItems = [...topics].sort((a, b) => b.createTime - a.createTime);
 
   return (
     <div tw="flex flex-col gap-4">

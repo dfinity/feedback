@@ -20,6 +20,7 @@ actor class FeedbackBoard() {
   };
 
   type Metadata = {
+    id : Id;
     owner : ?User;
     createTime : Int;
     upVoters : List.List<User>;
@@ -37,6 +38,7 @@ actor class FeedbackBoard() {
   // List all feedback (TODO: pagination)
   public query ({ caller }) func fetch() : async [Topic] {
     // TODO: sort by creation time (eventually also number of upvotes)
+    // TODO: return `TopicView` with computed number of votes, whether the caller owns the topic, etc.
     Iter.toArray(topics.vals());
   };
 
@@ -51,7 +53,7 @@ actor class FeedbackBoard() {
       downVoters = List.nil();
       status = #open;
     };
-    topics.put(id, { info and metadata });
+    topics.put(id, { info and metadata with id });
     return id;
   };
 
