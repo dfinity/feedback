@@ -20,6 +20,7 @@ import {
 import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
+import { handlePromise } from '../utils/handlers';
 
 const maxPreviewTags = isMobile ? 0 : 2;
 
@@ -55,8 +56,12 @@ export default function TopicView({
     }
   }, [expanded]);
 
-  const onSubmitEdit = (info: TopicInfo) => {
-    edit(topic.id, info);
+  const onSubmitEdit = async (info: TopicInfo) => {
+    /* await */ handlePromise(
+      edit(topic.id, info),
+      'Saving changes...',
+      'Error while saving topic!',
+    );
     setEditing(false);
   };
 

@@ -137,14 +137,14 @@ export const useTopicStore = create<TopicState>((set, get) => {
       set((state) => ({
         topics: [...state.topics, topic],
       }));
-      await get().fetch();
+      // await get().fetch();
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
       if (topic) {
         updateTopic({ ...topic, ...info });
       }
-      // TODO: call backend
+      await backend.edit(BigInt(id), info);
     },
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({

@@ -3,25 +3,30 @@ import useIdentity from '../../hooks/useIdentity';
 import { TopicInfo, useTopicStore } from '../../stores/topicStore';
 import { handlePromise } from '../../utils/handlers';
 import TopicForm from '../TopicForm';
+import { useSessionStorage } from 'usehooks-ts';
 
 export default function SubmitPage() {
+  const [recentInfo, setRecentInfo] = useSessionStorage<TopicInfo | undefined>(
+    'dfinity.feedback.submit',
+    undefined,
+  );
   const user = useIdentity();
   const create = useTopicStore((state) => state.create);
   const navigate = useNavigate();
 
   const onSubmit = async (info: TopicInfo) => {
-    await handlePromise(
+    /* await */ handlePromise(
       create(info),
       'Submitting...',
       'Error while submitting!',
-    );
+    ).then(() => setRecentInfo(undefined));
     navigate('/');
   };
 
   return user ? (
     <>
       <div tw="bg-gray-100 flex flex-col items-center px-10 py-8 rounded-xl">
-        <TopicForm onSubmit={onSubmit} />
+        <TopicForm initial={recentInfo} onSubmit={onSubmit} />
       </div>
     </>
   ) : (
