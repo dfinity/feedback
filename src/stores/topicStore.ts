@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
+import { Status } from '../declarations/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
@@ -38,6 +39,13 @@ export const useTopicStore = create<TopicState>((set, get) => {
         topic.id === other.id ? topic : other,
       ),
     }));
+
+  const statusMap: Record<TopicStatus, Status> = {
+    open: { open: null },
+    next: { next: null },
+    completed: { completed: null },
+    closed: { closed: null },
+  };
 
   return {
     // topics: [
@@ -167,7 +175,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, status });
       }
-      // TODO: call backend
+      backend.changeStatus(BigInt(id), statusMap[status]);
     },
   };
 });
