@@ -28,7 +28,18 @@ actor class FeedbackBoard() {
     status : Status;
   };
 
+  type MetadataView = {
+    id : Id;
+    isOwner : Bool;
+    createTime : Int; // milliseconds since Unix epoch
+    upVoters : Nat;
+    downVoters : Nat;
+    yourVote : VoteStatus;
+    status : Status;
+  };
+
   type Topic = Info and Metadata;
+  type TopicView = Info and MetadataView;
   type Id = Nat;
 
   let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
@@ -36,10 +47,30 @@ actor class FeedbackBoard() {
   stable var nextId : Id = 1;
 
   // List all feedback (TODO: pagination)
-  public query ({ caller }) func fetch() : async [Topic] {
+  public query ({ caller }) func fetch() : async [TopicView] {
+    // TODO
+    let user = #principal caller;
     // TODO: sort by creation time (eventually also number of upvotes)
-    // TODO: return `TopicView` with computed number of votes, whether the caller owns the topic, etc.
-    Iter.toArray(topics.vals());
+    Iter.toArray(
+      Iter.map(
+        topics.vals(),
+        func(t : Topic) : TopicView {
+          let yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
+            #up;
+          } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
+            #down;
+          } else #none;
+          let isOwner = ?(#principal caller) == t.owner; // to do -- improve this check.
+          {
+            t with
+            upVoters = List.size(t.upVoters);
+            downVoters = List.size(t.downVoters);
+            yourVote;
+            isOwner;
+          };
+        },
+      )
+    );
   };
 
   // Post feedback
