@@ -6,7 +6,7 @@ import Tooltip from '../Tooltip';
 import useIdentity from '../../hooks/useIdentity';
 
 const userTypeLookup: Record<User['type'], string> = {
-  ii: 'Internet Identity',
+  ic: 'Internet Identity',
   auth0: 'Auth0',
 };
 
@@ -34,6 +34,13 @@ export default function ProfilePage() {
                     {user.auth0.given_name ||
                       user.auth0.nickname ||
                       user.auth0.name}
+                  </span>
+                </>
+              ) : user.type === 'ic' ? (
+                <>
+                  Logged in as{' '}
+                  <span tw="font-bold">
+                    {user.client.getIdentity().getPrincipal().toString()}
                   </span>
                 </>
               ) : (
