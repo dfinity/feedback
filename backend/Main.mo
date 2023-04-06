@@ -46,10 +46,9 @@ actor class FeedbackBoard() {
   stable var storedTopics : List.List<(Nat, Topic)> = null;
   stable var nextId : Id = 1;
 
-  // List all feedback (TODO: pagination)
+  // List all feedback
   public query ({ caller }) func fetch() : async [TopicView] {
-    // TODO
-    let user = #principal caller;
+    let user = #principal caller; // TODO
     // TODO: sort by creation time (eventually also number of upvotes)
     Iter.toArray(
       Iter.map(
@@ -60,7 +59,7 @@ actor class FeedbackBoard() {
           } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
             #down;
           } else #none;
-          let isOwner = ?(#principal caller) == t.owner; // to do -- improve this check.
+          let isOwner = ?user == t.owner; // to do -- improve this check.
           {
             t with
             upVoters = List.size(t.upVoters);
@@ -75,10 +74,11 @@ actor class FeedbackBoard() {
 
   // Post feedback
   public shared ({ caller }) func create(info : Info) : async Id {
+    let user = #principal caller; // TODO
     let id = nextId;
     nextId += 1;
     let metadata = {
-      owner = ?(#principal caller);
+      owner = ?user;
       createTime = Time.now() / 1_000_000;
       upVoters = List.nil();
       downVoters = List.nil();
@@ -88,17 +88,20 @@ actor class FeedbackBoard() {
     return id;
   };
 
-  public func edit(id : Id, info : Info) : async () {
+  public shared ({ caller }) func edit(id : Id, info : Info) : async () {
+    let user = #principal caller; // TODO
     ignore do ? {
       let topic : Metadata = topics.get(id)!;
+      assert ?user == topic.owner;
       topics.put(id, { info and topic });
     };
   };
 
   public shared ({ caller }) func vote(id : Id, status : VoteStatus) : async () {
+    let user = #principal caller; // TODO
     ignore do ? {
       let topic = topics.get(id)!;
-      let user = #principal caller;
+      assert ?user == topic.owner;
       func notCaller(voter : User) : Bool {
         switch voter {
           case (#principal p) not Principal.equal(p, caller);
@@ -121,9 +124,11 @@ actor class FeedbackBoard() {
     };
   };
 
-  public func changeStatus(id : Id, status : Status) : async () {
+  public shared ({ caller }) func changeStatus(id : Id, status : Status) : async () {
+    let user = #principal caller; // TODO
     ignore do ? {
       let topic = topics.get(id)!;
+      assert ?user == topic.owner;
       topics.put(id, { topic with status });
     };
   };
