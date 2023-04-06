@@ -2,6 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { TopicInfo } from '../stores/topicStore';
+import Tag from './Tag';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -163,6 +164,39 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
                   });
                 }}
               />
+            </div>
+          ))}
+        </div>
+      </label>
+      <label>
+        Tags
+        <div tw="flex flex-col gap-2">
+          {[...info.tags, ''].map((tag, i) => (
+            <div key={i} tw="flex items-center gap-3">
+              <div tw="max-w-[200px]">
+                <input
+                  type="text"
+                  // placeholder=""
+                  value={tag}
+                  onChange={(e) => {
+                    const newTag = e.target.value;
+                    const newTags = [...info.tags];
+                    if (newTag) {
+                      newTags[i] = newTag;
+                    } else {
+                      newTags.splice(i, 1);
+                    }
+                    patch({
+                      tags: newTags,
+                    });
+                  }}
+                />
+              </div>
+              {!!tag && (
+                <div>
+                  <Tag>{tag}</Tag>
+                </div>
+              )}
             </div>
           ))}
         </div>
