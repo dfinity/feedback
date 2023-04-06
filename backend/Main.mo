@@ -77,14 +77,15 @@ actor class FeedbackBoard() {
     let user = #principal caller; // TODO
     let id = nextId;
     nextId += 1;
-    let metadata = {
+    let metadata : Metadata = {
+      id;
       owner = ?user;
       createTime = Time.now() / 1_000_000;
       upVoters = List.nil();
       downVoters = List.nil();
       status = #open;
     };
-    topics.put(id, { info and metadata with id });
+    topics.put(id, { info and metadata });
     return id;
   };
 
