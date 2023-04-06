@@ -58,7 +58,7 @@ export default function LoginArea({ label }: LoginAreaProps) {
           <img src={astronautLogo} alt="Internet Identity" />
         </LoginAreaButton>
       </Tooltip>
-      <Tooltip content="Social Login">
+      <Tooltip content="NFID Login">
         <LoginAreaButton
           tw="flex gap-1 items-center justify-center w-[80px] h-[48px]"
           onClick={() => loginNFID().catch(onLoginError)}
