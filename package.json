@@ -14,8 +14,6 @@
     "test": "run-s test:mo test:ts",
     "test:mo": "mo-test",
     "test:ts": "vitest run",
-    "deploy": "npm run test && dfx deploy",
-    "deploy:prod": "npm run test && npm run build && netlify deploy --dir=dist --prod",
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\" \"backend/**/*.mo\"",
     "prepare": "husky install",
     "precommit": "lint-staged",

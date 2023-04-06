@@ -4,9 +4,10 @@ import { useIdentityStore, User } from '../../stores/identityStore';
 import LoginArea, { LoginAreaButton } from '../LoginArea';
 import Tooltip from '../Tooltip';
 import useIdentity from '../../hooks/useIdentity';
+import 'twin.macro';
 
 const userTypeLookup: Record<User['type'], string> = {
-  ii: 'Internet Identity',
+  ic: 'Internet Identity',
   auth0: 'Auth0',
 };
 
@@ -34,6 +35,13 @@ export default function ProfilePage() {
                     {user.auth0.given_name ||
                       user.auth0.nickname ||
                       user.auth0.name}
+                  </span>
+                </>
+              ) : user.type === 'ic' ? (
+                <>
+                  Logged in with principal:
+                  <span tw="block text-sm font-bold">
+                    {user.client.getIdentity().getPrincipal().toString()}
                   </span>
                 </>
               ) : (
