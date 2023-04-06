@@ -34,6 +34,7 @@ actor class FeedbackBoard() {
     createTime : Int; // milliseconds since Unix epoch
     upVoters : Nat;
     downVoters : Nat;
+    yourVote : VoteStatus;
     status : Status;
   };
 
@@ -47,13 +48,27 @@ actor class FeedbackBoard() {
 
   // List all feedback (TODO: pagination)
   public query ({ caller }) func fetch() : async [TopicView] {
+    // TODO
+    let user = #principal caller;
     // TODO: sort by creation time (eventually also number of upvotes)
-      Iter.toArray(Iter.map(topics.vals(), func(t : Topic) : TopicView {
+    Iter.toArray(
+      Iter.map(
+        topics.vals(),
+        func(t : Topic) : TopicView {
           let isOwner = ?(#principal caller) == t.owner; // to do -- improve this check.
-          { t with upVoters = List.size(t.upVoters);
+          {
+            t with upVoters = List.size(t.upVoters);
             downVoters = List.size(t.downVoters);
-            isOwner
-          } }))
+            yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
+              #up;
+            } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
+              #down;
+            } else #none;
+            isOwner;
+          };
+        },
+      )
+    );
   };
 
   // Post feedback
