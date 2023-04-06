@@ -57,7 +57,8 @@ actor class FeedbackBoard() {
         func(t : Topic) : TopicView {
           let isOwner = ?(#principal caller) == t.owner; // to do -- improve this check.
           {
-            t with upVoters = List.size(t.upVoters);
+            t with
+            upVoters = List.size(t.upVoters);
             downVoters = List.size(t.downVoters);
             yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
               #up;
