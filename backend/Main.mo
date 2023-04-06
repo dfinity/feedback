@@ -55,16 +55,17 @@ actor class FeedbackBoard() {
       Iter.map(
         topics.vals(),
         func(t : Topic) : TopicView {
+          let yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
+            #up;
+          } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
+            #down;
+          } else #none;
           let isOwner = ?(#principal caller) == t.owner; // to do -- improve this check.
           {
             t with
             upVoters = List.size(t.upVoters);
             downVoters = List.size(t.downVoters);
-            yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
-              #up;
-            } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
-              #down;
-            } else #none;
+            yourVote;
             isOwner;
           };
         },
