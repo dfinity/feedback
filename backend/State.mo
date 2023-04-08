@@ -31,30 +31,34 @@ module {
     public type TopicId = Types.Topic.Id;
     public type UserVote = Types.Topic.UserVote;
 
-    // XXXState (for User-, Topic- and Team-).
+    // XXX-State (for User-, Topic- and Team-).
     //
-    // Maps that collectively give user-oriented, topic-oriented state
-    // and team-oriented state state.
+    // Maps that collectively give user-oriented, topic-oriented
+    // and team-oriented state.
     //
-    // This state lives outside of the cross-entity relations,
+    // This per-entity state lives outside of the cross-entity relations,
     // (Each state field comes from a single ID, and no other IDs).
     //
     // Question: Is it better to have separate maps for different
     // records, or to join the records into a single map target?
     // Still unclear.  Will revisit when there is more code.
+
     public type UserState = {
-        info : Map<UserId, Types.User.Edit>;
+        edit : Map<UserId, Types.User.Edit>;
         internal : Map<UserId, Types.User.Internal>;
     };
+    // Or this?
+    public type UserState_ =
+      Map<UserId, Types.User.Edit and Types.User.Internal>;
 
     public type TopicState = {
-        info : Map<TopicId, Types.Topic.Edit>;
+        edit : Map<TopicId, Types.Topic.Edit>;
         status : Map<TopicId, Types.Topic.Status>;
         internal : Map<TopicId, Types.Topic.Internal>;
     };
 
     public type TeamState = {
-        info : Map<TeamId, Types.Team.Edit>;
+        edit : Map<TeamId, Types.Team.Edit>;
         internal : Map<TeamId, Types.Team.Internal>;
     };
 
@@ -71,8 +75,8 @@ module {
 
         principalState : PrincipalState;
 
-        // user-team binary relation.
-        userTeamRel : BinRel<UserId, TeamId>;
+        // user-team-member binary relation.
+        userTeamMember : BinRel<UserId, TeamId>;
 
         // user-submitted-topic relation.
         userSubmittedTopic : BinRel<UserId, TopicId>;
@@ -81,7 +85,7 @@ module {
         userOwnsTopic : BinRel<UserId, TopicId>;
 
         // user-topic-userVote relation.
-        userVoteRel : TernRel<UserId, TopicId, UserVote>;
+        userTopicVotes : TernRel<UserId, TopicId, UserVote>;
     };
 
 
@@ -99,17 +103,19 @@ module {
     // Question: What entry point(s) will generate this user ID if
     // none exists?
     //
-    //Suppose we have a private method `getUserId` that maps a
+    // Suppose we have a private method `getUserId` that maps a
     // principal to the corresponding userId, and creates it if none
     // exists.  All of the business logic that needs a userId will
-    // either
+    // either:
     //
-    //  (1) take userId as an arg *and* double-check the principal against it,
+    //  (1) take userId as an arg
+    //      *and*
+    //      double-check the caller Principal against it,
     //
-    // or even more simply,
+    // Or even more simply
     //
     //  (2) *not* take userId as an arg, but instead get it from
-    //  `getUserId`, internally.
+    //      `getUserId`, internally, based on the caller Principal.
     //
     public type PrincipalState = {
         userId : Map<Principal, UserId>;
