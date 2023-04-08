@@ -16,19 +16,19 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
-  public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.Id {
+  public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
       P.xxx()
   };
 
-  public func editTopic(id : Types.Topic.Id, edit : Types.Topic.Edit) : async () {
+  public func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
       P.xxx()
   };
 
-  public shared ({ caller }) func userVote(id : Types.Topic.Id, userVote : Types.Topic.UserVote) : async () {
+  public shared ({ caller }) func userVote(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
       P.xxx()
   };
 
-  public func topicSetStatus(id : Types.Topic.Id, status : Types.Topic.Status) : async () {
+  public func topicSetStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
       P.xxx()
   };
 

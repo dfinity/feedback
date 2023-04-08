@@ -1,7 +1,8 @@
 module {
 
   public module Topic {
-      public type Id = { #topic: Nat };
+      public type Id = { #topic: RawId };
+      public type RawId = Nat;
 
       public type Status = { #open; #next; #completed; #closed };
 
@@ -33,7 +34,8 @@ module {
   };
 
   public module User {
-      public type Id = { #user: Nat };
+      public type Id = { #user: RawId };
+      public type RawId = Nat;
 
       public type Internal = {
           createTime : Int; // milliseconds since Unix epoch
@@ -46,7 +48,8 @@ module {
   };
 
   public module Team {
-      public type Id = { #team: Nat };
+      public type Id = { #team: RawId };
+      public type RawId = Nat;
 
       public type Internal = {
           createTime : Int; // milliseconds since Unix epoch
