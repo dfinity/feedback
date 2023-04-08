@@ -8,7 +8,7 @@ module {
 
       public type UserVote = { #up; #down; #none };
 
-      public type Edit = {
+      public type Edit = { // "Edit": another name could be "Info"
           title : Text;
           description : Text;
           links : [Text];
@@ -16,8 +16,8 @@ module {
       };
 
       public type Internal = {
-          submitter : User.Id;
-          owner : User.Id;
+          // submitter : User.Id; -- Use separate relation?
+          // owner : User.Id;  -- Use separate relation?
           createTime : Int; // milliseconds since Unix epoch
       };
 
@@ -37,27 +37,30 @@ module {
       public type Id = { #user: RawId };
       public type RawId = Nat;
 
+      public type Edit = { // "Edit": another name could be "Info"
+          name : Text;
+          bioBlurb: Text; // one-liner, like on Twitter
+      };
+
       public type Internal = {
           createTime : Int; // milliseconds since Unix epoch
       };
 
-      public type Info = {
-          name : Text;
-          bioBlurb: Text; // one-liner, like on Twitter
-      };
   };
 
   public module Team {
       public type Id = { #team: RawId };
       public type RawId = Nat;
 
+      public type Edit = { // "Edit": another name could be "Info"
+          name : Text;
+          description: Text; // one-linear? may be more than one line?
+      };
+
       public type Internal = {
           createTime : Int; // milliseconds since Unix epoch
       };
 
-      public type Info = {
-          name : Text;
-          description: Text; // one-linear? may be more than one line?
-      };
+
   }
 }
