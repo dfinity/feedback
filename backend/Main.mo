@@ -24,7 +24,7 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
-  public shared ({ caller }) func userVote(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
+  public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
       P.xxx()
   };
 
