@@ -66,6 +66,11 @@ module {
     //
     // A record that can be versioned (wrapped in a big variant type,
     // starting at #v0), in a stable variable.
+    //
+    // Eventually, when stable regions are complete and we have a canonical
+    // map representation for them, we can migrate into stable memory
+    // representations of these maps, and avoid serialization/deserialization
+    // steps on upgrade.
     public type State = {
 
         // Per-entity state:
