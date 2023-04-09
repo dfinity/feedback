@@ -32,10 +32,14 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
+  // create (or get) a user Id for the given caller Id.
+  // once created, the user Id for a given caller Id is stored and fixed.
   public func login() : async Types.User.RawId {
       P.xxx()
   };
 
+  // get the (optional) user Id for the given caller Id.
+  // null when none exists yet (see login()).
   public query func fastLogin() : async ?Types.User.RawId {
       P.xxx()
   };
