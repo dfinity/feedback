@@ -32,4 +32,12 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
+  public func login() : async Types.User.RawId {
+      P.xxx()
+  };
+
+  public query func fastLogin() : async ?Types.User.RawId {
+      P.xxx()
+  };
+
 };
