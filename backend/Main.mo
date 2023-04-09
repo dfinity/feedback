@@ -28,7 +28,7 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
-  public func changeTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
+  public func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
       P.xxx()
   };
 

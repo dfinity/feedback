@@ -21,6 +21,12 @@ module {
           createTime : Int; // milliseconds since Unix epoch
       };
 
+      public type State = {
+          edit : Edit;
+          internal : Internal;
+          status : Status;
+      };
+
       public type UserView = {
           id : Id;
           isOwner : Bool;
@@ -46,6 +52,10 @@ module {
           createTime : Int; // milliseconds since Unix epoch
       };
 
+      public type State = {
+          edit : Edit;
+          internal : Internal
+      };
   };
 
   public module Team {
@@ -61,6 +71,9 @@ module {
           createTime : Int; // milliseconds since Unix epoch
       };
 
-
+      public type State = {
+          edit : Edit;
+          internal : Internal
+      };
   }
 }

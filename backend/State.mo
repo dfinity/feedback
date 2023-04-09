@@ -38,29 +38,12 @@ module {
     //
     // This per-entity state lives outside of the cross-entity relations,
     // (Each state field comes from a single ID, and no other IDs).
-    //
-    // Question: Is it better to have separate maps for different
-    // records, or to join the records into a single map target?
-    // Still unclear.  Will revisit when there is more code.
 
-    public type UserState = {
-        edit : Map<UserId, Types.User.Edit>;
-        internal : Map<UserId, Types.User.Internal>;
-    };
-    // Or this?
-    public type UserState_ =
-      Map<UserId, Types.User.Edit and Types.User.Internal>;
+    public type UserState = Map<UserId, Types.User.State>;
 
-    public type TopicState = {
-        edit : Map<TopicId, Types.Topic.Edit>;
-        status : Map<TopicId, Types.Topic.Status>;
-        internal : Map<TopicId, Types.Topic.Internal>;
-    };
+    public type TopicState = Map<TopicId, Types.Topic.State>;
 
-    public type TeamState = {
-        edit : Map<TeamId, Types.Team.Edit>;
-        internal : Map<TeamId, Types.Team.Internal>;
-    };
+    public type TeamState = Map<TeamId, Types.Team.State>;
 
     // Feedback board state representation.
     //
