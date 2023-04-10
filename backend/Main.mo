@@ -10,7 +10,7 @@ import Trie "mo:base/Trie";
 import Types "Types";
 import P "mo:base/Prelude";
 
-actor class FeedbackBoard() {
+actor class Main() {
 
   public query ({ caller }) func listTopics() : async [Types.Topic.UserView] {
       P.xxx()
@@ -32,14 +32,14 @@ actor class FeedbackBoard() {
       P.xxx()
   };
 
-  // create (or get) a user Id for the given caller Id.
-  // once created, the user Id for a given caller Id is stored and fixed.
+  /// Create (or get) a user Id for the given caller Id.
+  /// Once created, the user Id for a given caller Id is stored and fixed.
   public func login() : async Types.User.RawId {
       P.xxx()
   };
 
-  // get the (optional) user Id for the given caller Id.
-  // null when none exists yet (see login()).
+  /// Get the (optional) user Id for the given caller Id.
+  /// Returns null when none exists yet (see `login()`).
   public query func fastLogin() : async ?Types.User.RawId {
       P.xxx()
   };
