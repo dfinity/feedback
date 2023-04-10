@@ -6,7 +6,7 @@ export function handlePromise<T>(
   errMessage?: string | undefined,
 ): Promise<T> {
   toast.promise(
-    promise.catch((err) => handleError(errMessage || err)),
+    promise.catch((err) => handleError(err, errMessage)),
     {
       pending: message,
     },
@@ -14,10 +14,13 @@ export function handlePromise<T>(
   return promise;
 }
 
-export function handleError(err: Error | string) {
+export function handleError(err: Error | string, message?: string | undefined) {
   console.error(err);
-  toast(typeof err === 'string' ? err : err.message || String(err), {
-    type: 'error',
-    autoClose: 5000,
-  });
+  toast(
+    message || (typeof err === 'string' ? err : err.message || String(err)),
+    {
+      type: 'error',
+      autoClose: 5000,
+    },
+  );
 }

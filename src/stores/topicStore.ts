@@ -18,7 +18,7 @@ export interface Topic extends TopicInfo {
   createTime: number;
   votes: number;
   status: TopicStatus;
-  owned: boolean;
+  isOwner: boolean;
   yourVote: VoteStatus;
 }
 
@@ -123,14 +123,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...result,
         id: String(result.id),
         createTime: Number(result.createTime),
-        votes: result.upVoters.length - result.downVoters.length,
+        votes: Number(result.upVoters - result.downVoters),
         status: Object.keys(result.status)[0] as TopicStatus,
-        owned: true, // TODO
-        yourVote: result.upVoters.length
-          ? 1
-          : result.downVoters.length
-          ? -1
-          : 0, // TODO
+        yourVote:
+          'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
       }));
       set({ topics });
       console.log(topics); // temporary
@@ -144,7 +140,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         createTime: Date.now(),
         votes: 0,
         status: 'open',
-        owned: true,
+        isOwner: true,
         yourVote: 0,
       };
       set((state) => ({

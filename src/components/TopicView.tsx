@@ -151,7 +151,7 @@ export default function TopicView({
                   </div>
                 </>
               )}
-              {!!topic.owned && (
+              {!!topic.isOwner && (
                 <>
                   <hr tw="my-3" />
                   <div tw="flex mt-4">
