@@ -11,17 +11,11 @@ export default function App() {
       <Router>
         <Navbar />
         <div tw="max-w-[800px] mx-auto p-4 mt-1">
-          {/* <Suspense
-            fallback={
-              <div className="opacity-50 text-center text-2xl">Loading...</div>
-            }
-          > */}
           <Routes>
             <Route path="/" element={<TopicsPage />} />
             <Route path="/submit" element={<SubmitPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Routes>
-          {/* </Suspense> */}
         </div>
       </Router>
     </div>
