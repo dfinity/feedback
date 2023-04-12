@@ -23,14 +23,14 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div tw="flex flex-col items-center p-10 bg-gray-100 rounded-xl">
+      <div tw="flex flex-col md:flex-row items-center p-10 bg-gray-100 rounded-xl">
         {/* <LoginButton onClick={() => loginWithRedirect()}>Login</LoginButton> */}
         {user ? (
           <>
-            <div tw="pb-4 text-lg text-gray-600">
+            <div tw="flex-1 pb-4 text-lg text-gray-600">
               {user.type === 'auth0' && user.auth0 ? (
                 <>
-                  Logged in as{' '}
+                  Signed in as{' '}
                   <span tw="font-bold">
                     {user.auth0.given_name ||
                       user.auth0.nickname ||
@@ -39,7 +39,7 @@ export default function ProfilePage() {
                 </>
               ) : user.type === 'ic' ? (
                 <>
-                  Logged in with principal:
+                  Signed in with principal:
                   <span tw="block text-sm font-bold">
                     {user.client.getIdentity().getPrincipal().toString()}
                   </span>
