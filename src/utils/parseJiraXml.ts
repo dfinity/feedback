@@ -1,4 +1,11 @@
 import { TopicInfo } from '../stores/topicStore';
+import Turndown from 'turndown';
+
+const turndown = new Turndown();
+
+function htmlToMarkdown(html: string): string {
+  return turndown.turndown(html);
+}
 
 export default function parseJiraXml(xml: string): TopicInfo[] {
   const parser = new DOMParser();
@@ -22,7 +29,7 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
 
     return {
       title: getField(item, 'title'),
-      description: getField(item, 'description'),
+      description: htmlToMarkdown(getField(item, 'description')),
       links: [...getFields(item, 'link')],
       tags: [
         ...getFields(item, 'project'),

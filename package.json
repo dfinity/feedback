@@ -37,6 +37,7 @@
     "react-router-dom": "^6.9.0",
     "react-toastify": "^9.1.2",
     "styled-components": "^5.3.9",
+    "turndown": "^7.1.2",
     "twin.macro": "^3.1.0",
     "usehooks-ts": "^2.9.1",
     "zustand": "^4.3.6"
@@ -50,6 +51,7 @@
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
+    "@types/turndown": "^5.0.1",
     "@vitejs/plugin-react": "^3.1.0",
     "autoprefixer": "^10.4.14",
     "babel-plugin-twin": "^1.1.0",
