@@ -29,7 +29,7 @@ export function FileDropZone({ children }: FileDropZoneProps) {
         reader.onload = () => {
           try {
             const infoArray = parseJiraXml(reader.result as string);
-            console.log(infoArray); ///
+            console.log('Importing Jira topics:', infoArray);
             handlePromise(
               useTopicStore.getState().bulkCreate(infoArray),
               `Importing ${infoArray.length} topic${
