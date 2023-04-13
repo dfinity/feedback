@@ -63,7 +63,6 @@ export const useTopicStore = create<TopicState>((set, get) => {
           'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
       }));
       set({ topics });
-      console.log(topics); // temporary
       return topics;
     },
     async create(info: TopicInfo) {
