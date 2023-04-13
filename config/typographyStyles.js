@@ -1245,11 +1245,11 @@ module.exports = {
         '[class~="lead"]': {
           color: 'var(--tw-prose-lead)',
         },
-        a: {
-          color: 'var(--tw-prose-links)',
-          textDecoration: 'underline',
-          fontWeight: '500',
-        },
+        // a: {
+        //   color: 'var(--tw-prose-links)',
+        //   textDecoration: 'underline',
+        //   fontWeight: '500',
+        // },
         strong: {
           color: 'var(--tw-prose-bold)',
           fontWeight: '600',
