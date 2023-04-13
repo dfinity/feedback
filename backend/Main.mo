@@ -89,6 +89,23 @@ actor class FeedbackBoard() {
     return id;
   };
 
+  public shared ({ caller }) func bulkCreateTopics(infoArray : [Info]) {
+    let user = #principal caller; // TODO: only moderators
+    for (info in infoArray.vals()) {
+      let id = nextId;
+      nextId += 1;
+      let metadata : Metadata = {
+        id;
+        owner = ?user;
+        createTime = Time.now() / 1_000_000;
+        upVoters = List.nil();
+        downVoters = List.nil();
+        status = #open;
+      };
+      topics.put(id, { info and metadata });
+    };
+  };
+
   public shared ({ caller }) func edit(id : Id, info : Info) : async () {
     let user = #principal caller; // TODO
     ignore do ? {
