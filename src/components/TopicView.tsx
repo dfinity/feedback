@@ -22,8 +22,6 @@ import Tag from './Tag';
 import TopicForm from './TopicForm';
 import { handlePromise } from '../utils/handlers';
 
-const maxPreviewTags = isMobile ? 0 : 2;
-
 const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
 const statusColors: Record<TopicStatus, string> = {
@@ -49,6 +47,8 @@ export default function TopicView({
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.changeStatus);
+
+  const maxPreviewTags = isMobile || expanded ? 0 : 2;
 
   useEffect(() => {
     if (!expanded) {
@@ -100,7 +100,10 @@ export default function TopicView({
               <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
             </div>
           )}
-          <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden select-none">
+          <div
+            tw="flex-1 overflow-hidden select-none"
+            css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
+          >
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">
