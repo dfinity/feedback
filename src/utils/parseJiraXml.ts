@@ -24,6 +24,8 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
     return fields[0];
   };
 
+  // TODO: detect topic status from 'status' field when possible
+
   return [...doc.getElementsByTagName('item')].map((item) => {
     return {
       title: getField(item, 'title'),
