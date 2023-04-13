@@ -3,6 +3,12 @@ import Turndown from 'turndown';
 
 const turndown = new Turndown();
 
+function htmlDecode(escaped: string): string {
+  var e = document.createElement('textarea');
+  e.innerHTML = escaped;
+  return e.childNodes[0]?.nodeValue ?? '';
+}
+
 function htmlToMarkdown(html: string): string {
   return turndown.turndown(html);
 }
@@ -29,7 +35,7 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
   return [...doc.getElementsByTagName('item')].map((item) => {
     return {
       title: getField(item, 'title'),
-      description: htmlToMarkdown(getField(item, 'description')),
+      description: htmlToMarkdown(htmlDecode(getField(item, 'description'))),
       links: [...getFields(item, 'link')],
       tags: [
         ...getFields(item, 'project'),
