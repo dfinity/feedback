@@ -4,6 +4,7 @@ import {
   FaCaretDown,
   FaCaretUp,
   FaEdit,
+  FaJira,
   FaRegCheckCircle,
   FaRegDotCircle,
   FaRegPlayCircle,
@@ -132,17 +133,6 @@ export default function TopicView({
                   <Markdown>{topic.description}</Markdown>
                 </div>
               )}
-              {topic.tags.length > 0 && (
-                <>
-                  <hr tw="my-3" />
-                  <div tw="flex flex-wrap gap-2 items-center">
-                    <span tw="font-bold opacity-70">Tags:</span>
-                    {topic.tags.map((tag, i) => (
-                      <Tag key={i}>{tag}</Tag>
-                    ))}
-                  </div>
-                </>
-              )}
               {topic.links.length > 0 && (
                 <>
                   <hr tw="my-3" />
@@ -150,14 +140,28 @@ export default function TopicView({
                     {topic.links.map((link, i) => (
                       <div key={i}>
                         <a
-                          tw="text-blue-500"
+                          tw="text-blue-500 flex gap-2 items-center"
                           href={link}
                           target="_blank"
                           rel="noreferrer"
                         >
+                          {!!link.startsWith(
+                            'https://dfinity.atlassian.net',
+                          ) && <FaJira />}
                           {link}
                         </a>
                       </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {topic.tags.length > 0 && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex flex-wrap gap-2 items-center">
+                    <span tw="font-bold opacity-70">Tags:</span>
+                    {topic.tags.map((tag, i) => (
+                      <Tag key={i}>{tag}</Tag>
                     ))}
                   </div>
                 </>
