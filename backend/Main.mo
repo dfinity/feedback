@@ -42,7 +42,7 @@ actor class FeedbackBoard() {
   type TopicView = Info and MetadataView;
   type Id = Nat;
 
-  let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
+  var topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
   stable var storedTopics : List.List<(Nat, Topic)> = null;
   stable var nextId : Id = 1;
 
@@ -104,6 +104,11 @@ actor class FeedbackBoard() {
       };
       topics.put(id, { info and metadata });
     };
+  };
+
+  /// TEMPORARY
+  public shared func clearTopics() {
+    topics := TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
   };
 
   public shared ({ caller }) func edit(id : Id, info : Info) : async () {
