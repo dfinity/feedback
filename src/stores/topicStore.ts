@@ -84,6 +84,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     },
     async bulkCreate(infoArray: TopicInfo[]) {
       await backend.bulkCreateTopics(infoArray);
+      await get().fetch();
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
