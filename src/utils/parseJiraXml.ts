@@ -25,8 +25,6 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
   };
 
   return [...doc.getElementsByTagName('item')].map((item) => {
-    console.log(item);
-
     return {
       title: getField(item, 'title'),
       description: htmlToMarkdown(getField(item, 'description')),
