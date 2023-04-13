@@ -175,7 +175,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, status });
       }
-      backend.changeStatus(BigInt(id), statusMap[status]);
+      await backend.changeStatus(BigInt(id), statusMap[status]);
     },
   };
 });

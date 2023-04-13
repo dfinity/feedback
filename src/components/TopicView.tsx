@@ -56,6 +56,14 @@ export default function TopicView({
     }
   }, [expanded]);
 
+  const onChangeStatus = (topic: Topic, status: TopicStatus) => {
+    handlePromise(
+      changeStatus(topic.id, status),
+      'Changing status...',
+      'Error while changing status!',
+    );
+  };
+
   const onSubmitEdit = async (info: TopicInfo) => {
     /* await */ handlePromise(
       edit(topic.id, info),
@@ -165,7 +173,7 @@ export default function TopicView({
                       {topic.status === 'open' && (
                         <OwnerButton
                           // css={{ background: statusColors.next }}
-                          onClick={() => changeStatus(topic.id, 'next')}
+                          onClick={() => onChangeStatus(topic, 'next')}
                         >
                           <FaRegPlayCircle />
                           Start
@@ -174,7 +182,7 @@ export default function TopicView({
                       {topic.status === 'next' && (
                         <OwnerButton
                           // css={{ background: statusColors.completed }}
-                          onClick={() => changeStatus(topic.id, 'completed')}
+                          onClick={() => onChangeStatus(topic, 'completed')}
                         >
                           <FaRegCheckCircle />
                           Complete
@@ -183,7 +191,7 @@ export default function TopicView({
                       {(topic.status === 'open' || topic.status === 'next') && (
                         <OwnerButton
                           // css={{ background: statusColors.closed }}
-                          onClick={() => changeStatus(topic.id, 'closed')}
+                          onClick={() => onChangeStatus(topic, 'closed')}
                         >
                           <FaRegTimesCircle />
                           Close
@@ -193,7 +201,7 @@ export default function TopicView({
                         topic.status === 'closed') && (
                         <OwnerButton
                           // css={{ background: statusColors.open }}
-                          onClick={() => changeStatus(topic.id, 'open')}
+                          onClick={() => onChangeStatus(topic, 'open')}
                         >
                           <FaRegDotCircle />
                           Reopen
