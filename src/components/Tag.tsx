@@ -9,7 +9,7 @@ export interface TagProps {
 export default function Tag({ color, children }: TagProps) {
   return (
     <div
-      tw="px-3 py-1 rounded-full font-bold text-sm whitespace-nowrap lowercase"
+      tw="px-2 py-0.5 rounded-full font-bold text-sm whitespace-nowrap lowercase"
       css={{ background: color || '#e1dceb' }}
     >
       {children}

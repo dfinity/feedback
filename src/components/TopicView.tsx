@@ -76,7 +76,7 @@ export default function TopicView({
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-lg md:text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
