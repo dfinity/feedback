@@ -52,8 +52,8 @@ export function FileDropZone({ children }: FileDropZoneProps) {
 
   return (
     <ContainerDiv {...getRootProps({ isDragActive })}>
-      <input {...getInputProps()} />
       {children}
+      <input {...getInputProps({ style: { display: 'none' } })} />
     </ContainerDiv>
   );
 }
