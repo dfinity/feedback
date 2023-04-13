@@ -30,7 +30,7 @@ When ready, run `dfx deploy` to build and deploy the application.
 - [Vite](https://vitejs.dev/): high-performance tooling for front-end web development
 - [React](https://reactjs.org/): a component-based UI library
 - [Zustand](https://www.npmjs.com/package/zustand): a simple, clean state management library
-- [Sass](https://sass-lang.com/): an extended syntax for CSS stylesheets
+- [Tailwind](https://tailwindcss.com/): a highly expressive, utility-first CSS framework
 - [Prettier](https://prettier.io/): code formatting for a wide range of supported languages
 
 **Back-end Service:**

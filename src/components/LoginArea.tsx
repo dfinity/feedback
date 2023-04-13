@@ -36,7 +36,7 @@ export default function LoginArea({ label }: LoginAreaProps) {
 
   useEffect(() => {
     if (auth0User) {
-      console.log(auth0User); //
+      console.log(auth0User);
 
       useIdentityStore.setState({ user: { type: 'auth0', auth0: auth0User } });
     }
