@@ -8,5 +8,7 @@ export interface MarkdownViewProps {
 }
 
 export default function Markdown({ children }: MarkdownViewProps) {
-  return <ProseReactMarkdown>{children}</ProseReactMarkdown>;
+  return (
+    <ProseReactMarkdown linkTarget="_blank">{children}</ProseReactMarkdown>
+  );
 }
