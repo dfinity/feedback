@@ -4,6 +4,8 @@ import {
   FaCaretDown,
   FaCaretUp,
   FaEdit,
+  FaGithub,
+  FaJira,
   FaRegCheckCircle,
   FaRegDotCircle,
   FaRegPlayCircle,
@@ -21,8 +23,6 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
 import { handlePromise } from '../utils/handlers';
-
-const maxPreviewTags = isMobile ? 0 : 2;
 
 const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -50,11 +50,21 @@ export default function TopicView({
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.changeStatus);
 
+  const maxPreviewTags = isMobile || expanded ? 0 : 2;
+
   useEffect(() => {
     if (!expanded) {
       setEditing(false);
     }
   }, [expanded]);
+
+  const onChangeStatus = (topic: Topic, status: TopicStatus) => {
+    handlePromise(
+      changeStatus(topic.id, status),
+      'Changing status...',
+      'Error while changing status!',
+    );
+  };
 
   const onSubmitEdit = async (info: TopicInfo) => {
     /* await */ handlePromise(
@@ -68,7 +78,7 @@ export default function TopicView({
   return (
     <div tw="bg-gray-100 rounded-2xl">
       <div
-        tw="p-3 text-lg md:text-xl flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
@@ -92,7 +102,10 @@ export default function TopicView({
               <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
             </div>
           )}
-          <div tw="flex-1 text-ellipsis whitespace-nowrap overflow-hidden select-none">
+          <div
+            tw="flex-1 overflow-hidden select-none"
+            css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
+          >
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">
@@ -117,27 +130,24 @@ export default function TopicView({
           ) : (
             <>
               {!!topic.description && (
-                <div>
-                  <Markdown>{topic.description}</Markdown>
-                </div>
-              )}
-              {topic.tags.length > 0 && (
                 <>
-                  <hr tw="my-3" />
-                  <div tw="flex flex-wrap gap-2 items-center">
-                    <span tw="font-bold opacity-70">Tags:</span>
-                    {topic.tags.map((tag, i) => (
-                      <Tag key={i}>{tag}</Tag>
-                    ))}
+                  <div>
+                    <Markdown>{topic.description}</Markdown>
                   </div>
+                  <hr tw="my-3" />
                 </>
               )}
               {topic.links.length > 0 && (
                 <>
-                  <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
-                      <div key={i}>
+                      <div key={i} tw="flex gap-2 items-center">
+                        {!!link.startsWith(
+                          'https://dfinity.atlassian.net/',
+                        ) && <FaJira tw="text-blue-500" />}
+                        {!!link.startsWith('https://github.com/') && (
+                          <FaGithub tw="text-black" />
+                        )}
                         <a
                           tw="text-blue-500"
                           href={link}
@@ -147,6 +157,17 @@ export default function TopicView({
                           {link}
                         </a>
                       </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {topic.tags.length > 0 && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex flex-wrap gap-2 items-center">
+                    <span tw="font-bold opacity-70">Tags:</span>
+                    {topic.tags.map((tag, i) => (
+                      <Tag key={i}>{tag}</Tag>
                     ))}
                   </div>
                 </>
@@ -165,7 +186,7 @@ export default function TopicView({
                       {topic.status === 'open' && (
                         <OwnerButton
                           // css={{ background: statusColors.next }}
-                          onClick={() => changeStatus(topic.id, 'next')}
+                          onClick={() => onChangeStatus(topic, 'next')}
                         >
                           <FaRegPlayCircle />
                           Start
@@ -174,7 +195,7 @@ export default function TopicView({
                       {topic.status === 'next' && (
                         <OwnerButton
                           // css={{ background: statusColors.completed }}
-                          onClick={() => changeStatus(topic.id, 'completed')}
+                          onClick={() => onChangeStatus(topic, 'completed')}
                         >
                           <FaRegCheckCircle />
                           Complete
@@ -183,7 +204,7 @@ export default function TopicView({
                       {(topic.status === 'open' || topic.status === 'next') && (
                         <OwnerButton
                           // css={{ background: statusColors.closed }}
-                          onClick={() => changeStatus(topic.id, 'closed')}
+                          onClick={() => onChangeStatus(topic, 'closed')}
                         >
                           <FaRegTimesCircle />
                           Close
@@ -193,7 +214,7 @@ export default function TopicView({
                         topic.status === 'closed') && (
                         <OwnerButton
                           // css={{ background: statusColors.open }}
-                          onClick={() => changeStatus(topic.id, 'open')}
+                          onClick={() => onChangeStatus(topic, 'open')}
                         >
                           <FaRegDotCircle />
                           Reopen

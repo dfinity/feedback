@@ -42,7 +42,7 @@ actor class FeedbackBoard() {
   type TopicView = Info and MetadataView;
   type Id = Nat;
 
-  let topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
+  var topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
   stable var storedTopics : List.List<(Nat, Topic)> = null;
   stable var nextId : Id = 1;
 
@@ -87,6 +87,28 @@ actor class FeedbackBoard() {
     };
     topics.put(id, { info and metadata });
     return id;
+  };
+
+  public shared ({ caller }) func bulkCreateTopics(infoArray : [Info]) {
+    let user = #principal caller; // TODO: only moderators
+    for (info in infoArray.vals()) {
+      let id = nextId;
+      nextId += 1;
+      let metadata : Metadata = {
+        id;
+        owner = ?user;
+        createTime = Time.now() / 1_000_000;
+        upVoters = List.nil();
+        downVoters = List.nil();
+        status = #open;
+      };
+      topics.put(id, { info and metadata });
+    };
+  };
+
+  /// TEMPORARY
+  public shared func clearTopics() {
+    topics := TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
   };
 
   public shared ({ caller }) func edit(id : Id, info : Info) : async () {

@@ -27,6 +27,7 @@ export interface TopicState {
   loading: boolean;
   fetch(): Promise<Topic[]>;
   create(info: TopicInfo): Promise<void>;
+  bulkCreate(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   changeStatus(id: string, status: TopicStatus): Promise<void>;
@@ -48,73 +49,6 @@ export const useTopicStore = create<TopicState>((set, get) => {
   };
 
   return {
-    // topics: [
-    //   {
-    //     id: '0000',
-    //     title: 'Example request',
-    //     description: 'Example description',
-    //     links: [],
-    //     tags: ['Motoko', 'Syntax'],
-    //     owner: Principal.anonymous(),
-    //     createTime: Date.now(),
-    //     votes: 0,
-    //     status: 'open',
-    //     owned: true,
-    //     yourVote: 0,
-    //   },
-    //   {
-    //     id: '1111',
-    //     title: 'Another example',
-    //     description: '## Markdown description\n\n\n\n> Quoted text',
-    //     links: ['https://github.com/dfinity/feedback/issues/1'],
-    //     tags: ['Docs', 'Stable Memory', 'Rust', 'P1'],
-    //     owner: Principal.anonymous(),
-    //     createTime: Date.now(),
-    //     votes: 3,
-    //     status: 'open',
-    //     owned: true,
-    //     yourVote: 1,
-    //   },
-    //   {
-    //     id: '2222',
-    //     title: 'Feature in progress',
-    //     description: 'In-progress description',
-    //     links: [],
-    //     tags: ['Agent-JS', 'P0', 'Feature'],
-    //     owner: Principal.anonymous(),
-    //     createTime: Date.now(),
-    //     votes: 5,
-    //     status: 'next',
-    //     owned: true,
-    //     yourVote: 1,
-    //   },
-    //   {
-    //     id: '3333',
-    //     title: 'Completed feature',
-    //     description: 'Completed description',
-    //     links: [],
-    //     tags: ['DFX', 'Config'],
-    //     owner: Principal.anonymous(),
-    //     createTime: Date.now(),
-    //     votes: 5,
-    //     status: 'completed',
-    //     owned: true,
-    //     yourVote: 0,
-    //   },
-    //   {
-    //     id: '4444',
-    //     title: 'Closed topic',
-    //     description: 'Closed description',
-    //     links: [],
-    //     tags: [],
-    //     owner: Principal.anonymous(),
-    //     createTime: Date.now(),
-    //     votes: 0,
-    //     status: 'closed',
-    //     owned: true,
-    //     yourVote: 0,
-    //   },
-    // ],
     topics: [],
     loading: false,
     async fetch() {
@@ -129,7 +63,6 @@ export const useTopicStore = create<TopicState>((set, get) => {
           'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
       }));
       set({ topics });
-      console.log(topics); // temporary
       return topics;
     },
     async create(info: TopicInfo) {
@@ -147,6 +80,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
         topics: [topic, ...state.topics],
       }));
       // await get().fetch();
+    },
+    async bulkCreate(infoArray: TopicInfo[]) {
+      await backend.bulkCreateTopics(infoArray);
+      await get().fetch();
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
@@ -175,7 +112,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, status });
       }
-      backend.changeStatus(BigInt(id), statusMap[status]);
+      await backend.changeStatus(BigInt(id), statusMap[status]);
     },
   };
 });

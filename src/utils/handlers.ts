@@ -14,10 +14,13 @@ export function handlePromise<T>(
   return promise;
 }
 
-export function handleError(err: Error | string, message?: string | undefined) {
+export function handleError(
+  err: Error | string | any,
+  message?: string | undefined,
+) {
   console.error(err);
   toast(
-    message || (typeof err === 'string' ? err : err.message || String(err)),
+    message || (typeof err === 'string' ? err : String(err?.message || err)),
     {
       type: 'error',
       autoClose: 5000,
