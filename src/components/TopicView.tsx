@@ -138,16 +138,16 @@ export default function TopicView({
                   <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
-                      <div key={i}>
+                      <div key={i} tw="flex gap-2 items-center">
+                        {!!link.startsWith('https://dfinity.atlassian.net') && (
+                          <FaJira tw="text-blue-700" />
+                        )}
                         <a
-                          tw="text-blue-500 flex gap-2 items-center"
+                          tw="text-blue-500"
                           href={link}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          {!!link.startsWith(
-                            'https://dfinity.atlassian.net',
-                          ) && <FaJira />}
                           {link}
                         </a>
                       </div>
