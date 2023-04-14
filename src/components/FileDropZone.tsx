@@ -29,10 +29,19 @@ export function FileDropZone({ children }: FileDropZoneProps) {
         reader.onload = () => {
           try {
             const infoArray = parseJiraXml(reader.result as string);
-            console.log('Importing Jira topics:', infoArray);
+            if (
+              !window.confirm(
+                `Import ${infoArray.length} topic${
+                  infoArray.length === 1 ? '' : 's'
+                } from Jira?`,
+              )
+            ) {
+              return;
+            }
+            console.log('Importing from Jira XML file:', infoArray);
             handlePromise(
               useTopicStore.getState().bulkCreate(infoArray),
-              `Importing ${infoArray.length} topic${
+              `Importing topic${
                 infoArray.length === 1 ? '' : 's'
               } from Jira...`,
               'Error while importing from Jira!',
