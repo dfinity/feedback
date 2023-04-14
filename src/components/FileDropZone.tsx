@@ -35,7 +35,6 @@ export function FileDropZone({ children }: FileDropZoneProps) {
                 infoArray.length === 1 ? '' : 's'
               } from Jira?`,
               showCancelButton: true,
-              focusConfirm: false,
               confirmButtonColor: '#7450c3', // TODO: refactor
             });
             if (!result.isConfirmed) {
