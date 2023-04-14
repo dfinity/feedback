@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components/macro';
+import Swal from 'sweetalert2';
 import tw from 'twin.macro';
 import { useTopicStore } from '../stores/topicStore';
 import { handleError, handlePromise } from '../utils/handlers';
@@ -26,16 +27,18 @@ export function FileDropZone({ children }: FileDropZoneProps) {
           console.error(event);
           handleError('Error while reading file!');
         };
-        reader.onload = () => {
+        reader.onload = async () => {
           try {
             const infoArray = parseJiraXml(reader.result as string);
-            if (
-              !window.confirm(
-                `Import ${infoArray.length} topic${
-                  infoArray.length === 1 ? '' : 's'
-                } from Jira?`,
-              )
-            ) {
+            const result = await Swal.fire({
+              title: `Import ${infoArray.length} topic${
+                infoArray.length === 1 ? '' : 's'
+              } from Jira?`,
+              showCancelButton: true,
+              focusConfirm: false,
+              confirmButtonColor: '#7450c3', // TODO: refactor
+            });
+            if (!result.isConfirmed) {
               return;
             }
             console.log('Importing from Jira XML file:', infoArray);
