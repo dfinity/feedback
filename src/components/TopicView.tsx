@@ -130,13 +130,15 @@ export default function TopicView({
           ) : (
             <>
               {!!topic.description && (
-                <div>
-                  <Markdown>{topic.description}</Markdown>
-                </div>
+                <>
+                  <div>
+                    <Markdown>{topic.description}</Markdown>
+                  </div>
+                  <hr tw="my-3" />
+                </>
               )}
               {topic.links.length > 0 && (
                 <>
-                  <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
                       <div key={i} tw="flex gap-2 items-center">
