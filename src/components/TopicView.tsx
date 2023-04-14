@@ -4,6 +4,7 @@ import {
   FaCaretDown,
   FaCaretUp,
   FaEdit,
+  FaGithub,
   FaJira,
   FaRegCheckCircle,
   FaRegDotCircle,
@@ -139,8 +140,11 @@ export default function TopicView({
                   <div>
                     {topic.links.map((link, i) => (
                       <div key={i} tw="flex gap-2 items-center">
-                        {!!link.startsWith('https://dfinity.atlassian.net') && (
-                          <FaJira tw="text-blue-700" />
+                        {!!link.startsWith(
+                          'https://dfinity.atlassian.net/',
+                        ) && <FaJira tw="text-blue-500" />}
+                        {!!link.startsWith('https://github.com/') && (
+                          <FaGithub tw="text-black" />
                         )}
                         <a
                           tw="text-blue-500"
