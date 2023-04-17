@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Topic, VoteStatus } from '../stores/topicStore';
+import { useSearchParams } from 'react-router-dom';
+import { Topic } from '../stores/topicStore';
 import TopicView from './TopicView';
 
 export interface TopicListProps {
   topics: Topic[];
-  onVote?(topic: Topic, voteStatus: VoteStatus): void;
 }
 
-export default function TopicList({ topics, onVote }: TopicListProps) {
+export default function TopicList({ topics }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
+  const [searchParams] = useSearchParams();
 
   const sortedItems = [...topics].sort((a, b) => b.createTime - a.createTime);
 
@@ -19,9 +20,14 @@ export default function TopicList({ topics, onVote }: TopicListProps) {
           key={item.id}
           topic={item}
           expanded={item.id === expandedId}
-          onChangeExpanded={(expanded) =>
-            setExpandedId(expanded ? item.id : undefined)
-          }
+          onChangeExpanded={(expanded) => {
+            setExpandedId(expanded ? item.id : undefined);
+            if (expanded) {
+              searchParams.set('topic', item.id);
+            } else {
+              searchParams.delete('topic');
+            }
+          }}
         />
       ))}
     </div>

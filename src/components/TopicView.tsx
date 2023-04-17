@@ -19,12 +19,12 @@ import {
   VoteStatus,
   useTopicStore,
 } from '../stores/topicStore';
+import { handlePromise } from '../utils/handlers';
 import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
-import { handlePromise } from '../utils/handlers';
 
-const OwnerButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
+const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
 const statusColors: Record<TopicStatus, string> = {
   open: '#e8caf1',
@@ -188,48 +188,48 @@ export default function TopicView({
                   <hr tw="my-3" />
                   <div tw="flex mt-4">
                     <div tw="flex flex-1">
-                      <OwnerButton onClick={() => setEditing(true)}>
+                      <ToolbarButton onClick={() => setEditing(true)}>
                         <FaEdit />
                         Edit
-                      </OwnerButton>
+                      </ToolbarButton>
                     </div>
                     <div tw="flex gap-2">
                       {topic.status === 'open' && (
-                        <OwnerButton
+                        <ToolbarButton
                           // css={{ background: statusColors.next }}
                           onClick={() => onChangeStatus(topic, 'next')}
                         >
                           <FaRegPlayCircle />
                           Start
-                        </OwnerButton>
+                        </ToolbarButton>
                       )}
                       {topic.status === 'next' && (
-                        <OwnerButton
+                        <ToolbarButton
                           // css={{ background: statusColors.completed }}
                           onClick={() => onChangeStatus(topic, 'completed')}
                         >
                           <FaRegCheckCircle />
                           Complete
-                        </OwnerButton>
+                        </ToolbarButton>
                       )}
                       {(topic.status === 'open' || topic.status === 'next') && (
-                        <OwnerButton
+                        <ToolbarButton
                           // css={{ background: statusColors.closed }}
                           onClick={() => onChangeStatus(topic, 'closed')}
                         >
                           <FaRegTimesCircle />
                           Close
-                        </OwnerButton>
+                        </ToolbarButton>
                       )}
                       {(topic.status === 'completed' ||
                         topic.status === 'closed') && (
-                        <OwnerButton
+                        <ToolbarButton
                           // css={{ background: statusColors.open }}
                           onClick={() => onChangeStatus(topic, 'open')}
                         >
                           <FaRegDotCircle />
                           Reopen
-                        </OwnerButton>
+                        </ToolbarButton>
                       )}
                     </div>
                   </div>

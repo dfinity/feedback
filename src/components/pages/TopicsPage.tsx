@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import 'twin.macro';
 import { Topic, TopicStatus, useTopicStore } from '../../stores/topicStore';
 import TopicList from '../TopicList';
@@ -16,12 +17,21 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
 
 export default function TopicsPage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
+  const [searchParams] = useSearchParams();
 
   const topics = useTopicStore((state) => state.topics);
+  const navigate = useNavigate();
 
   const filter = (topic: Topic) => !!filterStates[topic.status];
 
   const visibleTopics = topics.filter(filter);
+
+  useEffect(() => {
+    const id = searchParams.get('topic');
+    if (id && id === String(+id) && !topics.some((t) => t.id === id)) {
+      navigate(`/topic/${id}`);
+    }
+  }, [navigate, searchParams, topics]);
 
   return (
     <>
