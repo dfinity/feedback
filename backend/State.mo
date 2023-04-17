@@ -1,37 +1,12 @@
 import Types "Types";
-import Trie "mo:base/Trie";
+import Relate "Relate";
 
 module {
+    type Map<A, B> = Relate.Map<A, B>;
+    type BinRel<A, B> = Relate.BinRel<A, B>;
+    type TernRel<A, B> = Relate.TernRel<A, B>;
 
-    // Function from A to B, represented as a data structure.
-    public type Map<A, B> = {
-        var map: Trie.Trie<A, B>;
-    };
-
-    // Binary relation among A and B,
-    // stored in way that permits efficiently collecting
-    //  - all B related to an A.
-    //  - all A related to a B.
-    public type BinRel<A, B> = {
-        var aB: Trie.Trie2D<A, B, ()>;
-        var bA: Trie.Trie2D<B, A, ()>;
-    };
-
-    // Ternary relation among A, B, C,
-    // stored in way that permits efficiently collecting
-    //  - all (B, C) related to an A.
-    //  - all (A, C) related to a B.
-    public type TernRel<A, B, C> = {
-        var aB: Trie.Trie2D<A, B, C>;
-        var bA: Trie.Trie2D<B, A, C>;
-    };
-
-    public type UserId = Types.User.Id;
-    public type TeamId = Types.Team.Id;
-    public type TopicId = Types.Topic.Id;
-    public type UserVote = Types.Topic.UserVote;
-
-    // XXX-State (for User-, Topic- and Team-).
+    // # User, Topic and Team-State.
     //
     // Maps that collectively give user-oriented, topic-oriented
     // and team-oriented state.
@@ -39,13 +14,18 @@ module {
     // This per-entity state lives outside of the cross-entity relations,
     // (Each state field comes from a single ID, and no other IDs).
 
+    public type UserId = Types.User.Id;
+    public type TeamId = Types.Team.Id;
+    public type TopicId = Types.Topic.Id;
+    public type UserVote = Types.Topic.UserVote;
+
     public type UserState = Map<UserId, Types.User.State>;
 
     public type TopicState = Map<TopicId, Types.Topic.State>;
 
     public type TeamState = Map<TeamId, Types.Team.State>;
 
-    // Feedback board state representation.
+    // # Feedback board state representation.
     //
     // A record that can be versioned (wrapped in a big variant type,
     // starting at #v0), in a stable variable.

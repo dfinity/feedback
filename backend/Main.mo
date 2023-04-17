@@ -8,6 +8,7 @@ import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
 import Types "Types";
+import State "State";
 import P "mo:base/Prelude";
 
 actor class Main() {
