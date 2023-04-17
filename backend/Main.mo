@@ -19,9 +19,9 @@ actor class Main() {
 
   stable var state_v0 : State.State = State.init();
 
-  stable var nextUserId : Types.User.RawId = 0;
-  stable var nextTeamId : Types.Team.RawId = 0;
-  stable var nextTopicId : Types.Topic.RawId = 0;
+  stable var nextUserId : Types.User.RawId = 1;
+  stable var nextTeamId : Types.Team.RawId = 1;
+  stable var nextTopicId : Types.Topic.RawId = 1;
 
   // # OO Wrappers for entities.
   //
