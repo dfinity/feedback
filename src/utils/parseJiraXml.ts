@@ -33,15 +33,21 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
   // TODO: detect topic status from 'status' field when possible
 
   return [...doc.getElementsByTagName('item')].map((item) => {
+    let title = getField(item, 'title');
+    // Move Jira identifier to end of title
+    title = title.replace(/^(\[[^\]]+\])\s(.+)$/, '$2 $1');
+
     let description = htmlToMarkdown(htmlDecode(getField(item, 'description')));
+
     const links = getFields(item, 'link');
     const match = /^\[([^\]]+)\]\n?\(([^)]+)\)$/.exec(description)?.[2];
     if (match) {
       description = '';
       links.unshift(match);
     }
+
     return {
-      title: getField(item, 'title'),
+      title,
       description,
       links,
       tags: [
