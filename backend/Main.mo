@@ -46,7 +46,9 @@ actor class Main() {
   };
 
   public func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
-      P.xxx()
+      topics.update(#topic id, func (topic: Types.Topic.State) : Types.Topic.State {
+          { topic with edit }
+      })
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {

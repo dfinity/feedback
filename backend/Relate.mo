@@ -137,11 +137,11 @@ module {
                 stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, b).0;
             };
 
-            public func update(a : A, f : {old : B} -> B) {
+            public func update(a : A, f : B -> B) {
                 switch (get(a)) {
                 case null { assert false };
                 case (?b) {
-                         stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, f {old=b}).0;
+                         stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, f b).0;
                      };
                 }
             };
