@@ -160,7 +160,7 @@ export default function TopicView({
                           <FaGithub tw="text-black" />
                         )}
                         <a
-                          tw="text-blue-500"
+                          tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"
                           href={link}
                           target="_blank"
                           rel="noreferrer"
