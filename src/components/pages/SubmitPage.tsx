@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useSessionStorage } from 'usehooks-ts';
 import useIdentity from '../../hooks/useIdentity';
 import { TopicInfo, useTopicStore } from '../../stores/topicStore';
 import { handlePromise } from '../../utils/handlers';
 import TopicForm from '../TopicForm';
-import { useSessionStorage } from 'usehooks-ts';
 
 export default function SubmitPage() {
   const [recentInfo, setRecentInfo] = useSessionStorage<TopicInfo | undefined>(
