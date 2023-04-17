@@ -162,6 +162,16 @@ module {
           hash : HashPair<A, B>,
           equal : EqualPair<A, B>
         ) {
+            public func has(a : A, b : B) : Bool {
+                let t = Trie.find(stableBinRel.aB, key<A>(hash.0, a), equal.0);
+                switch t {
+                case null false;
+                case (?t) {
+                         Trie.find<B, ()>(t, key<B>(hash.1, b), equal.1) != null;
+                     }
+                }
+            };
+
             public func getRelatedLeft(a : A) : Iter.Iter<B> {
                 let t = Trie.find(stableBinRel.aB, key<A>(hash.0, a), equal.0);
                 switch t {
@@ -228,6 +238,16 @@ module {
                 let k1 = key(hash.1, t.1);
                 stableTernRel.aB := Trie.remove2D(stableTernRel.aB, k0, equal.0, k1, equal.1).0;
                 stableTernRel.bA := Trie.remove2D(stableTernRel.bA, k1, equal.1, k0, equal.0).0;
+            };
+
+            public func get(a : A, b : B) : ?C {
+                let t = Trie.find(stableTernRel.aB, key<A>(hash.0, a), equal.0);
+                switch t {
+                case null null;
+                case (?t) {
+                         Trie.find<B, C>(t, key<B>(hash.1, b), equal.1)
+                     }
+                }
             };
 
         };

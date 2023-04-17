@@ -18,6 +18,10 @@ actor class Main() {
 
   stable var state_v0 : State.State = State.init();
 
+  stable var nextUserId : Types.User.RawId = 0;
+  stable var nextTeamId : Types.Team.RawId = 0;
+  stable var nextTopicId : Types.Topic.RawId = 0;
+
   // # OO Wrappers for entities.
   //
   // Arguments are relevant fields from state, and primary-key utility functions (hash, equal).
@@ -37,6 +41,15 @@ actor class Main() {
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
 
+  func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
+      switch (principals.get(caller)) {
+      case null { assert false };
+      case (?user) {
+               assert userOwnsTopic.has(user, topic)
+           }
+      }
+  };
+
   public query ({ caller }) func listTopics() : async [Types.Topic.UserView] {
       P.xxx()
   };
@@ -45,7 +58,8 @@ actor class Main() {
       P.xxx()
   };
 
-  public func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
+  public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
+      assertCallerOwnsTopic(caller, #topic id);
       topics.update(#topic id, func (topic: Types.Topic.State) : Types.Topic.State {
           { topic with edit }
       })
@@ -55,20 +69,34 @@ actor class Main() {
       P.xxx()
   };
 
-  public func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
-      P.xxx()
+  public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
+      assertCallerOwnsTopic(caller, #topic id);
+      topics.update(#topic id, func (topic: Types.Topic.State) : Types.Topic.State {
+          { topic with status }
+      })
   };
 
   /// Create (or get) a user Id for the given caller Id.
   /// Once created, the user Id for a given caller Id is stored and fixed.
-  public func login() : async Types.User.RawId {
-      P.xxx()
+  public shared ({ caller }) func login() : async Types.User.RawId {
+      switch(principals.get(caller)) {
+      case null {
+               let user = nextUserId;
+               nextUserId += 1;
+               principals.put(caller, #user user);
+               user
+           };
+      case (?(#user u)) u;
+      }
   };
 
   /// Get the (optional) user Id for the given caller Id.
   /// Returns null when none exists yet (see `login()`).
-  public query func fastLogin() : async ?Types.User.RawId {
-      P.xxx()
+  public query ({ caller })  func fastLogin() : async ?Types.User.RawId {
+      switch (principals.get(caller)) {
+      case null null;
+      case (?(#user u)) ?u;
+      }
   };
 
 };
