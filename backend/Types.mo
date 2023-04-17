@@ -37,11 +37,12 @@ module {
       public type UserView = {
           id : Id;
           isOwner : Bool;
-          submitterName: Text;
-          ownerName: Text;
+          // submitterName: Text;
+          // ownerName: Text;
           createTime : Int; // milliseconds since Unix epoch
           upVoters : Nat;
           downVoters : Nat;
+          yourVote : UserVote;
           status : Status;
       };
   };

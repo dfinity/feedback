@@ -154,6 +154,9 @@ module {
                 stableMap.map := Trie.remove(stableMap.map, key(hash, a), equal).0;
             };
 
+            public func entries() : Iter.Iter<(A, B)> {
+                iterAllPairs(stableMap.map)
+            }
         };
 
         /// General binary relation.

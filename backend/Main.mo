@@ -7,6 +7,7 @@ import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
+
 import Types "Types";
 import State "State";
 import Relate "Relate";
@@ -40,6 +41,9 @@ actor class Main() {
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
+  func assertCaller(caller : Principal) {
+      assert principals.get(caller) != null
+  };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
       switch (principals.get(caller)) {
@@ -50,12 +54,59 @@ actor class Main() {
       }
   };
 
+  func viewTopic(user : ?Types.User.Id, topic : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.UserView {
+      var upVoters : Nat = 0;
+      var downVoters : Nat = 0;
+      for ((_, vote) in userTopicVotes.getRelatedRight(topic)) {
+          switch vote {
+          case (#up) upVoters += 1;
+          case (#down) downVoters += 1;
+          case (#none) ();
+          }
+      };
+      let userFields = switch user {
+        case null {
+        { isOwner = false;
+          yourVote = #none
+        } };
+        case (?user) {
+        { isOwner = userOwnsTopic.has(user, topic);
+          yourVote = switch (userTopicVotes.get(user, topic)) { case null #none; case (?v) v };
+        } };
+      };
+      {
+          userFields with
+          createTime = state.internal.createTime;
+          id = topic;
+          upVoters;
+          downVoters;
+          status = state.status;
+      }
+  };
+
   public query ({ caller }) func listTopics() : async [Types.Topic.UserView] {
-      P.xxx()
+      let callerUser = principals.get(caller); // okay if null.
+      func viewAsCaller( (topic : Types.Topic.Id, state : Types.Topic.State) ) : Types.Topic.UserView {
+          viewTopic(callerUser, topic, state)
+      };
+      Iter.toArray(Iter.map(topics.entries(), viewAsCaller))
   };
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
-      P.xxx()
+      assertCaller(caller);
+      let topic = nextTopicId;
+      nextTopicId += 1;
+      let internal = {
+          createTime = Time.now()
+      };
+      topics.put(
+        #topic topic,
+        {
+            edit;
+            internal;
+            status = #open;
+        });
+      topic
   };
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
