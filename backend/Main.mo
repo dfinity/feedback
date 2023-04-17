@@ -42,10 +42,9 @@ actor class Main() {
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
-    switch (principals.get(caller)) {
-      case null { assert false; loop {} };
-      case (?user) user;
-    };
+    assert not Principal.isAnonymous(caller);
+    let ?user = principals.get(caller) else { assert false; loop {} };
+    user;
   };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
