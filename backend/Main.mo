@@ -66,7 +66,12 @@ actor class Main() {
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
-      P.xxx()
+      ignore do ? {
+          // validates arguments before updating relation.
+          ignore topics.get(#topic id)!;
+          let user = principals.get(caller)!;
+          userTopicVotes.put(user, #topic id, userVote)
+      };
   };
 
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
