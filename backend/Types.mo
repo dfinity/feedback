@@ -34,7 +34,7 @@ module {
           status : Status;
       };
 
-      public type UserView = {
+      public type View = Edit and {
           id : Id;
           isOwner : Bool;
           // submitterName: Text;

@@ -57,7 +57,7 @@ actor class Main() {
       }
   };
 
-  func viewTopic(user : ?Types.User.Id, topic : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.UserView {
+  func viewTopic(user : ?Types.User.Id, topic : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
       var upVoters : Nat = 0;
       var downVoters : Nat = 0;
       for ((_, vote) in userTopicVotes.getRelatedRight(topic)) {
@@ -78,7 +78,7 @@ actor class Main() {
         } };
       };
       {
-          userFields with
+          state.edit and userFields with
           createTime = state.internal.createTime;
           id = topic;
           upVoters;
@@ -87,9 +87,9 @@ actor class Main() {
       }
   };
 
-  public query ({ caller }) func listTopics() : async [Types.Topic.UserView] {
+  public query ({ caller }) func listTopics() : async [Types.Topic.View] {
       let callerUser = principals.get(caller); // okay if null.
-      func viewAsCaller( (topic : Types.Topic.Id, state : Types.Topic.State) ) : Types.Topic.UserView {
+      func viewAsCaller( (topic : Types.Topic.Id, state : Types.Topic.State) ) : Types.Topic.View {
           viewTopic(callerUser, topic, state)
       };
       Iter.toArray(Iter.map(topics.entries(), viewAsCaller))
