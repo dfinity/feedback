@@ -37,8 +37,8 @@ module {
       status : Status;
     };
 
-    public type UserView = {
-      id : Id;
+    public type View = {
+      id : RawId;
       isOwner : Bool;
       // submitterName: Text;
       // ownerName: Text;
@@ -47,7 +47,7 @@ module {
       downVoters : Nat;
       yourVote : UserVote;
       status : Status;
-    };
+    } and Edit;
   };
 
   public module User {

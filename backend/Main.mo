@@ -57,14 +57,14 @@ actor class Main() {
     };
   };
 
-  func viewTopic(user : ?Types.User.Id, topic : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.UserView {
+  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
-    for ((_, vote) in userTopicVotes.getRelatedRight(topic)) {
+    for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
       switch vote {
         case (#up) upVoters += 1;
         case (#down) downVoters += 1;
-        case (#none)();
+        case (#none) {};
       };
     };
     let userFields = switch user {
@@ -76,27 +76,28 @@ actor class Main() {
       };
       case (?user) {
         {
-          isOwner = userOwnsTopic.has(user, topic);
-          yourVote = switch (userTopicVotes.get(user, topic)) {
+          isOwner = userOwnsTopic.has(user, id);
+          yourVote = switch (userTopicVotes.get(user, id)) {
             case null #none;
             case (?v) v;
           };
         };
       };
     };
+    let #topic rawId = id;
     {
-      userFields with
+      state.edit and userFields with
+      id = rawId;
       createTime = state.internal.createTime;
-      id = topic;
       upVoters;
       downVoters;
       status = state.status;
     };
   };
 
-  public query ({ caller }) func listTopics() : async [Types.Topic.UserView] {
+  public query ({ caller }) func listTopics() : async [Types.Topic.View] {
     let callerUser = principals.get(caller); // okay if null.
-    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.UserView {
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
       viewTopic(callerUser, topic, state);
     };
     Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
