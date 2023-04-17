@@ -43,8 +43,10 @@ actor class Main() {
 
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     assert not Principal.isAnonymous(caller);
-    let ?user = principals.get(caller) else { assert false; loop {} };
-    user;
+    switch (principals.get(caller)) {
+      case null { assert false; loop {} };
+      case (?user) user;
+    };
   };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
