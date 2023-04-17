@@ -133,6 +133,10 @@ module {
           hash : A -> Hash.Hash,
           equal : (A, A) -> Bool)
         {
+            public func clear() {
+                stableMap.map := Trie.empty();
+            };
+
             public func put(a : A, b : B) {
                 stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, b).0;
             };
@@ -165,6 +169,11 @@ module {
           hash : HashPair<A, B>,
           equal : EqualPair<A, B>
         ) {
+            public func clear() {
+                stableBinRel.aB := Trie.empty();
+                stableBinRel.bA := Trie.empty();
+            };
+
             public func has(a : A, b : B) : Bool {
                 let t = Trie.find(stableBinRel.aB, key<A>(hash.0, a), equal.0);
                 switch t {
@@ -212,6 +221,10 @@ module {
           hash : HashPair<A, B>,
           equal : EqualPair<A, B>
         ) {
+            public func clear() {
+                stableTernRel.aB := Trie.empty();
+                stableTernRel.bA := Trie.empty();
+            };
 
             public func getRelatedLeft(a : A) : Iter.Iter<(B, C)> {
                 let t = Trie.find(stableTernRel.aB, key<A>(hash.0, a), equal.0);

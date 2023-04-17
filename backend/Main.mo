@@ -41,8 +41,11 @@ actor class Main() {
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
-  func assertCaller(caller : Principal) {
-      assert principals.get(caller) != null
+  func assertCallerIsUser(caller : Principal) : Types.User.Id {
+      switch (principals.get(caller)) {
+      case null { assert false; loop { } };
+      case (?user) user
+      }
   };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
@@ -92,12 +95,11 @@ actor class Main() {
       Iter.toArray(Iter.map(topics.entries(), viewAsCaller))
   };
 
-  public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
-      assertCaller(caller);
+  func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
       let topic = nextTopicId;
       nextTopicId += 1;
       let internal = {
-          createTime = Time.now()
+          createTime = Time.now() / 1_000_000;
       };
       topics.put(
         #topic topic,
@@ -106,7 +108,29 @@ actor class Main() {
             internal;
             status = #open;
         });
+      userOwnsTopic.put(user, #topic topic);
+      userSubmitsTopic.put(user, #topic topic);
       topic
+  };
+
+  public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
+      let user = assertCallerIsUser(caller);
+      createTopic_(user, edit)
+  };
+
+  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.Edit]) {
+      let user = assertCallerIsUser(caller);
+      for (edit in edits.vals()) {
+          ignore createTopic_(user, edit)
+      }
+  };
+
+  /// TEMPORARY
+  public shared func clearTopics() {
+      topics.clear();
+      userOwnsTopic.clear();
+      userSubmitsTopic.clear();
+      userTopicVotes.clear();
   };
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
