@@ -5,6 +5,7 @@ import SubmitPage from './pages/SubmitPage';
 import TopicsPage from './pages/TopicsPage';
 import 'twin.macro';
 import { FileDropZone } from './FileDropZone';
+import TopicPage from './pages/TopicPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <div tw="max-w-[800px] mx-auto p-4 mt-1">
             <Routes>
               <Route path="/" element={<TopicsPage />} />
+              <Route path="/topic/:id" element={<TopicPage />} />
               <Route path="/submit" element={<SubmitPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
