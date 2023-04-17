@@ -9,7 +9,7 @@ export interface TopicListProps {
 
 export default function TopicList({ topics }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const sortedItems = [...topics].sort((a, b) => b.createTime - a.createTime);
 
@@ -23,9 +23,10 @@ export default function TopicList({ topics }: TopicListProps) {
           onChangeExpanded={(expanded) => {
             setExpandedId(expanded ? item.id : undefined);
             if (expanded) {
-              searchParams.set('topic', item.id);
+              setSearchParams({ topic: item.id });
             } else {
               searchParams.delete('topic');
+              setSearchParams(searchParams);
             }
           }}
         />
