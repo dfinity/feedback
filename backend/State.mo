@@ -1,6 +1,8 @@
 import Types "Types";
 import Relate "Relate";
 
+import Trie "mo:base/Trie";
+
 module {
     type Map<A, B> = Relate.Stable.Map<A, B>;
     type BinRel<A, B> = Relate.Stable.BinRel<A, B>;
@@ -37,17 +39,17 @@ module {
     public type State = {
 
         // Per-entity state:
-        userState : UserState;
-        topicState : TopicState;
-        teamState : TeamState;
+        users : UserState;
+        topics : TopicState;
+        teams : TeamState;
 
-        principalState : PrincipalState;
+        principals : PrincipalState;
 
         // user-team-member binary relation.
         userTeamMember : BinRel<UserId, TeamId>;
 
         // user-submitted-topic relation.
-        userSubmittedTopic : BinRel<UserId, TopicId>;
+        userSubmitsTopic : BinRel<UserId, TopicId>;
 
         // user-owns-topic relation.
         userOwnsTopic : BinRel<UserId, TopicId>;
@@ -56,6 +58,20 @@ module {
         userTopicVotes : TernRel<UserId, TopicId, UserVote>;
     };
 
+
+    public func init() : State {
+        {
+            users = Relate.Stable.emptyMap();
+            topics = Relate.Stable.emptyMap();
+            teams = Relate.Stable.emptyMap();
+            principals = Relate.Stable.emptyMap();
+
+            userTeamMember = Relate.Stable.emptyBinRel();
+            userSubmitsTopic = Relate.Stable.emptyBinRel();
+            userOwnsTopic = Relate.Stable.emptyBinRel();
+            userTopicVotes = Relate.Stable.emptyTernRel();
+        }
+    };
 
     // principalState
     //
@@ -85,8 +101,6 @@ module {
     //  (2) *not* take userId as an arg, but instead get it from
     //      `getUserId`, internally, based on the caller Principal.
     //
-    public type PrincipalState = {
-        userId : Map<Principal, UserId>;
-    };
+    public type PrincipalState = Map<Principal, UserId>;
 
 }

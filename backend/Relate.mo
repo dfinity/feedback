@@ -89,6 +89,10 @@ module {
             var map: Trie.Trie<A, B>;
         };
 
+        public func emptyMap<A, B>() : Map<A, B> {
+            { var map = Trie.empty() }
+        };
+
         // Binary relation among A and B,
         // stored in way that permits efficiently collecting
         //  - all B related to an A.
@@ -96,6 +100,12 @@ module {
         public type BinRel<A, B> = {
             var aB: Trie.Trie2D<A, B, ()>;
             var bA: Trie.Trie2D<B, A, ()>;
+        };
+
+        public func emptyBinRel<A, B>() : BinRel<A, B> {
+            { var aB = Trie.empty();
+              var bA = Trie.empty();
+            }
         };
 
         // Ternary relation among A, B, C,
@@ -106,6 +116,13 @@ module {
             var aB: Trie.Trie2D<A, B, C>;
             var bA: Trie.Trie2D<B, A, C>;
         };
+
+        public func emptyTernRel<A, B, C>() : TernRel<A, B, C> {
+            { var aB = Trie.empty();
+              var bA = Trie.empty();
+            }
+        };
+
     };
 
     // Ergonomic, invariant-enforcing, object-oriented wrappers for relations, rebuilt on upgrade.
@@ -139,6 +156,7 @@ module {
 
         };
 
+        /// General binary relation.
         public class BinRel<A, B>(
           stableBinRel : Stable.BinRel<A, B>,
           hash : HashPair<A, B>,
@@ -175,6 +193,7 @@ module {
             };
         };
 
+        /// Ternary relation where C is functionally determined by the two other components.
         public class TernRel<A, B, C>(
           stableTernRel : Stable.TernRel<A, B, C>,
           hash : HashPair<A, B>,
