@@ -52,7 +52,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     topics: [],
     loading: false,
     async fetch() {
-      const results = await backend.fetch();
+      const results = await backend.listTopics();
       const topics: Topic[] = results.map((result) => ({
         ...result,
         id: String(result.id),
@@ -66,7 +66,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       return topics;
     },
     async create(info: TopicInfo) {
-      const id = String(await backend.create(info));
+      const id = String(await backend.createTopic(info));
       const topic: Topic = {
         ...info,
         id,
@@ -90,7 +90,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, ...info });
       }
-      await backend.edit(BigInt(id), info);
+      await backend.editTopic(BigInt(id), info);
     },
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({
@@ -98,7 +98,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         votes: topic.votes + vote - topic.yourVote,
         yourVote: vote,
       });
-      await backend.vote(
+      await backend.voteTopic(
         BigInt(topic.id),
         vote === 1
           ? { up: null }
@@ -112,7 +112,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, status });
       }
-      await backend.changeStatus(BigInt(id), statusMap[status]);
+      backend.setTopicStatus(BigInt(id), statusMap[status]);
     },
   };
 });

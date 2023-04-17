@@ -1,4 +1,4 @@
-import TrieMap "mo:base/TrieMap";
+import P "mo:base/Prelude";
 import Nat "mo:base/Nat";
 import List "mo:base/List";
 import Hash "mo:base/Hash";
@@ -6,169 +6,182 @@ import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
+import Trie "mo:base/Trie";
 
-actor class FeedbackBoard() {
-  type User = { #principal : Principal; #auth0 : Text };
-  type Status = { #open; #next; #completed; #closed };
-  type VoteStatus = { #up; #down; #none };
+import Types "Types";
+import State "State";
+import Relate "Relate";
 
-  type Info = {
-    title : Text;
-    description : Text;
-    links : [Text];
-    tags : [Text];
-  };
+actor class Main() {
 
-  type Metadata = {
-    id : Id;
-    owner : ?User;
-    createTime : Int; // milliseconds since Unix epoch
-    upVoters : List.List<User>;
-    downVoters : List.List<User>;
-    status : Status;
-  };
+  /// Stable canister state, version 0.
+  /// Rather than use this directly, we use instead use the OO wrappers defined from its projections.
 
-  type MetadataView = {
-    id : Id;
-    isOwner : Bool;
-    createTime : Int; // milliseconds since Unix epoch
-    upVoters : Nat;
-    downVoters : Nat;
-    yourVote : VoteStatus;
-    status : Status;
-  };
+  stable var state_v0 : State.State = State.init();
 
-  type Topic = Info and Metadata;
-  type TopicView = Info and MetadataView;
-  type Id = Nat;
+  stable var nextUserId : Types.User.RawId = 1;
+  stable var nextTeamId : Types.Team.RawId = 1;
+  stable var nextTopicId : Types.Topic.RawId = 1;
 
-  var topics = TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
-  stable var storedTopics : List.List<(Nat, Topic)> = null;
-  stable var nextId : Id = 1;
+  // # OO Wrappers for entities.
+  //
+  // Arguments are relevant fields from state, and primary-key utility functions (hash, equal).
 
-  // List all feedback
-  public query ({ caller }) func fetch() : async [TopicView] {
-    let user = #principal caller; // TODO
-    // TODO: sort by creation time (eventually also number of upvotes)
-    Iter.toArray(
-      Iter.map(
-        topics.vals(),
-        func(t : Topic) : TopicView {
-          let yourVote = if (List.some(t.upVoters, func(v : User) : Bool { v == user })) {
-            #up;
-          } else if (List.some(t.downVoters, func(v : User) : Bool { v == user })) {
-            #down;
-          } else #none;
-          let isOwner = ?user == t.owner; // to do -- improve this check.
-          {
-            t with
-            upVoters = List.size(t.upVoters);
-            downVoters = List.size(t.downVoters);
-            yourVote;
-            isOwner;
-          };
-        },
-      )
-    );
-  };
+  let users = Relate.OO.Map(state_v0.users, Types.User.idHash, Types.User.idEqual);
+  let topics = Relate.OO.Map(state_v0.topics, Types.Topic.idHash, Types.Topic.idEqual);
+  let teams = Relate.OO.Map(state_v0.teams, Types.Team.idHash, Types.Team.idEqual);
+  let principals = Relate.OO.Map(state_v0.principals, Principal.hash, Principal.equal);
 
-  // Post feedback
-  public shared ({ caller }) func create(info : Info) : async Id {
-    let user = #principal caller; // TODO
-    let id = nextId;
-    nextId += 1;
-    let metadata : Metadata = {
-      id;
-      owner = ?user;
-      createTime = Time.now() / 1_000_000;
-      upVoters = List.nil();
-      downVoters = List.nil();
-      status = #open;
+  // # OO Wrappers for relations.
+  //
+  // Arguments are relevant fields from state, and primary-key utility functions (hash, equal).
+
+  let userTeamMember = Relate.OO.BinRel(state_v0.userTeamMember, (Types.User.idHash, Types.Team.idHash), (Types.User.idEqual, Types.Team.idEqual));
+  let userSubmitsTopic = Relate.OO.BinRel(state_v0.userSubmitsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
+  let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
+  let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
+
+  func assertCallerIsUser(caller : Principal) : Types.User.Id {
+    switch (principals.get(caller)) {
+      case null { assert false; loop {} };
+      case (?user) user;
     };
-    topics.put(id, { info and metadata });
-    return id;
   };
 
-  public shared ({ caller }) func bulkCreateTopics(infoArray : [Info]) {
-    let user = #principal caller; // TODO: only moderators
-    for (info in infoArray.vals()) {
-      let id = nextId;
-      nextId += 1;
-      let metadata : Metadata = {
-        id;
-        owner = ?user;
-        createTime = Time.now() / 1_000_000;
-        upVoters = List.nil();
-        downVoters = List.nil();
-        status = #open;
+  func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
+    switch (principals.get(caller)) {
+      case null { assert false };
+      case (?user) {
+        assert userOwnsTopic.has(user, topic);
       };
-      topics.put(id, { info and metadata });
+    };
+  };
+
+  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
+    var upVoters : Nat = 0;
+    var downVoters : Nat = 0;
+    for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
+      switch vote {
+        case (#up) upVoters += 1;
+        case (#down) downVoters += 1;
+        case (#none) {};
+      };
+    };
+    let userFields = switch user {
+      case null {
+        {
+          isOwner = false;
+          yourVote = #none;
+        };
+      };
+      case (?user) {
+        {
+          isOwner = userOwnsTopic.has(user, id);
+          yourVote = switch (userTopicVotes.get(user, id)) {
+            case null #none;
+            case (?v) v;
+          };
+        };
+      };
+    };
+    let #topic rawId = id;
+    {
+      state.edit and userFields with
+      id = rawId;
+      createTime = state.internal.createTime;
+      upVoters;
+      downVoters;
+      status = state.status;
+    };
+  };
+
+  public query ({ caller }) func listTopics() : async [Types.Topic.View] {
+    let callerUser = principals.get(caller); // okay if null.
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
+      viewTopic(callerUser, topic, state);
+    };
+    Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+  };
+
+  func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
+    let topic = nextTopicId;
+    nextTopicId += 1;
+    let internal = {
+      createTime = Time.now() / 1_000_000;
+    };
+    topics.put(
+      #topic topic,
+      {
+        edit;
+        internal;
+        status = #open;
+      },
+    );
+    userOwnsTopic.put(user, #topic topic);
+    userSubmitsTopic.put(user, #topic topic);
+    topic;
+  };
+
+  public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
+    let user = assertCallerIsUser(caller);
+    createTopic_(user, edit);
+  };
+
+  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.Edit]) {
+    let user = assertCallerIsUser(caller);
+    for (edit in edits.vals()) {
+      ignore createTopic_(user, edit);
     };
   };
 
   /// TEMPORARY
   public shared func clearTopics() {
-    topics := TrieMap.TrieMap<Id, Topic>(Nat.equal, Nat32.fromIntWrap);
+    topics.clear();
+    userOwnsTopic.clear();
+    userSubmitsTopic.clear();
+    userTopicVotes.clear();
   };
 
-  public shared ({ caller }) func edit(id : Id, info : Info) : async () {
-    let user = #principal caller; // TODO
+  public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
+    assertCallerOwnsTopic(caller, #topic id);
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with edit } });
+  };
+
+  public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
     ignore do ? {
-      let topic : Metadata = topics.get(id)!;
-      assert ?user == topic.owner;
-      topics.put(id, { info and topic });
+      // validates arguments before updating relation.
+      ignore topics.get(#topic id)!;
+      let user = principals.get(caller)!;
+      userTopicVotes.put(user, #topic id, userVote);
     };
   };
 
-  public shared ({ caller }) func vote(id : Id, status : VoteStatus) : async () {
-    let user = #principal caller; // TODO
-    ignore do ? {
-      let topic = topics.get(id)!;
-      assert ?user == topic.owner;
-      func notCaller(voter : User) : Bool {
-        switch voter {
-          case (#principal p) not Principal.equal(p, caller);
-          case _ true;
-        };
+  public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
+    assertCallerOwnsTopic(caller, #topic id);
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
+  };
+
+  /// Create (or get) a user Id for the given caller Id.
+  /// Once created, the user Id for a given caller Id is stored and fixed.
+  public shared ({ caller }) func login() : async Types.User.RawId {
+    switch (principals.get(caller)) {
+      case null {
+        let user = nextUserId;
+        nextUserId += 1;
+        principals.put(caller, #user user);
+        user;
       };
-      var upVoters = List.filter(topic.upVoters, notCaller);
-      var downVoters = List.filter(topic.downVoters, notCaller);
-
-      switch (status) {
-        case (#up) {
-          upVoters := List.push(user, upVoters);
-        };
-        case (#down) {
-          downVoters := List.push(user, downVoters);
-        };
-        case _ {};
-      };
-      topics.put(id, { topic with upVoters; downVoters });
+      case (?(#user u)) u;
     };
   };
 
-  public shared ({ caller }) func changeStatus(id : Id, status : Status) : async () {
-    let user = #principal caller; // TODO
-    ignore do ? {
-      let topic = topics.get(id)!;
-      assert ?user == topic.owner;
-      topics.put(id, { topic with status });
+  /// Get the (optional) user Id for the given caller Id.
+  /// Returns null when none exists yet (see `login()`).
+  public query ({ caller }) func fastLogin() : async ?Types.User.RawId {
+    switch (principals.get(caller)) {
+      case null null;
+      case (?(#user u)) ?u;
     };
   };
 
-  // Pre-upgrade method
-  system func preupgrade() : () {
-    storedTopics := Iter.toList(topics.entries());
-  };
-
-  // Post-upgrade method
-  system func postupgrade() : () {
-    List.iterate(
-      storedTopics,
-      func(entry : (Id, Topic)) : () {
-        let (id, topic) = entry;
-        topics.put(id, topic);
-      },
-    );
-  };
 };

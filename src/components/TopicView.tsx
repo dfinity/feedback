@@ -61,7 +61,8 @@ export default function TopicView({
   const onChangeStatus = (topic: Topic, status: TopicStatus) => {
     handlePromise(
       changeStatus(topic.id, status),
-      'Changing status...',
+      // 'Changing status...',
+      undefined,
       'Error while changing status!',
     );
   };

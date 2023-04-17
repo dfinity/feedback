@@ -6,6 +6,8 @@ import {
 } from '@dfinity/auth-client';
 import { create } from 'zustand';
 import { useTopicStore } from './topicStore';
+import { handleError, handlePromise } from '../utils/handlers';
+import { backend } from '../declarations/backend';
 
 export type User =
   | {
@@ -31,10 +33,16 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     AuthClient.create().then(async (client) => {
       if (await client.isAuthenticated()) {
         set({ user: { type: 'ic', client } });
+        await fetchUser().catch((err) =>
+          handleError(err, 'Error while fetching user info!'),
+        );
       }
 
       // Fetch topics after authenticating
-      useTopicStore.getState().fetch();
+      useTopicStore
+        .getState()
+        .fetch()
+        .catch((err) => handleError(err, 'Error while fetching topics!'));
       // handlePromise(
       //    useTopicStore.getState().fetch(),
       //   'Fetching...',
@@ -73,9 +81,24 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         }
         throw err;
       }
+
+      await handlePromise(
+        fetchUser(),
+        'Signing in...',
+        'Error while signing in!',
+      );
     }
     return client;
     // }
+  };
+
+  // TODO: return user info
+  const fetchUser = async () => {
+    const [id] = await backend.fastLogin();
+    if (id !== undefined) {
+      return String(id);
+    }
+    return String(await backend.login());
   };
 
   return {
