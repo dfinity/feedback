@@ -98,7 +98,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     if (id !== undefined) {
       return String(id);
     }
-    console.log(await backend.login()); //
     return String(await backend.login());
   };
 
