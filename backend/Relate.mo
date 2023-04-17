@@ -51,6 +51,36 @@ module {
         }
     };
 
+    func iterAllPairs<X, Y>(t : Trie.Trie<X, Y>) : Iter.Iter<(X, Y)> =
+      object {
+        var stack = ?(t, null) : List.List<Trie.Trie<X, Y>>;
+        public func next() : ?(X, Y) {
+            switch stack {
+            case null { null };
+            case (?(trie, stack2)) {
+                     switch trie {
+                     case (#empty) {
+                              stack := stack2;
+                              next()
+                          };
+                     case (#leaf({keyvals=null})) {
+                              stack := stack2;
+                              next()
+                          };
+                     case (#leaf({size=c; keyvals=?((k2, v2), kvs)})) {
+                              stack := ?(#leaf({size=c-1; keyvals=kvs}), stack2);
+                              ?(k2.key, v2)
+                          };
+                     case (#branch(br)) {
+                              stack := ?(br.left, ?(br.right, stack2));
+                              next()
+                          };
+                     }
+                 }
+            }
+        }
+    };
+
     // Relation structures that can be stored directly in stable vars.
     public module Stable {
 
@@ -80,16 +110,33 @@ module {
 
     // Ergonomic, invariant-enforcing, object-oriented wrappers for relations, rebuilt on upgrade.
     public module OO {
-        // to do
-        // - take hash and equal functions for key types.
-        // - expose functions from this PR https://github.com/dfinity/motoko-base/pull/219/files
 
         public class Map<A, B>(
           stableMap : Stable.Map<A, B>,
           hash : A -> Hash.Hash,
           equal : (A, A) -> Bool)
         {
-            // to do
+            public func put(a : A, b : B) {
+                stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, b).0;
+            };
+
+            public func update(a : A, f : {old : B} -> B) {
+                switch (get(a)) {
+                case null { assert false };
+                case (?b) {
+                         stableMap.map := Trie.put(stableMap.map, key(hash, a), equal, f {old=b}).0;
+                     };
+                }
+            };
+
+            public func get(a : A) : ?B {
+                Trie.get(stableMap.map, key(hash, a), equal)
+            };
+
+            public func remove(a : A) {
+                stableMap.map := Trie.remove(stableMap.map, key(hash, a), equal).0;
+            };
+
         };
 
         public class BinRel<A, B>(
@@ -98,7 +145,7 @@ module {
           equal : EqualPair<A, B>
         ) {
             public func getRelatedLeft(a : A) : Iter.Iter<B> {
-                let t = Trie.find<A, Trie.Trie<B, ()>>(stableBinRel.aB, key<A>(hash.0, a), equal.0);
+                let t = Trie.find(stableBinRel.aB, key<A>(hash.0, a), equal.0);
                 switch t {
                 case null { iterEmpty() };
                 case (?t) { iterAll<B>(t) };
@@ -106,7 +153,7 @@ module {
             };
 
             public func getRelatedRight(b : B) : Iter.Iter<A> {
-                let t = Trie.find<B, Trie.Trie<A, ()>>(stableBinRel.bA, key<B>(hash.1, b), equal.1);
+                let t = Trie.find(stableBinRel.bA, key<B>(hash.1, b), equal.1);
                 switch t {
                 case null { iterEmpty() };
                 case (?t) { iterAll<A>(t) };
@@ -114,23 +161,56 @@ module {
             };
 
             public func put(p : (A, B)) {
-                let k0 = key<A>(hash.0, p.0);
-                let k1 = key<B>(hash.1, p.1);
+                let k0 = key(hash.0, p.0);
+                let k1 = key(hash.1, p.1);
                 stableBinRel.aB := Trie.put2D(stableBinRel.aB, k0, equal.0, k1, equal.1, ());
                 stableBinRel.bA := Trie.put2D(stableBinRel.bA, k1, equal.1, k0, equal.0, ());
             };
 
-            public func delete(p : (A, B)) {
-                let k0 = key<A>(hash.0, p.0);
-                let k1 = key<B>(hash.1, p.1);
+            public func remove(p : (A, B)) {
+                let k0 = key(hash.0, p.0);
+                let k1 = key(hash.1, p.1);
                 stableBinRel.aB := Trie.remove2D(stableBinRel.aB, k0, equal.0, k1, equal.1).0;
                 stableBinRel.bA := Trie.remove2D(stableBinRel.bA, k1, equal.1, k0, equal.0).0;
             };
         };
 
-        public class TernRel<A, B, C>(stableTernRel : Stable.TernRel<A, B, C>) {
+        public class TernRel<A, B, C>(
+          stableTernRel : Stable.TernRel<A, B, C>,
+          hash : HashPair<A, B>,
+          equal : EqualPair<A, B>
+        ) {
 
-            // to do
+            public func getRelatedLeft(a : A) : Iter.Iter<(B, C)> {
+                let t = Trie.find(stableTernRel.aB, key<A>(hash.0, a), equal.0);
+                switch t {
+                case null { iterEmpty() };
+                case (?t) { iterAllPairs(t) };
+                }
+            };
+
+            public func getRelatedRight(b : B) : Iter.Iter<(A, C)> {
+                let t = Trie.find(stableTernRel.bA, key<B>(hash.1, b), equal.1);
+                switch t {
+                case null { iterEmpty() };
+                case (?t) { iterAllPairs(t) };
+                }
+            };
+
+            public func put(t : (A, B, C)) {
+                let k0 = key(hash.0, t.0);
+                let k1 = key(hash.1, t.1);
+                stableTernRel.aB := Trie.put2D(stableTernRel.aB, k0, equal.0, k1, equal.1, t.2);
+                stableTernRel.bA := Trie.put2D(stableTernRel.bA, k1, equal.1, k0, equal.0, t.2);
+            };
+
+            public func remove(t : (A, B)) {
+                let k0 = key(hash.0, t.0);
+                let k1 = key(hash.1, t.1);
+                stableTernRel.aB := Trie.remove2D(stableTernRel.aB, k0, equal.0, k1, equal.1).0;
+                stableTernRel.bA := Trie.remove2D(stableTernRel.bA, k1, equal.1, k0, equal.0).0;
+            };
+
         };
     }
 }
