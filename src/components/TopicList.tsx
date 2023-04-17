@@ -22,7 +22,6 @@ export default function TopicList({ topics, onVote }: TopicListProps) {
           onChangeExpanded={(expanded) =>
             setExpandedId(expanded ? item.id : undefined)
           }
-          onVote={onVote && ((voted) => onVote?.(item, voted))}
         />
       ))}
     </div>

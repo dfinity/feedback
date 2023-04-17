@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
 import { Status } from '../declarations/backend/backend.did';
+import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type VoteStatus = 1 | 0 | -1;
@@ -25,7 +26,8 @@ export interface Topic extends TopicInfo {
 export interface TopicState {
   topics: Topic[];
   loading: boolean;
-  fetch(): Promise<Topic[]>;
+  search(): Promise<Topic[]>;
+  find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
   bulkCreate(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
@@ -48,22 +50,30 @@ export const useTopicStore = create<TopicState>((set, get) => {
     closed: { closed: null },
   };
 
+  const mapTopic = (result: View): Topic => ({
+    ...result,
+    id: String(result.id),
+    createTime: Number(result.createTime),
+    votes: Number(result.upVoters - result.downVoters),
+    status: Object.keys(result.status)[0] as TopicStatus,
+    yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
+  });
+
   return {
     topics: [],
     loading: false,
-    async fetch() {
+    async search() {
       const results = await backend.listTopics();
-      const topics: Topic[] = results.map((result) => ({
-        ...result,
-        id: String(result.id),
-        createTime: Number(result.createTime),
-        votes: Number(result.upVoters - result.downVoters),
-        status: Object.keys(result.status)[0] as TopicStatus,
-        yourVote:
-          'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
-      }));
+      const topics: Topic[] = results.map(mapTopic);
       set({ topics });
       return topics;
+    },
+    async find(id: string) {
+      const result = await backend.getTopic(BigInt(id));
+      if (!result.length) {
+        return;
+      }
+      return mapTopic(result[0]);
     },
     async create(info: TopicInfo) {
       const id = String(await backend.createTopic(info));
@@ -83,7 +93,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     },
     async bulkCreate(infoArray: TopicInfo[]) {
       await backend.bulkCreateTopics(infoArray);
-      await get().fetch();
+      await get().search();
     },
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);

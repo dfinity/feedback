@@ -41,7 +41,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       // Fetch topics after authenticating
       useTopicStore
         .getState()
-        .fetch()
+        .search()
         .catch((err) => handleError(err, 'Error while fetching topics!'));
       // handlePromise(
       //    useTopicStore.getState().fetch(),

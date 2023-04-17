@@ -37,18 +37,18 @@ export interface TopicViewProps {
   topic: Topic;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
-  onVote?(voteStatus: VoteStatus): void;
 }
 
 export default function TopicView({
   topic,
   expanded,
   onChangeExpanded,
-  onVote,
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.changeStatus);
+
+  const vote = useTopicStore((state) => state.vote);
 
   const maxPreviewTags = isMobile || expanded ? 0 : 2;
 
@@ -57,6 +57,18 @@ export default function TopicView({
       setEditing(false);
     }
   }, [expanded]);
+
+  const onVote = (voteStatus: VoteStatus) => {
+    handlePromise(
+      vote(topic, voteStatus),
+      voteStatus === 1
+        ? 'Upvoting...'
+        : voteStatus === -1
+        ? 'Downvoting...'
+        : 'Removing vote...',
+      'Error occurred while voting!',
+    );
+  };
 
   const onChangeStatus = (topic: Topic, status: TopicStatus) => {
     handlePromise(
@@ -83,26 +95,24 @@ export default function TopicView({
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
-          {!!onVote && (
-            <div
-              tw="flex items-center gap-2 cursor-default select-none"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div>
-                <FaCaretUp
-                  tw="cursor-pointer hover:opacity-75"
-                  css={[topic.yourVote === 1 && tw`text-orange-500`]}
-                  onClick={() => onVote?.(topic.yourVote === 1 ? 0 : 1)}
-                />
-                <FaCaretDown
-                  tw="cursor-pointer -translate-y-1 hover:opacity-75"
-                  css={[topic.yourVote === -1 && tw`text-red-500`]}
-                  onClick={() => onVote?.(topic.yourVote === -1 ? 0 : -1)}
-                />
-              </div>
-              <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
+          <div
+            tw="flex items-center gap-2 cursor-default select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <FaCaretUp
+                tw="cursor-pointer hover:opacity-75"
+                css={[topic.yourVote === 1 && tw`text-orange-500`]}
+                onClick={() => onVote(topic.yourVote === 1 ? 0 : 1)}
+              />
+              <FaCaretDown
+                tw="cursor-pointer -translate-y-1 hover:opacity-75"
+                css={[topic.yourVote === -1 && tw`text-red-500`]}
+                onClick={() => onVote(topic.yourVote === -1 ? 0 : -1)}
+              />
             </div>
-          )}
+            <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
+          </div>
           <div
             tw="flex-1 overflow-hidden select-none"
             css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import 'twin.macro';
 import { Topic, TopicStatus, useTopicStore } from '../../stores/topicStore';
 import TopicList from '../TopicList';
-import { handlePromise } from '../../utils/handlers';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -19,7 +18,6 @@ export default function TopicsPage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
 
   const topics = useTopicStore((state) => state.topics);
-  const vote = useTopicStore((state) => state.vote);
 
   const filter = (topic: Topic) => !!filterStates[topic.status];
 
@@ -47,20 +45,7 @@ export default function TopicsPage() {
           </div>
         ))}
       </div>
-      <TopicList
-        topics={visibleTopics}
-        onVote={(item, voteStatus) =>
-          handlePromise(
-            vote(item, voteStatus),
-            voteStatus === 1
-              ? 'Upvoting...'
-              : voteStatus === -1
-              ? 'Downvoting...'
-              : 'Removing vote...',
-            'Error occurred while voting!',
-          )
-        }
-      />
+      <TopicList topics={visibleTopics} />
     </>
   );
 }
