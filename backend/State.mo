@@ -2,9 +2,9 @@ import Types "Types";
 import Relate "Relate";
 
 module {
-    type Map<A, B> = Relate.Map<A, B>;
-    type BinRel<A, B> = Relate.BinRel<A, B>;
-    type TernRel<A, B> = Relate.TernRel<A, B>;
+    type Map<A, B> = Relate.Stable.Map<A, B>;
+    type BinRel<A, B> = Relate.Stable.BinRel<A, B>;
+    type TernRel<A, B, C> = Relate.Stable.TernRel<A, B, C>;
 
     // # User, Topic and Team-State.
     //
