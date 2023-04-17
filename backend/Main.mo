@@ -41,16 +41,20 @@ actor class Main() {
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
+  func findUser(caller : Principal) : ?Types.User.Id {
+    principals.get(caller);
+  };
+
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     assert not Principal.isAnonymous(caller);
-    switch (principals.get(caller)) {
+    switch (findUser(caller)) {
       case null { assert false; loop {} };
       case (?user) user;
     };
   };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
-    switch (principals.get(caller)) {
+    switch (findUser(caller)) {
       case null { assert false };
       case (?user) {
         assert userOwnsTopic.has(user, topic);
@@ -97,11 +101,18 @@ actor class Main() {
   };
 
   public query ({ caller }) func listTopics() : async [Types.Topic.View] {
-    let callerUser = principals.get(caller); // okay if null.
+    let maybeUser = findUser(caller);
     func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
-      viewTopic(callerUser, topic, state);
+      viewTopic(maybeUser, topic, state);
     };
     Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+  };
+
+  public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
+    let maybeUser = findUser(caller);
+    do ? {
+      viewTopic(maybeUser, #topic id, topics.get(#topic id)!);
+    };
   };
 
   func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
