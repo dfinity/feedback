@@ -27,11 +27,11 @@ export default function ProfilePage() {
         {/* <LoginButton onClick={() => loginWithRedirect()}>Login</LoginButton> */}
         {user ? (
           <>
-            <div tw="flex-1 pb-4 text-lg text-gray-600">
+            <div tw="flex-1 pb-4 text-xl text-gray-600">
               {user.type === 'auth0' && user.auth0 ? (
                 <>
                   Signed in as{' '}
-                  <span tw="font-bold">
+                  <span tw="font-bold mt-1">
                     {user.auth0.given_name ||
                       user.auth0.nickname ||
                       user.auth0.name}
@@ -40,14 +40,14 @@ export default function ProfilePage() {
               ) : user.type === 'ic' ? (
                 <>
                   Signed in with principal:
-                  <span tw="block text-sm font-bold">
+                  <span tw="block text-sm font-bold mt-1">
                     {user.client.getIdentity().getPrincipal().toString()}
                   </span>
                 </>
               ) : (
                 <>
                   Logged in with{' '}
-                  <span tw="font-bold">
+                  <span tw="font-bold mt-1">
                     {userTypeLookup[user.type] ?? user.type}
                   </span>
                 </>

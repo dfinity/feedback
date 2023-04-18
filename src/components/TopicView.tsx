@@ -12,6 +12,7 @@ import {
   FaRegTimesCircle,
 } from 'react-icons/fa';
 import tw from 'twin.macro';
+import { useIdentityStore } from '../stores/identityStore';
 import {
   Topic,
   TopicInfo,
@@ -19,7 +20,7 @@ import {
   VoteStatus,
   useTopicStore,
 } from '../stores/topicStore';
-import { handlePromise } from '../utils/handlers';
+import { handleInfo, handlePromise } from '../utils/handlers';
 import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
@@ -48,6 +49,7 @@ export default function TopicView({
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.changeStatus);
 
+  const user = useIdentityStore((state) => state.user);
   const vote = useTopicStore((state) => state.vote);
 
   const maxPreviewTags = isMobile || expanded ? 0 : 2;
@@ -59,6 +61,9 @@ export default function TopicView({
   }, [expanded]);
 
   const onVote = (voteStatus: VoteStatus) => {
+    if (!user) {
+      return handleInfo('Please sign in to vote.');
+    }
     handlePromise(
       vote(topic, voteStatus),
       voteStatus === 1
