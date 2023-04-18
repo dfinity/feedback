@@ -35,7 +35,7 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
   return [...doc.getElementsByTagName('item')].map((item) => {
     let title = getField(item, 'title');
     // Move Jira identifier to end of title
-    title = title.replace(/^(\[[^\]]+\])\s(.+)$/, '$2 $1');
+    title = title.replace(/^\[([^\]]+)\]\s(.+)$/, '$2 ($1)');
 
     let description = htmlToMarkdown(htmlDecode(getField(item, 'description')));
 
