@@ -98,11 +98,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       (backend as any)[Symbol.for('ic-agent-metadata')].config
         .agent as HttpAgent
     ).replaceIdentity(client.getIdentity());
-    // (backend as any)[Symbol.for('ic-agent-metadata')].config.agent =
-    //   new HttpAgent({
-    //     identity: client.getIdentity(),
-    //   });
-    console.log((await backend.echo()).toString()); //////
   };
 
   // TODO: return user info
