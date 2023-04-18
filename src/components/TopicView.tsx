@@ -122,6 +122,9 @@ export default function TopicView({
             tw="flex-1 overflow-hidden select-none"
             css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
           >
+            {
+              !!topic.importId && null /////////
+            }
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">

@@ -45,6 +45,7 @@ module {
 
     public type View = Edit and {
       id : RawId;
+      importId: ?ImportId;
       isOwner : Bool;
       // submitterName: Text;
       // ownerName: Text;

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { Status } from '../declarations/backend/backend.did';
+import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
@@ -15,6 +15,7 @@ export interface TopicInfo {
 
 export interface Topic extends TopicInfo {
   id: string;
+  importId: { type: string; id: string } | undefined;
   // owner: Principal;
   createTime: number;
   votes: number;
@@ -50,9 +51,22 @@ export const useTopicStore = create<TopicState>((set, get) => {
     closed: { closed: null },
   };
 
+  const mapImportId = (id: ImportId) => {
+    const entry = Object.entries(id)[0];
+    return (
+      entry && {
+        type: entry[0],
+        id: entry[1],
+      }
+    );
+  };
+
   const mapTopic = (result: View): Topic => ({
     ...result,
     id: String(result.id),
+    importId: result.importId.length
+      ? mapImportId(result.importId[0])
+      : undefined,
     createTime: Number(result.createTime),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,

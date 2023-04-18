@@ -98,6 +98,7 @@ actor class Main() {
     {
       state.edit and userFields with
       id = rawId;
+      importId = state.importId;
       createTime = state.internal.createTime;
       upVoters;
       downVoters;
