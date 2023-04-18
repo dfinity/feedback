@@ -12,12 +12,12 @@ import Types "Types";
 import State "State";
 import Relate "Relate";
 
-actor class Main() {
+shared ({caller = installer}) actor class Main() {
 
   /// Stable canister state, version 0.
   /// Rather than use this directly, we use instead use the OO wrappers defined from its projections.
 
-  stable var state_v0 : State.State = State.init();
+  stable var state_v0 : State.State = State.init(installer);
 
   stable var nextUserId : Types.User.RawId = 1;
   stable var nextTeamId : Types.Team.RawId = 1;
@@ -37,6 +37,7 @@ actor class Main() {
   // Arguments are relevant fields from state, and primary-key utility functions (hash, equal).
 
   let userTeamMember = Relate.OO.BinRel(state_v0.userTeamMember, (Types.User.idHash, Types.Team.idHash), (Types.User.idEqual, Types.Team.idEqual));
+  let userIsModerator = Relate.OO.UnRel(state_v0.userIsModerator, Types.User.idHash, Types.User.idEqual);
   let userSubmitsTopic = Relate.OO.BinRel(state_v0.userSubmitsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
@@ -65,6 +66,17 @@ actor class Main() {
         assert userOwnsTopic.has(user, topic);
       };
     };
+  };
+
+  func assertCallerIsModerator(caller : Principal) {
+    if (caller != installer) {
+      switch (findUser(caller)) {
+        case null { assert false };
+        case (?user) {
+          assert userIsModerator.has(user);
+        };
+      };
+    }
   };
 
   func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
@@ -102,7 +114,16 @@ actor class Main() {
       upVoters;
       downVoters;
       status = state.status;
+      modStatus = state.modStatus;
     };
+  };
+
+  public shared({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
+    assertCallerIsModerator(caller);
+    ignore do ? {
+      ignore users.get(#user id)!;
+      userIsModerator.put(#user id);
+    }
   };
 
   public query ({ caller }) func listTopics() : async [Types.Topic.View] {
@@ -129,6 +150,7 @@ actor class Main() {
     topics.put(
       #topic topic,
       {
+        modStatus = #pending;
         edit;
         internal;
         status = #open;
@@ -176,6 +198,11 @@ actor class Main() {
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
     assertCallerOwnsTopic(caller, #topic id);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
+  };
+
+  public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
+    assertCallerIsModerator(caller);
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus } });
   };
 
   /// Create (or get) a user Id for the given caller Id.
