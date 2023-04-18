@@ -120,7 +120,7 @@ actor class Main() {
     };
   };
 
-  func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
+  func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
     let topic = nextTopicId;
     nextTopicId += 1;
     let internal = {
@@ -130,6 +130,7 @@ actor class Main() {
       #topic topic,
       {
         edit;
+        importId;
         internal;
         status = #open;
       },
@@ -141,13 +142,13 @@ actor class Main() {
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     let user = assertCallerIsUser(caller);
-    createTopic_(user, edit);
+    createTopic_(user, null, edit);
   };
 
-  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.Edit]) {
+  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
-      ignore createTopic_(user, edit);
+      ignore createTopic_(user, ?edit.importId, edit);
     };
   };
 

@@ -25,6 +25,11 @@ module {
       tags : [Text];
     };
 
+    public type ImportEdit =
+      { importId : ImportId } and Edit;
+
+    public type ImportId = { #jira : Text };
+
     public type Internal = {
       // submitter : User.Id; -- Use separate relation?
       // owner : User.Id;  -- Use separate relation?
@@ -33,6 +38,7 @@ module {
 
     public type State = {
       edit : Edit;
+      importId : ?ImportId;
       internal : Internal;
       status : Status;
     };

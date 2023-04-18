@@ -1,5 +1,5 @@
 # Motoko dependencies (https://mops.one/)
 
 [dependencies]
-sequence = "https://github.com/matthewhammer/motoko-sequence#master"
+# sequence = "https://github.com/matthewhammer/motoko-sequence#master"
 base = "https://github.com/dfinity/motoko-base#moc-0.8.5"
