@@ -1,11 +1,11 @@
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
+import 'twin.macro';
+import { FileDropZone } from './FileDropZone';
 import Navbar from './Navbar';
 import ProfilePage from './pages/ProfilePage';
 import SubmitPage from './pages/SubmitPage';
-import TopicsPage from './pages/TopicsPage';
-import 'twin.macro';
-import { FileDropZone } from './FileDropZone';
 import TopicPage from './pages/TopicPage';
+import TopicsPage from './pages/TopicsPage';
 
 export default function App() {
   return (

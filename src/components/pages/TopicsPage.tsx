@@ -15,7 +15,7 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
   closed: false,
 };
 
-export default function TopicsPage() {
+export default function TopicPage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
   const [searchParams] = useSearchParams();
 

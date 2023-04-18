@@ -1,13 +1,14 @@
 import { type User as Auth0User } from '@auth0/auth0-react';
+import { HttpAgent } from '@dfinity/agent';
 import {
   AuthClient,
   AuthClientLoginOptions,
   ERROR_USER_INTERRUPT,
 } from '@dfinity/auth-client';
 import { create } from 'zustand';
-import { useTopicStore } from './topicStore';
-import { handleError, handlePromise } from '../utils/handlers';
 import { backend } from '../declarations/backend';
+import { handleError, handlePromise } from '../utils/handlers';
+import { useTopicStore } from './topicStore';
 
 export type User =
   | {
@@ -19,7 +20,10 @@ export type User =
       auth0: Auth0User;
     };
 
-const applicationName = 'IC Feedback'; // TODO: refactor
+// TODO: refactor
+const applicationName = 'IC Feedback';
+
+const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
   user: User | null;
@@ -33,6 +37,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     AuthClient.create().then(async (client) => {
       if (await client.isAuthenticated()) {
         set({ user: { type: 'ic', client } });
+        await updateIdentity(client);
         await fetchUser().catch((err) =>
           handleError(err, 'Error while fetching user info!'),
         );
@@ -54,10 +59,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   const loginIC = async (
     options?: Omit<Omit<AuthClientLoginOptions, 'onSuccess'>, 'onError'>,
   ) => {
-    // const { user } = get();
-    // if (user?.type === 'ic') {
-    //   return user.client;
-    // } else {
     const client = await AuthClient.create();
     if (!(await client.isAuthenticated())) {
       try {
@@ -82,6 +83,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         throw err;
       }
 
+      await updateIdentity(client);
       await handlePromise(
         fetchUser(),
         'Signing in...',
@@ -89,7 +91,18 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       );
     }
     return client;
-    // }
+  };
+
+  const updateIdentity = async (client: AuthClient) => {
+    (
+      (backend as any)[Symbol.for('ic-agent-metadata')].config
+        .agent as HttpAgent
+    ).replaceIdentity(client.getIdentity());
+    // (backend as any)[Symbol.for('ic-agent-metadata')].config.agent =
+    //   new HttpAgent({
+    //     identity: client.getIdentity(),
+    //   });
+    console.log((await backend.echo()).toString()); //////
   };
 
   // TODO: return user info
@@ -104,7 +117,11 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   return {
     user: null,
     async loginInternetIdentity() {
-      return loginIC();
+      return loginIC({
+        identityProvider: import.meta.env.PROD
+          ? undefined
+          : localIdentityProvider,
+      });
     },
     async loginNFID() {
       return loginIC({
