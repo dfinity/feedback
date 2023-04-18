@@ -1,5 +1,6 @@
 import P "mo:base/Prelude";
 import Nat "mo:base/Nat";
+import Int "mo:base/Int";
 import List "mo:base/List";
 import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
@@ -7,6 +8,8 @@ import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
+import Array "mo:base/Array";
+import Order "mo:base/Order";
 
 import Types "Types";
 import State "State";
@@ -99,6 +102,8 @@ actor class Main() {
       state.edit and userFields with
       id = rawId;
       createTime = state.internal.createTime;
+      editTime = state.internal.editTime;
+      voteTime = state.internal.voteTime;
       upVoters;
       downVoters;
       status = state.status;
@@ -113,6 +118,40 @@ actor class Main() {
     Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
   };
 
+  public type SearchSort = { #votes ; #activity };
+
+  public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {
+    let maybeUser = findUser(caller);
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
+      viewTopic(maybeUser, topic, state);
+    };
+    let unsorted = Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+    Array.sort(
+      unsorted,
+      func(t1 : Types.Topic.View,
+           t2 : Types.Topic.View) : Order.Order {
+        switch searchSort {
+        case (#votes) {
+                 // Compare size of net votes.
+                 // More goes first, meaning bigger is "less".
+                 Int.compare(t2.upVoters : Int - t2.downVoters,
+                             t1.upVoters : Int - t1.downVoters)
+             };
+        case (#activity) {
+                 // Prefer topics with recent votes.
+                 // If no votes at all, then use edit time.
+                 // In all cases "bigger time" is "less."
+                 switch (t1.voteTime, t2.voteTime) {
+                 case (?time1, ?time2) Int.compare(time2, time1);
+                 case (?_, _) #less;
+                 case (_, ?_) #greater;
+                 case _ Int.compare(t2.editTime, t1.editTime);
+                 }
+             };
+        }
+    })
+  };
+
   public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
     let maybeUser = findUser(caller);
     do ? {
@@ -125,6 +164,8 @@ actor class Main() {
     nextTopicId += 1;
     let internal = {
       createTime = Time.now() / 1_000_000;
+      editTime = Time.now() / 1_000_000;
+      voteTime = null : ?Int;
     };
     topics.put(
       #topic topic,
@@ -161,7 +202,9 @@ actor class Main() {
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
     assertCallerOwnsTopic(caller, #topic id);
-    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with edit } });
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
+        { topic with edit ;
+          internal = { topic.internal with editTime = Time.now() / 1_000_000 } } });
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
@@ -170,6 +213,9 @@ actor class Main() {
       ignore topics.get(#topic id)!;
       let user = principals.get(caller)!;
       userTopicVotes.put(user, #topic id, userVote);
+      topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
+          { topic with internal = { topic.internal with voteTime = ?(Time.now() / 1_000_000) } } });
+
     };
   };
 
