@@ -41,12 +41,17 @@ actor class Main() {
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
+  public query ({ caller }) func echo() : async Principal { return caller };//////////
+
   func findUser(caller : Principal) : ?Types.User.Id {
-    principals.get(caller);
+    if (Principal.isAnonymous(caller)) {
+      null;
+    } else {
+      principals.get(caller);
+    };
   };
 
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
-    assert not Principal.isAnonymous(caller);
     switch (findUser(caller)) {
       case null { assert false; loop {} };
       case (?user) user;

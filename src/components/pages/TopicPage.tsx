@@ -8,26 +8,33 @@ import TopicView from '../TopicView';
 
 export default function TopicPage() {
   const [topic, setTopic] = useState<Topic | undefined>();
+  const [fetchId, setFetchId] = useState<string | undefined>();
+
+  const find = useTopicStore((state) => state.find);
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const find = useTopicStore((state) => state.find);
-
   useEffect(() => {
-    (async () => {
-      try {
-        const topic = id ? await find(id) : undefined;
-        if (!topic) {
-          handleError('Topic not found!');
-          navigate('/');
+    if (id && id !== fetchId) {
+      setFetchId(id);
+      (async () => {
+        try {
+          if (!id) {
+            return;
+          }
+          const topic = await find(id);
+          if (!topic) {
+            handleError('Topic not found!');
+            // navigate('/');
+          } else {
+            setTopic(topic);
+          }
+        } catch (err) {
+          handleError(err, 'Error while loading topic!');
         }
-        setTopic(topic);
-      } catch (err) {
-        handleError(err, 'Error while loading topic!');
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+      })();
+    }
+  }, [find, id, navigate, fetchId]);
 
   if (!topic) {
     return (
