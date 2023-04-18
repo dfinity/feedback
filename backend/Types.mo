@@ -15,7 +15,7 @@ module {
 
     public type Status = { #open; #next; #completed; #closed };
 
-    public type ModStatus = { #pending; #spam; #approve };
+    public type ModStatus = { #pending; #spam; #approved };
 
     public type UserVote = { #up; #down; #none };
 

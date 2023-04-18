@@ -131,6 +131,11 @@ shared ({caller = installer}) actor class Main() {
     func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
       viewTopic(maybeUser, topic, state);
     };
+    let approved = Iter.filter(
+      topics.entries(),
+      func ((_ : Types.Topic.Id, t : Types.Topic.State)) : Bool {
+        t.modStatus == #approved
+    });
     Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
   };
 
