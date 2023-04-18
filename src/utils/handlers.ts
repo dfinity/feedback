@@ -27,3 +27,12 @@ export function handleError(
     },
   );
 }
+
+export function handleInfo(message: string) {
+  console.log(message);
+  toast(message, {
+    type: 'info',
+    autoClose: 5000,
+    position: 'top-left',
+  });
+}
