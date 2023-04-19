@@ -8,7 +8,8 @@ let id = await service.createTopic({
   links = ["baz"];
   tags = ["qux"];
 });
-do { // Assert topic view
+do {
+  // Assert topic view
   let topics = await service.listTopics();
   assert topics.size() == 1;
   assert topics[0].title == "foo";
@@ -27,11 +28,12 @@ await service.editTopic(
 );
 await service.voteTopic(id, #up);
 await service.setTopicStatus(id, #completed);
-do {  // Assert topic view
+do {
+  // Assert topic view
   let topics = await service.listTopics();
   assert topics.size() == 1;
   assert topics[0].title == "foo2";
   assert topics[0].upVoters == 1;
   assert topics[0].downVoters == 0;
   assert topics[0].status == #completed;
-}
+};
