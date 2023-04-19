@@ -4,6 +4,7 @@ import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
+export type ModStatus = 'pending' | 'approved' | 'spam';
 export type VoteStatus = 1 | 0 | -1;
 
 export interface TopicInfo {
@@ -19,6 +20,7 @@ export interface Topic extends TopicInfo {
   createTime: number;
   votes: number;
   status: TopicStatus;
+  modStatus: ModStatus;
   isOwner: boolean;
   yourVote: VoteStatus;
   importId?: { type: string; id: string } | undefined;
@@ -67,6 +69,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     createTime: Number(result.createTime),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
+    modStatus: Object.keys(result.status)[0] as ModStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
     importId: result.importId.length
       ? mapImportId(result.importId[0])
@@ -97,6 +100,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         createTime: Date.now(),
         votes: 0,
         status: 'open',
+        modStatus: 'pending',
         isOwner: true,
         yourVote: 0,
       };
