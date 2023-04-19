@@ -6,30 +6,31 @@ module {
     public type TopicId = Types.Topic.Id;
 
     public type Request = {
-        #setUserIsModerator : UserId;
+        #setUserIsModerator : {
+            user : UserId;
+            isMod : Bool
+        };
         #createTopic : {
-            user : ?UserId;
-            importId : ?Types.Topic.ImportId;
             edit : Types.Topic.Edit
         };
         #bulkCreateTopics : {
-            edits : [Types.Topic.Edit]
+            edits : [Types.Topic.ImportEdit]
         };
         #clearTopics;
         #editTopic : {
-            id : TopicId;
+            topic : TopicId;
             edit : Types.Topic.Edit;
         };
         #voteTopic : {
-            id : TopicId;
+            topic : TopicId;
             userVote : Types.Topic.UserVote
         };
         #setTopicStatus : {
-            id : TopicId;
+            topic : TopicId;
             status : Types.Topic.Status
         };
         #setTopicModStatus : {
-            id : TopicId;
+            topic : TopicId;
             modStatus : Types.Topic.ModStatus
         };
         #login;
@@ -41,16 +42,18 @@ module {
 
     public type Response = {
         #ok;
+        #err; // e.g., the user gives an invalid topic ID.
         #errAccess : AccessPredicate;
     };
 
     public type AccessPredicate = {
-        #callerIsUser : UserId;
+        #callerIsUser; // caller ID comes from outer Event type.
+        #callerOwnsTopic : UserId;
         #callerIsModerator : UserId
     };
 
     public type Event = {
-        #request : Request;
+        #request : (Principal, Request);
         #internal : Internal;
         #response : Response;
     };
@@ -83,6 +86,27 @@ module {
             request_ := null;
 
             // to do -- record it.
+        };
+
+        public func okIf(b : Bool) {
+            assert request_ != null;
+            request_ := null;
+
+            // to do -- record either #ok or #err, depending.
+        };
+
+        public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
+            assert request_ != null;
+            request_ := null;
+            // to do -- record it.
+            i
+        };
+
+        public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
+            assert request_ != null;
+            request_ := null;
+            // to do -- record it.
+            i
         };
 
         public func errAccess(a : AccessPredicate) {
