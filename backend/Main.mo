@@ -132,7 +132,15 @@ shared ({ caller = installer }) actor class Main() {
     };
     let approved = Iter.filter(
       topics.entries(),
-      func((_ : Types.Topic.Id, t : Types.Topic.State)) : Bool {
+      func((id : Types.Topic.Id, t : Types.Topic.State)) : Bool {
+        // switch maybeUser {
+        //   case null {};
+        //   case (?user) {
+        //     if (userOwnsTopic.has(user, id)) {
+        //       return true;
+        //     };
+        //   };
+        // };
         t.modStatus == #approved;
       },
     );

@@ -69,7 +69,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     createTime: Number(result.createTime),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
-    modStatus: Object.keys(result.status)[0] as ModStatus,
+    modStatus: Object.keys(result.modStatus)[0] as ModStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
     importId: result.importId.length
       ? mapImportId(result.importId[0])
@@ -83,6 +83,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
       const results = await backend.listTopics();
       const topics: Topic[] = results.map(mapTopic);
       set({ topics });
+      if (import.meta.env.DEV) {
+        console.log('Topics:', get().topics);
+      }
       return topics;
     },
     async find(id: string) {
@@ -107,7 +110,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().fetch();
+      // await get().search();
     },
     async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
       await backend.bulkCreateTopics(infoArray);
