@@ -27,8 +27,7 @@ module {
       tags : [Text];
     };
 
-    public type ImportEdit =
-      { importId : ImportId } and Edit;
+    public type ImportEdit = { importId : ImportId } and Edit;
 
     public type ImportId = { #jira : Text };
 
@@ -50,7 +49,7 @@ module {
 
     public type View = Edit and {
       id : RawId;
-      importId: ?ImportId;
+      importId : ?ImportId;
       isOwner : Bool;
       // submitterName: Text;
       // ownerName: Text;

@@ -61,8 +61,15 @@ shared ({ caller = installer }) actor class Main() {
 
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
-      case null { assert false; loop {} };
-      case (?user) user;
+      case null {
+        log.errAccess(#callerIsUser);
+        assert false;
+        loop {};
+      };
+      case (?user) {
+        log.internal(#callerIsUser user);
+        user;
+      };
     };
   };
 
@@ -70,7 +77,13 @@ shared ({ caller = installer }) actor class Main() {
     switch (findUser(caller)) {
       case null { assert false };
       case (?user) {
-        assert userOwnsTopic.has(user, topic);
+        let a = #callerOwnsTopic { user; topic };
+        if (userOwnsTopic.has(user, topic)) {
+          log.internal(#okAccess a);
+        } else {
+          log.errAccess(a);
+          assert false;
+        };
       };
     };
   };
@@ -80,17 +93,27 @@ shared ({ caller = installer }) actor class Main() {
       switch (findUser(caller)) {
         case null { assert false };
         case (?user) {
-          assert userIsModerator.has(user);
+          let a = #callerIsModerator;
+          if (userIsModerator.has(user)) {
+            log.internal(#okAccess a);
+          } else {
+            log.errAccess(a);
+            assert false;
+          };
         };
       };
+    } else {
+      log.internal(#callerIsInstaller);
     };
   };
 
   // returns some topic view when user owns the topic, or when the topic is approved.
   // returns null when a topic is unapproved and not owned by the optional user argument.
   func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
-    let userIsOwner =
-      switch user { case null false; case (?u) { userOwnsTopic.has(u, id) } };
+    let userIsOwner = switch user {
+      case null false;
+      case (?u) { userOwnsTopic.has(u, id) };
+    };
     if (not userIsOwner and state.modStatus != #approved) { return null };
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
@@ -134,16 +157,16 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
-    log.request(caller, #setUserIsModerator {user = #user id; isMod});
+    log.request(caller, #setUserIsModerator { user = #user id; isMod });
     assertCallerIsModerator(caller);
     ignore do ? {
       ignore users.get(#user id)!;
       userIsModerator.put(#user id);
     };
-    log.ok()
+    log.ok();
   };
 
-  public type SearchSort = { #votes ; #activity };
+  public type SearchSort = { #votes; #activity };
 
   public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
@@ -154,38 +177,47 @@ shared ({ caller = installer }) actor class Main() {
       // If Iter had filterMap this could be more efficient.
       // The outer map, filter and inner map could be one pass.
       Iter.map(
-        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
-                    Option.isSome),
-        func (x:?Types.Topic.View) : Types.Topic.View {
-        switch x {
-        case null { assert false; loop { } };
-        case (?v) v
-        }})
+        Iter.filter(
+          Iter.map(topics.entries(), viewAsCaller),
+          Option.isSome,
+        ),
+        func(x : ?Types.Topic.View) : Types.Topic.View {
+          switch x {
+            case null { assert false; loop {} };
+            case (?v) v;
+          };
+        },
+      ),
     );
     Array.sort(
       unsorted,
-      func(t1 : Types.Topic.View,
-           t2 : Types.Topic.View) : Order.Order {
+      func(
+        t1 : Types.Topic.View,
+        t2 : Types.Topic.View,
+      ) : Order.Order {
         switch searchSort {
-        case (#votes) {
-                 // Compare size of net votes.
-                 // More goes first, meaning bigger is "less".
-                 Int.compare(t2.upVoters : Int - t2.downVoters,
-                             t1.upVoters : Int - t1.downVoters)
-             };
-        case (#activity) {
-                 // Prefer topics with recent votes.
-                 // If no votes at all, then use edit time.
-                 // In all cases "bigger time" is "less."
-                 switch (t1.voteTime, t2.voteTime) {
-                 case (?time1, ?time2) Int.compare(time2, time1);
-                 case (?_, _) #less;
-                 case (_, ?_) #greater;
-                 case _ Int.compare(t2.editTime, t1.editTime);
-                 }
-             };
-        }
-    });
+          case (#votes) {
+            // Compare size of net votes.
+            // More goes first, meaning bigger is "less".
+            Int.compare(
+              t2.upVoters : Int - t2.downVoters,
+              t1.upVoters : Int - t1.downVoters,
+            );
+          };
+          case (#activity) {
+            // Prefer topics with recent votes.
+            // If no votes at all, then use edit time.
+            // In all cases "bigger time" is "less."
+            switch (t1.voteTime, t2.voteTime) {
+              case (?time1, ?time2) Int.compare(time2, time1);
+              case (?_, _) #less;
+              case (_, ?_) #greater;
+              case _ Int.compare(t2.editTime, t1.editTime);
+            };
+          };
+        };
+      },
+    );
   };
 
   public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
@@ -219,19 +251,19 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
-    log.request(caller, #createTopic {edit});
+    log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
     let id = createTopic_(user, null, edit);
-    log.okWithTopicId(id)
+    log.okWithTopicId(id);
   };
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
-    log.request(caller, #bulkCreateTopics {edits});
+    log.request(caller, #bulkCreateTopics { edits });
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
       ignore createTopic_(user, ?edit.importId, edit);
     };
-    log.ok()
+    log.ok();
   };
 
   /// TEMPORARY
@@ -243,32 +275,46 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
-    log.request(caller, #editTopic {topic = #topic id; edit});
+    log.request(caller, #editTopic { topic = #topic id; edit });
     assertCallerOwnsTopic(caller, #topic id);
-    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
-        { topic with edit ;
-          internal = { topic.internal with editTime = Time.now() / 1_000_000 } } });
-    log.ok()
+    topics.update(
+      #topic id,
+      func(topic : Types.Topic.State) : Types.Topic.State {
+        {
+          topic with edit;
+          internal = { topic.internal with editTime = Time.now() / 1_000_000 };
+        };
+      },
+    );
+    log.ok();
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
-    log.request(caller, #voteTopic {topic = #topic id; userVote});
+    log.request(caller, #voteTopic { topic = #topic id; userVote });
     let success = do ? {
       // validates arguments before updating relation.
       ignore topics.get(#topic id)!;
       let user = principals.get(caller)!;
       userTopicVotes.put(user, #topic id, userVote);
-      topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
-          { topic with internal = { topic.internal with voteTime = ?(Time.now() / 1_000_000) } } });
+      topics.update(
+        #topic id,
+        func(topic : Types.Topic.State) : Types.Topic.State {
+          {
+            topic with internal = {
+              topic.internal with voteTime = ?(Time.now() / 1_000_000)
+            }
+          };
+        },
+      );
     };
-    log.okIf(success == ?())
+    log.okIf(success == ?());
   };
 
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
-    log.request(caller, #setTopicStatus {topic = #topic id; status});
+    log.request(caller, #setTopicStatus { topic = #topic id; status });
     assertCallerOwnsTopic(caller, #topic id);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
-    log.ok()
+    log.ok();
   };
 
   public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
@@ -289,7 +335,7 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?(#user u)) u;
     };
-    log.okWithUserId(u)
+    log.okWithUserId(u);
   };
 
   /// Get the (optional) user Id for the given caller Id.

@@ -226,7 +226,7 @@ module {
     public class UnRel<A>(
       stableUnRel : Stable.UnRel<A>,
       hash : A -> Hash.Hash,
-      equal : (A, A) -> Bool
+      equal : (A, A) -> Bool,
     ) {
       public func clear() {
         stableUnRel.map := Trie.empty();
