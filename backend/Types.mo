@@ -100,7 +100,7 @@ module {
     public type Edit = {
       // "Edit": another name could be "Info"
       name : Text;
-      description : Text; // one-linear? may be more than one line?
+      description : Text; // one-liner? may be more than one line?
     };
 
     public type Internal = {
