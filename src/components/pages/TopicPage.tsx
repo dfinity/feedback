@@ -26,7 +26,7 @@ export default function TopicPage() {
           const topic = await find(id);
           if (!topic) {
             handleError('Topic not found!');
-            // navigate('/');
+            navigate('/');
           } else {
             setTopic(topic);
           }
