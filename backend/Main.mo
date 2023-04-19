@@ -14,6 +14,7 @@ import Option "mo:base/Option";
 
 import Types "Types";
 import State "State";
+import History "History";
 import Relate "Relate";
 
 shared ({ caller = installer }) actor class Main() {
