@@ -1,5 +1,6 @@
 import Types "Types";
 import Time "mo:base/Time";
+import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Seq "mo:sequence/Sequence";
 import Stream "mo:sequence/Stream";
@@ -95,7 +96,7 @@ module {
     // request var is local state to
     // ensure logs are well-formed
     // (Request, followed by zero or more Internal events, ended by a Response).
-    let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(0);
+    let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(Int.abs(Time.now()));
     var request_ : ?Request = null;
 
     public func getEvents(start : Nat, size : Nat) : [Event] {
