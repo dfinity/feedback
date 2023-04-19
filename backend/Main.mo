@@ -75,7 +75,10 @@ shared ({ caller = installer }) actor class Main() {
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
     switch (findUser(caller)) {
-      case null { assert false };
+      case null {
+        log.errAccess(#callerIsUser);
+        assert false;
+      };
       case (?user) {
         let a = #callerOwnsTopic { user; topic };
         if (userOwnsTopic.has(user, topic)) {
