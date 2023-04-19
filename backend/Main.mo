@@ -42,8 +42,6 @@ shared ({caller = installer}) actor class Main() {
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
 
-  public query ({ caller }) func echo() : async Principal { return caller };//////////
-
   func findUser(caller : Principal) : ?Types.User.Id {
     if (Principal.isAnonymous(caller)) {
       null;
@@ -110,6 +108,7 @@ shared ({caller = installer}) actor class Main() {
     {
       state.edit and userFields with
       id = rawId;
+      importId = state.importId;
       createTime = state.internal.createTime;
       upVoters;
       downVoters;
@@ -146,7 +145,7 @@ shared ({caller = installer}) actor class Main() {
     };
   };
 
-  func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
+  func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
     let topic = nextTopicId;
     nextTopicId += 1;
     let internal = {
@@ -157,6 +156,7 @@ shared ({caller = installer}) actor class Main() {
       {
         modStatus = #pending;
         edit;
+        importId;
         internal;
         status = #open;
       },
@@ -168,13 +168,13 @@ shared ({caller = installer}) actor class Main() {
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     let user = assertCallerIsUser(caller);
-    createTopic_(user, edit);
+    createTopic_(user, null, edit);
   };
 
-  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.Edit]) {
+  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
-      ignore createTopic_(user, edit);
+      ignore createTopic_(user, ?edit.importId, edit);
     };
   };
 
