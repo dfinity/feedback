@@ -136,25 +136,6 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  public query ({ caller }) func listTopics() : async [Types.Topic.View] {
-    let maybeUser = findUser(caller);
-    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
-      viewTopic(maybeUser, topic, state);
-    };
-    let approved =
-      // If Iter had filterMap this could be more efficient.
-      // The outer map, filter and inner map could be one pass.
-      Iter.map(
-        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
-                    Option.isSome),
-        func (x:?Types.Topic.View) : Types.Topic.View {
-        switch x {
-        case null { assert false; loop { } };
-        case (?v) v
-        }});
-    Iter.toArray(approved)
-  };
-
   public type SearchSort = { #votes ; #activity };
 
   public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {

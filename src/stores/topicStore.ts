@@ -6,6 +6,7 @@ import { View } from '../../.dfx/local/canisters/backend/backend.did';
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type ModStatus = 'pending' | 'approved' | 'spam';
 export type VoteStatus = 1 | 0 | -1;
+export type SearchSort = 'votes' | 'activity';
 
 export interface TopicInfo {
   title: string;
@@ -28,7 +29,7 @@ export interface Topic extends TopicInfo {
 
 export interface TopicState {
   topics: Topic[];
-  loading: boolean;
+  sort: SearchSort;
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
@@ -78,9 +79,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
 
   return {
     topics: [],
-    loading: false,
+    sort: 'activity',
     async search() {
-      const results = await backend.listTopics();
+      const results = await backend.searchTopics({ [get().sort]: null } as any);
       const topics: Topic[] = results.map(mapTopic);
       set({ topics });
       if (import.meta.env.DEV) {
