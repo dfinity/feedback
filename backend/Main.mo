@@ -12,7 +12,7 @@ import Types "Types";
 import State "State";
 import Relate "Relate";
 
-shared ({caller = installer}) actor class Main() {
+shared ({ caller = installer }) actor class Main() {
 
   /// Stable canister state, version 0.
   /// Rather than use this directly, we use instead use the OO wrappers defined from its projections.
@@ -74,7 +74,7 @@ shared ({caller = installer}) actor class Main() {
           assert userIsModerator.has(user);
         };
       };
-    }
+    };
   };
 
   func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
@@ -117,12 +117,12 @@ shared ({caller = installer}) actor class Main() {
     };
   };
 
-  public shared({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
+  public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
     assertCallerIsModerator(caller);
     ignore do ? {
       ignore users.get(#user id)!;
       userIsModerator.put(#user id);
-    }
+    };
   };
 
   public query ({ caller }) func listTopics() : async [Types.Topic.View] {
@@ -132,9 +132,10 @@ shared ({caller = installer}) actor class Main() {
     };
     let approved = Iter.filter(
       topics.entries(),
-      func ((_ : Types.Topic.Id, t : Types.Topic.State)) : Bool {
-        t.modStatus == #approved
-    });
+      func((_ : Types.Topic.Id, t : Types.Topic.State)) : Bool {
+        t.modStatus == #approved;
+      },
+    );
     Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
   };
 
