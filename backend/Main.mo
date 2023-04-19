@@ -24,13 +24,15 @@ shared ({ caller = installer }) actor class Main() {
 
   stable var state_v0 : State.State = State.init(installer);
 
+  stable var history_v0 : History.History = History.init(installer);
+
   stable var nextUserId : Types.User.RawId = 1;
   stable var nextTeamId : Types.Team.RawId = 1;
   stable var nextTopicId : Types.Topic.RawId = 1;
 
   // # OO Wrapper for log.
 
-  let log = History.Log(); // to do -- use stable var to store this rep, and pass it in.
+  let log = History.Log(history_v0);
 
   // # OO Wrappers for entities.
   //
@@ -96,7 +98,7 @@ shared ({ caller = installer }) actor class Main() {
       switch (findUser(caller)) {
         case null {
           log.errAccess(#callerIsUser);
-          assert false
+          assert false;
         };
         case (?user) {
           let a = #callerIsModerator;
@@ -308,7 +310,7 @@ shared ({ caller = installer }) actor class Main() {
           {
             topic with internal = {
               topic.internal with voteTime = ?(Time.now() / 1_000_000)
-            }
+            };
           };
         },
       );

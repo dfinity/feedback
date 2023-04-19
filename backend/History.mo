@@ -1,4 +1,8 @@
 import Types "Types";
+import Time "mo:base/Time";
+import Iter "mo:base/Iter";
+import Seq "mo:sequence/Sequence";
+import Stream "mo:sequence/Stream";
 
 module {
 
@@ -44,6 +48,8 @@ module {
 
   public type Response = {
     #ok;
+    #okWithTopic : { topic : TopicId };
+    #okWithUser : { user : UserId };
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
   };
@@ -55,66 +61,94 @@ module {
   };
 
   public type Event = {
-    #request : (Principal, Request);
+    #install : {
+      time : Int; // nano seconds
+      installer : Principal;
+    };
+    #request : {
+      time : Int; // nano seconds
+      caller : Principal;
+      request : Request;
+    };
     #internal : Internal;
     #response : Response;
+  };
+
+  /// # Feedback board history representation.
+  ///
+  /// A record that can recover state and diagnose behavior.
+  /// Can be stored in a stable variable.
+  ///
+  public type History = {
+    var events : Seq.Sequence<Event>;
+  };
+
+  public func init(installer : Principal) : History {
+    { var events = Seq.make(#install { time = Time.now(); installer }) };
   };
 
   ///
   /// OO interface for `Main` canister to log all of its state-affecting update behavior.
   /// Of particular interest are access control checks, and their outcomes.
   ///
-  public class Log(/* to do -- accept stable log rep as init arg. */) {
+  public class Log(history : History) {
     // request var is local state to
     // ensure logs are well-formed
     // (Request, followed by zero or more Internal events, ended by a Response).
+    let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(0);
     var request_ : ?Request = null;
 
-    public func request(caller : Principal, r : Request) {
-      assert request_ == null;
-      request_ := ?r;
+    public func add(event : Event) {
+      history.events := Seq.pushBack<Event>(
+        history.events,
+        levels.next(),
+        event,
+      );
+    };
 
-      // to do -- record it.
+    public func request(caller : Principal, request : Request) {
+      assert request_ == null;
+      request_ := ?request;
+      add(#request { time = Time.now(); caller; request });
     };
 
     public func internal(i : Internal) {
       assert request_ != null;
-
-      // to do -- record it.
+      add(#internal i);
     };
 
     public func ok() {
       assert request_ != null;
       request_ := null;
-
-      // to do -- record it.
+      add(#response(#ok));
     };
 
     public func okIf(b : Bool) {
       assert request_ != null;
       request_ := null;
-
-      // to do -- record either #ok or #err, depending.
+      if b { ok() } else {
+        add(#response(#err));
+      };
     };
 
     public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
       assert request_ != null;
       request_ := null;
-      // to do -- record it.
+      add(#response(#okWithTopic({ topic = #topic i })));
       i;
     };
 
     public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
       assert request_ != null;
       request_ := null;
-      // to do -- record it.
+      add(#response(#okWithUser({ user = #user i })));
       i;
     };
 
     public func errAccess(a : AccessPredicate) {
       assert request_ != null;
       request_ := null;
-      // to do -- record it.
+      add(#response(#errAccess(a)));
     };
 
   };
