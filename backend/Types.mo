@@ -15,6 +15,8 @@ module {
 
     public type Status = { #open; #next; #completed; #closed };
 
+    public type ModStatus = { #pending; #spam; #approved };
+
     public type UserVote = { #up; #down; #none };
 
     public type Edit = {
@@ -41,6 +43,7 @@ module {
       importId : ?ImportId;
       internal : Internal;
       status : Status;
+      modStatus : ModStatus;
     };
 
     public type View = Edit and {
@@ -54,6 +57,7 @@ module {
       downVoters : Nat;
       yourVote : UserVote;
       status : Status;
+      modStatus : ModStatus;
     };
   };
 

@@ -4,6 +4,7 @@ import Relate "Relate";
 import Trie "mo:base/Trie";
 
 module {
+  type UnRel<A> = Relate.Stable.UnRel<A>;
   type Map<A, B> = Relate.Stable.Map<A, B>;
   type BinRel<A, B> = Relate.Stable.BinRel<A, B>;
   type TernRel<A, B, C> = Relate.Stable.TernRel<A, B, C>;
@@ -48,6 +49,9 @@ module {
     // user-team-member binary relation.
     userTeamMember : BinRel<UserId, TeamId>;
 
+    // user-is-moderator predicate.
+    userIsModerator : UnRel<UserId>;
+
     // user-submitted-topic relation.
     userSubmitsTopic : BinRel<UserId, TopicId>;
 
@@ -58,7 +62,7 @@ module {
     userTopicVotes : TernRel<UserId, TopicId, UserVote>;
   };
 
-  public func init() : State {
+  public func init(installer : Principal) : State {
     {
       users = Relate.Stable.emptyMap();
       topics = Relate.Stable.emptyMap();
@@ -66,6 +70,7 @@ module {
       principals = Relate.Stable.emptyMap();
 
       userTeamMember = Relate.Stable.emptyBinRel();
+      userIsModerator = Relate.Stable.emptyUnRel();
       userSubmitsTopic = Relate.Stable.emptyBinRel();
       userOwnsTopic = Relate.Stable.emptyBinRel();
       userTopicVotes = Relate.Stable.emptyTernRel();
