@@ -94,7 +94,10 @@ shared ({ caller = installer }) actor class Main() {
   func assertCallerIsModerator(caller : Principal) {
     if (caller != installer) {
       switch (findUser(caller)) {
-        case null { assert false };
+        case null {
+          log.errAccess(#callerIsUser);
+          assert false
+        };
         case (?user) {
           let a = #callerIsModerator;
           if (userIsModerator.has(user)) {
