@@ -98,6 +98,16 @@ module {
     let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(0);
     var request_ : ?Request = null;
 
+    public func getEvents(start : Nat, size : Nat) : [Event] {
+      let (_, slice, _) = Seq.slice(history.events, start, size);
+      let i : Iter.Iter<Event> = Seq.iter(slice, #fwd);
+      Iter.toArray(i);
+    };
+
+    public func getSize() : Nat {
+      Seq.size(history.events);
+    };
+
     public func add(event : Event) {
       history.events := Seq.pushBack<Event>(
         history.events,

@@ -282,6 +282,16 @@ shared ({ caller = installer }) actor class Main() {
     userTopicVotes.clear();
   };
 
+  public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
+    assertCallerIsModerator(caller);
+    log.getEvents(start, size);
+  };
+
+  public query ({ caller }) func getLogEventCount() : async Nat {
+    assertCallerIsModerator(caller);
+    log.getSize();
+  };
+
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
     log.request(caller, #editTopic { topic = #topic id; edit });
     assertCallerOwnsTopic(caller, #topic id);
