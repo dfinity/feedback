@@ -15,10 +15,9 @@ Make sure that [Node.js](https://nodejs.org/en/) `>= 16.x` and the latest versio
 Clone this repository and run the following commands in the project root:
 
 ```sh
-dfx start --clean --background # Run dfx in the background
-npm run setup # Install packages, deploy canisters, and generate type bindings
+npm run setup # Install packages and run `dfx` in the background
 
-npm start # Start the development server
+npm start # Start the live-reload development server
 ```
 
 When ready, run `dfx deploy` to build and deploy the application.
