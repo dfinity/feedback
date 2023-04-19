@@ -15,13 +15,13 @@ export interface TopicInfo {
 
 export interface Topic extends TopicInfo {
   id: string;
-  importId: { type: string; id: string } | undefined;
   // owner: Principal;
   createTime: number;
   votes: number;
   status: TopicStatus;
   isOwner: boolean;
   yourVote: VoteStatus;
+  importId?: { type: string; id: string } | undefined;
 }
 
 export interface TopicState {
@@ -64,13 +64,13 @@ export const useTopicStore = create<TopicState>((set, get) => {
   const mapTopic = (result: View): Topic => ({
     ...result,
     id: String(result.id),
-    importId: result.importId.length
-      ? mapImportId(result.importId[0])
-      : undefined,
     createTime: Number(result.createTime),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
+    importId: result.importId.length
+      ? mapImportId(result.importId[0])
+      : undefined,
   });
 
   return {
@@ -105,7 +105,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }));
       // await get().fetch();
     },
-    async bulkCreate(infoArray: TopicInfo[]) {
+    async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
       await backend.bulkCreateTopics(infoArray);
       await get().search();
     },
