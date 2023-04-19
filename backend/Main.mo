@@ -7,6 +7,7 @@ import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
+import Option "mo:base/Option";
 
 import Types "Types";
 import State "State";
@@ -77,7 +78,12 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
+  // returns some topic view when user owns the topic, or when the topic is approved.
+  // returns null when a topic is unapproved and not owned by the optional user argument.
+  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    let userIsOwner =
+      switch user { case null false; case (?u) { userOwnsTopic.has(u, id) } };
+    if (not userIsOwner and state.modStatus != #approved) { return null };
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -96,7 +102,7 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?user) {
         {
-          isOwner = userOwnsTopic.has(user, id);
+          isOwner = userIsOwner;
           yourVote = switch (userTopicVotes.get(user, id)) {
             case null #none;
             case (?v) v;
@@ -105,7 +111,7 @@ shared ({ caller = installer }) actor class Main() {
       };
     };
     let #topic rawId = id;
-    {
+    ?{
       state.edit and userFields with
       id = rawId;
       importId = state.importId;
@@ -127,30 +133,27 @@ shared ({ caller = installer }) actor class Main() {
 
   public query ({ caller }) func listTopics() : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
-    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
       viewTopic(maybeUser, topic, state);
     };
-    let approved = Iter.filter(
-      topics.entries(),
-      func((id : Types.Topic.Id, t : Types.Topic.State)) : Bool {
-        // switch maybeUser {
-        //   case null {};
-        //   case (?user) {
-        //     if (userOwnsTopic.has(user, id)) {
-        //       return true;
-        //     };
-        //   };
-        // };
-        t.modStatus == #approved;
-      },
-    );
-    Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+    let approved =
+      // If Iter had filterMap this could be more efficient.
+      // The outer map, filter and inner map could be one pass.
+      Iter.map(
+        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
+                    Option.isSome),
+        func (x:?Types.Topic.View) : Types.Topic.View {
+        switch x {
+        case null { assert false; loop { } };
+        case (?v) v
+        }});
+    Iter.toArray(approved)
   };
 
   public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
     let maybeUser = findUser(caller);
     do ? {
-      viewTopic(maybeUser, #topic id, topics.get(#topic id)!);
+      viewTopic(maybeUser, #topic id, topics.get(#topic id)!)!;
     };
   };
 
