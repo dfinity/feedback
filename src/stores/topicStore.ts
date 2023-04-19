@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { Status } from '../declarations/backend/backend.did';
+import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
@@ -21,6 +21,7 @@ export interface Topic extends TopicInfo {
   status: TopicStatus;
   isOwner: boolean;
   yourVote: VoteStatus;
+  importId?: { type: string; id: string } | undefined;
 }
 
 export interface TopicState {
@@ -50,6 +51,16 @@ export const useTopicStore = create<TopicState>((set, get) => {
     closed: { closed: null },
   };
 
+  const mapImportId = (id: ImportId) => {
+    const entry = Object.entries(id)[0];
+    return (
+      entry && {
+        type: entry[0],
+        id: entry[1],
+      }
+    );
+  };
+
   const mapTopic = (result: View): Topic => ({
     ...result,
     id: String(result.id),
@@ -57,6 +68,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
+    importId: result.importId.length
+      ? mapImportId(result.importId[0])
+      : undefined,
   });
 
   return {
@@ -91,7 +105,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }));
       // await get().fetch();
     },
-    async bulkCreate(infoArray: TopicInfo[]) {
+    async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
       await backend.bulkCreateTopics(infoArray);
       await get().search();
     },

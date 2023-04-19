@@ -47,6 +47,7 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
     }
 
     return {
+      importId: { jira: getField(item, 'key') },
       title,
       description,
       links,

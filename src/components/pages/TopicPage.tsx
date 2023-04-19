@@ -6,9 +6,10 @@ import { Topic, useTopicStore } from '../../stores/topicStore';
 import { handleError } from '../../utils/handlers';
 import TopicView from '../TopicView';
 
+let fetchId: string | undefined;
+
 export default function TopicPage() {
   const [topic, setTopic] = useState<Topic | undefined>();
-  const [fetchId, setFetchId] = useState<string | undefined>();
 
   const find = useTopicStore((state) => state.find);
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function TopicPage() {
 
   useEffect(() => {
     if (id && id !== fetchId) {
-      setFetchId(id);
+      fetchId = id;
       (async () => {
         try {
           if (!id) {
@@ -34,7 +35,7 @@ export default function TopicPage() {
         }
       })();
     }
-  }, [find, id, navigate, fetchId]);
+  }, [find, id, navigate]);
 
   if (!topic) {
     return (

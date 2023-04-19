@@ -64,12 +64,13 @@ export function FileDropZone({ children }: FileDropZoneProps) {
   return (
     <ContainerDiv
       {...getRootProps({
+        tabIndex: -1,
         isDragActive,
         style: { transition: '.2s background-color ease-out' },
       })}
     >
       {children}
-      <input {...getInputProps({ style: { display: 'none' } })} />
+      <input {...getInputProps()} />
     </ContainerDiv>
   );
 }
