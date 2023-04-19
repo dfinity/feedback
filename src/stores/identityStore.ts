@@ -38,9 +38,12 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       if (await client.isAuthenticated()) {
         set({ user: { type: 'ic', client } });
         await updateIdentity(client);
-        await fetchUser().catch((err) =>
+        const userId = await fetchUser().catch((err) =>
           handleError(err, 'Error while fetching user info!'),
         );
+        if (import.meta.env.DEV) {
+          console.log('User ID:', userId);
+        }
       }
 
       // Fetch topics after authenticating
@@ -84,11 +87,14 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       }
 
       await updateIdentity(client);
-      await handlePromise(
+      const userId = await handlePromise(
         fetchUser(),
         'Signing in...',
         'Error while signing in!',
       );
+      if (import.meta.env.DEV) {
+        console.log('User ID:', userId);
+      }
     }
     return client;
   };
