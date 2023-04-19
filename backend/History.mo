@@ -39,6 +39,7 @@ module {
       modStatus : Types.Topic.ModStatus;
     };
     #login;
+    #moderatorQuery;
   };
 
   public type Internal = {

@@ -283,11 +283,13 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
+    log.request(caller, #moderatorQuery);
     assertCallerIsModerator(caller);
     log.getEvents(start, size);
   };
 
   public query ({ caller }) func getLogEventCount() : async Nat {
+    log.request(caller, #moderatorQuery);
     assertCallerIsModerator(caller);
     log.getSize();
   };
