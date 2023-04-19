@@ -91,6 +91,13 @@ module {
 
     public func emptyMap<A, B>() : Map<A, B> { { var map = Trie.empty() } };
 
+    // Unary relation among A.
+    public type UnRel<A> = {
+      var map : Trie.Trie<A, ()>;
+    };
+
+    public func emptyUnRel<A>() : UnRel<A> { { var map = Trie.empty() } };
+
     // Binary relation among A and B,
     // stored in way that permits efficiently collecting
     //  - all B related to an A.
@@ -212,6 +219,31 @@ module {
         let k1 = key(hash.1, p.1);
         stableBinRel.aB := Trie.remove2D(stableBinRel.aB, k0, equal.0, k1, equal.1).0;
         stableBinRel.bA := Trie.remove2D(stableBinRel.bA, k1, equal.1, k0, equal.0).0;
+      };
+    };
+
+    /// General unary relation.
+    public class UnRel<A>(
+      stableUnRel : Stable.UnRel<A>,
+      hash : A -> Hash.Hash,
+      equal : (A, A) -> Bool
+    ) {
+      public func clear() {
+        stableUnRel.map := Trie.empty();
+      };
+
+      public func has(a : A) : Bool {
+        Trie.find(stableUnRel.map, key<A>(hash, a), equal) != ?();
+      };
+
+      public func put(a : A) {
+        let k0 = key<A>(hash, a);
+        stableUnRel.map := Trie.put(stableUnRel.map, k0, equal, ()).0;
+      };
+
+      public func remove(a : A) {
+        let k0 = key(hash, a);
+        stableUnRel.map := Trie.remove(stableUnRel.map, k0, equal).0;
       };
     };
 

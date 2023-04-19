@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { imagetools } from 'vite-imagetools';
+import { spawnSync } from 'child_process';
 
 const localNetwork = 'local';
 const network = process.env['DFX_NETWORK'] || localNetwork;
@@ -19,9 +20,14 @@ if (network === localNetwork) {
 }
 
 if (!existsSync(canisterIdPath)) {
-  throw new Error(
-    'Unable to find canisters. Running `dfx deploy` should fix this problem.',
-  );
+  // Create empty canisters
+  spawnSync('dfx', ['canister', 'create', '--all'], { cwd: __dirname });
+
+  if (!existsSync(canisterIdPath)) {
+    throw new Error(
+      'Unable to find canisters. Running `dfx deploy` should fix this problem.',
+    );
+  }
 }
 const canisterIds = JSON.parse(readFileSync(canisterIdPath, 'utf8'));
 

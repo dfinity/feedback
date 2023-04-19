@@ -24,6 +24,7 @@ import { handleInfo, handlePromise } from '../utils/handlers';
 import Markdown from './Markdown';
 import Tag from './Tag';
 import TopicForm from './TopicForm';
+import Tooltip from './Tooltip';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -119,9 +120,18 @@ export default function TopicView({
             <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
           </div>
           <div
-            tw="flex-1 overflow-hidden select-none"
+            tw="flex-1 flex gap-2 items-center overflow-hidden select-none"
             css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
           >
+            {topic.importId?.type === 'jira' && (
+              <div>
+                <Tooltip content={topic.importId.id}>
+                  <div>
+                    <FaJira tw="text-blue-500" />
+                  </div>
+                </Tooltip>
+              </div>
+            )}
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">

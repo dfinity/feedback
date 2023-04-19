@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { Status } from '../declarations/backend/backend.did';
+import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
+export type ModStatus = 'pending' | 'approved' | 'spam';
 export type VoteStatus = 1 | 0 | -1;
 
 export interface TopicInfo {
@@ -19,8 +20,10 @@ export interface Topic extends TopicInfo {
   createTime: number;
   votes: number;
   status: TopicStatus;
+  modStatus: ModStatus;
   isOwner: boolean;
   yourVote: VoteStatus;
+  importId?: { type: string; id: string } | undefined;
 }
 
 export interface TopicState {
@@ -50,13 +53,27 @@ export const useTopicStore = create<TopicState>((set, get) => {
     closed: { closed: null },
   };
 
+  const mapImportId = (id: ImportId) => {
+    const entry = Object.entries(id)[0];
+    return (
+      entry && {
+        type: entry[0],
+        id: entry[1],
+      }
+    );
+  };
+
   const mapTopic = (result: View): Topic => ({
     ...result,
     id: String(result.id),
     createTime: Number(result.createTime),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
+    modStatus: Object.keys(result.modStatus)[0] as ModStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
+    importId: result.importId.length
+      ? mapImportId(result.importId[0])
+      : undefined,
   });
 
   return {
@@ -66,6 +83,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
       const results = await backend.listTopics();
       const topics: Topic[] = results.map(mapTopic);
       set({ topics });
+      if (import.meta.env.DEV) {
+        console.log('Topics:', get().topics);
+      }
       return topics;
     },
     async find(id: string) {
@@ -83,15 +103,16 @@ export const useTopicStore = create<TopicState>((set, get) => {
         createTime: Date.now(),
         votes: 0,
         status: 'open',
+        modStatus: 'pending',
         isOwner: true,
         yourVote: 0,
       };
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().fetch();
+      // await get().search();
     },
-    async bulkCreate(infoArray: TopicInfo[]) {
+    async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
       await backend.bulkCreateTopics(infoArray);
       await get().search();
     },

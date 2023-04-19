@@ -15,6 +15,8 @@ module {
 
     public type Status = { #open; #next; #completed; #closed };
 
+    public type ModStatus = { #pending; #spam; #approved };
+
     public type UserVote = { #up; #down; #none };
 
     public type Edit = {
@@ -24,6 +26,11 @@ module {
       links : [Text];
       tags : [Text];
     };
+
+    public type ImportEdit =
+      { importId : ImportId } and Edit;
+
+    public type ImportId = { #jira : Text };
 
     public type Internal = {
       // submitter : User.Id; -- Use separate relation?
@@ -35,12 +42,15 @@ module {
 
     public type State = {
       edit : Edit;
+      importId : ?ImportId;
       internal : Internal;
       status : Status;
+      modStatus : ModStatus;
     };
 
     public type View = Edit and {
       id : RawId;
+      importId: ?ImportId;
       isOwner : Bool;
       // submitterName: Text;
       // ownerName: Text;
@@ -51,6 +61,7 @@ module {
       downVoters : Nat;
       yourVote : UserVote;
       status : Status;
+      modStatus : ModStatus;
     };
   };
 

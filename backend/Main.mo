@@ -10,17 +10,18 @@ import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
 import Array "mo:base/Array";
 import Order "mo:base/Order";
+import Option "mo:base/Option";
 
 import Types "Types";
 import State "State";
 import Relate "Relate";
 
-actor class Main() {
+shared ({ caller = installer }) actor class Main() {
 
   /// Stable canister state, version 0.
   /// Rather than use this directly, we use instead use the OO wrappers defined from its projections.
 
-  stable var state_v0 : State.State = State.init();
+  stable var state_v0 : State.State = State.init(installer);
 
   stable var nextUserId : Types.User.RawId = 1;
   stable var nextTeamId : Types.Team.RawId = 1;
@@ -40,11 +41,10 @@ actor class Main() {
   // Arguments are relevant fields from state, and primary-key utility functions (hash, equal).
 
   let userTeamMember = Relate.OO.BinRel(state_v0.userTeamMember, (Types.User.idHash, Types.Team.idHash), (Types.User.idEqual, Types.Team.idEqual));
+  let userIsModerator = Relate.OO.UnRel(state_v0.userIsModerator, Types.User.idHash, Types.User.idEqual);
   let userSubmitsTopic = Relate.OO.BinRel(state_v0.userSubmitsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userOwnsTopic = Relate.OO.BinRel(state_v0.userOwnsTopic, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
   let userTopicVotes = Relate.OO.TernRel(state_v0.userTopicVotes, (Types.User.idHash, Types.Topic.idHash), (Types.User.idEqual, Types.Topic.idEqual));
-
-  public query ({ caller }) func echo() : async Principal { return caller };//////////
 
   func findUser(caller : Principal) : ?Types.User.Id {
     if (Principal.isAnonymous(caller)) {
@@ -70,7 +70,23 @@ actor class Main() {
     };
   };
 
-  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
+  func assertCallerIsModerator(caller : Principal) {
+    if (caller != installer) {
+      switch (findUser(caller)) {
+        case null { assert false };
+        case (?user) {
+          assert userIsModerator.has(user);
+        };
+      };
+    };
+  };
+
+  // returns some topic view when user owns the topic, or when the topic is approved.
+  // returns null when a topic is unapproved and not owned by the optional user argument.
+  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    let userIsOwner =
+      switch user { case null false; case (?u) { userOwnsTopic.has(u, id) } };
+    if (not userIsOwner and state.modStatus != #approved) { return null };
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -89,7 +105,7 @@ actor class Main() {
       };
       case (?user) {
         {
-          isOwner = userOwnsTopic.has(user, id);
+          isOwner = userIsOwner;
           yourVote = switch (userTopicVotes.get(user, id)) {
             case null #none;
             case (?v) v;
@@ -98,34 +114,66 @@ actor class Main() {
       };
     };
     let #topic rawId = id;
-    {
+    ?{
       state.edit and userFields with
       id = rawId;
+      importId = state.importId;
       createTime = state.internal.createTime;
       editTime = state.internal.editTime;
       voteTime = state.internal.voteTime;
       upVoters;
       downVoters;
       status = state.status;
+      modStatus = state.modStatus;
+    };
+  };
+
+  public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
+    assertCallerIsModerator(caller);
+    ignore do ? {
+      ignore users.get(#user id)!;
+      userIsModerator.put(#user id);
     };
   };
 
   public query ({ caller }) func listTopics() : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
-    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
       viewTopic(maybeUser, topic, state);
     };
-    Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+    let approved =
+      // If Iter had filterMap this could be more efficient.
+      // The outer map, filter and inner map could be one pass.
+      Iter.map(
+        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
+                    Option.isSome),
+        func (x:?Types.Topic.View) : Types.Topic.View {
+        switch x {
+        case null { assert false; loop { } };
+        case (?v) v
+        }});
+    Iter.toArray(approved)
   };
 
   public type SearchSort = { #votes ; #activity };
 
   public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
-    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : Types.Topic.View {
+    func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
       viewTopic(maybeUser, topic, state);
     };
-    let unsorted = Iter.toArray(Iter.map(topics.entries(), viewAsCaller));
+    let unsorted = Iter.toArray(
+      // If Iter had filterMap this could be more efficient.
+      // The outer map, filter and inner map could be one pass.
+      Iter.map(
+        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
+                    Option.isSome),
+        func (x:?Types.Topic.View) : Types.Topic.View {
+        switch x {
+        case null { assert false; loop { } };
+        case (?v) v
+        }})
+    );
     Array.sort(
       unsorted,
       func(t1 : Types.Topic.View,
@@ -149,17 +197,17 @@ actor class Main() {
                  }
              };
         }
-    })
+    });
   };
 
   public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
     let maybeUser = findUser(caller);
     do ? {
-      viewTopic(maybeUser, #topic id, topics.get(#topic id)!);
+      viewTopic(maybeUser, #topic id, topics.get(#topic id)!)!;
     };
   };
 
-  func createTopic_(user : Types.User.Id, edit : Types.Topic.Edit) : Types.Topic.RawId {
+  func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
     let topic = nextTopicId;
     nextTopicId += 1;
     let internal = {
@@ -170,7 +218,9 @@ actor class Main() {
     topics.put(
       #topic topic,
       {
+        modStatus = #pending;
         edit;
+        importId;
         internal;
         status = #open;
       },
@@ -182,13 +232,13 @@ actor class Main() {
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     let user = assertCallerIsUser(caller);
-    createTopic_(user, edit);
+    createTopic_(user, null, edit);
   };
 
-  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.Edit]) {
+  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
-      ignore createTopic_(user, edit);
+      ignore createTopic_(user, ?edit.importId, edit);
     };
   };
 
@@ -222,6 +272,11 @@ actor class Main() {
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
     assertCallerOwnsTopic(caller, #topic id);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
+  };
+
+  public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
+    assertCallerIsModerator(caller);
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus } });
   };
 
   /// Create (or get) a user Id for the given caller Id.

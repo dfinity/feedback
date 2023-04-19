@@ -11,11 +11,11 @@ export default function TopicList({ topics }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const sortedItems = [...topics].sort((a, b) => b.createTime - a.createTime);
+  const sortedTopics = [...topics].sort((a, b) => b.createTime - a.createTime);
 
   return (
     <div tw="flex flex-col gap-4">
-      {sortedItems.map((item) => (
+      {sortedTopics.map((item) => (
         <TopicView
           key={item.id}
           topic={item}
