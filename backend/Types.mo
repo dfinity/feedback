@@ -36,6 +36,8 @@ module {
       // submitter : User.Id; -- Use separate relation?
       // owner : User.Id;  -- Use separate relation?
       createTime : Int; // milliseconds since Unix epoch
+      editTime : Int; // milliseconds since Unix epoch
+      voteTime : ?Int; // milliseconds since Unix epoch
     };
 
     public type State = {
@@ -53,6 +55,8 @@ module {
       // submitterName: Text;
       // ownerName: Text;
       createTime : Int; // milliseconds since Unix epoch
+      editTime : Int; // milliseconds since Unix epoch
+      voteTime : ?Int; // milliseconds since Unix epoch
       upVoters : Nat;
       downVoters : Nat;
       yourVote : UserVote;
