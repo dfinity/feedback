@@ -6,11 +6,12 @@ import {
   ERROR_USER_INTERRUPT,
 } from '@dfinity/auth-client';
 import { create } from 'zustand';
+import { UserView } from '../../.dfx/local/canisters/backend/backend.did';
 import { backend } from '../declarations/backend';
 import { handleError } from '../utils/handlers';
 import { useTopicStore } from './topicStore';
 
-export type User =
+export type User = (
   | {
       type: 'ic';
       client: AuthClient;
@@ -18,7 +19,10 @@ export type User =
   | {
       type: 'auth0';
       auth0: Auth0User;
-    };
+    }
+) & {
+  view: UserView;
+};
 
 // TODO: refactor
 const applicationName = 'IC Feedback';
@@ -35,15 +39,23 @@ export interface IdentityState {
 export const useIdentityStore = create<IdentityState>((set, get) => {
   if (window.indexedDB) {
     AuthClient.create().then(async (client) => {
-      if (await client.isAuthenticated()) {
-        set({ user: { type: 'ic', client } });
-        await updateIdentity(client);
-        const userId = await fetchUser().catch((err) =>
-          handleError(err, 'Error while fetching user info!'),
-        );
-        if (import.meta.env.DEV) {
-          console.log('User ID:', userId);
+      try {
+        if (await client.isAuthenticated()) {
+          await updateIdentity(client);
+          const view = await getUserView();
+          if (import.meta.env.DEV) {
+            console.log('User:', view);
+          }
+          set({
+            user: {
+              type: 'ic',
+              client,
+              view,
+            },
+          });
         }
+      } catch (err) {
+        handleError(err, 'Error while fetching user info!');
       }
 
       // Fetch topics after authenticating
@@ -73,12 +85,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
             onError,
           }),
         );
-        set({
-          user: {
-            type: 'ic',
-            client,
-          },
-        });
       } catch (err) {
         if (err === ERROR_USER_INTERRUPT) {
           return;
@@ -92,10 +98,17 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       //   'Signing in...',
       //   'Error while signing in!',
       // );
-      const userId = await fetchUser();
+      const view = await getUserView();
       if (import.meta.env.DEV) {
-        console.log('User ID:', userId);
+        console.log('User:', view);
       }
+      set({
+        user: {
+          type: 'ic',
+          client,
+          view,
+        },
+      });
     }
     return client;
   };
@@ -107,13 +120,12 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     ).replaceIdentity(client.getIdentity());
   };
 
-  // TODO: return user info
-  const fetchUser = async () => {
-    const [id] = await backend.fastLogin();
-    if (id !== undefined) {
-      return String(id);
+  const getUserView = async () => {
+    const [view] = await backend.fastLogin();
+    if (view !== undefined) {
+      return view;
     }
-    return String(await backend.login());
+    return await backend.login();
   };
 
   return {

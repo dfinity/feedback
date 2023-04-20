@@ -86,6 +86,11 @@ module {
       edit : Edit;
       internal : Internal;
     };
+
+    public type View = {
+      id : RawId;
+      isModerator : Bool;
+    };
   };
 
   public module Team {
