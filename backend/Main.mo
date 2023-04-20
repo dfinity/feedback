@@ -16,6 +16,7 @@ import Types "Types";
 import State "State";
 import History "History";
 import Relate "Relate";
+import Validate "Validate";
 
 shared ({ caller = installer }) actor class Main() {
 
