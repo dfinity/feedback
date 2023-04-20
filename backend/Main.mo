@@ -282,6 +282,16 @@ shared ({ caller = installer }) actor class Main() {
     userTopicVotes.clear();
   };
 
+  /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
+  public query ({ caller }) func getLogEvents__dev_tmp(start : Nat, size : Nat) : async [History.Event] {
+    log.getEvents(start, size);
+  };
+
+  /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
+  public query ({ caller }) func getLogEventCount__dev_tmp() : async Nat {
+    log.getSize();
+  };
+
   public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
     log.request(caller, #moderatorQuery);
     assertCallerIsModerator(caller);
