@@ -61,6 +61,13 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  func findUserUnwrap(caller : Principal) : Types.User.Id {
+    switch (findUser(caller)) {
+      case null { assert false; loop {} };
+      case (?u) u;
+    };
+  };
+
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
       case null {
@@ -115,14 +122,23 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  func maybeUserIsOwner(user : ?Types.User.Id, topic : Types.Topic.Id) : Bool {
+    switch user { case null false; case (?u) { userOwnsTopic.has(u, topic) } };
+  };
+
   // returns some topic view when user owns the topic, or when the topic is approved.
   // returns null when a topic is unapproved and not owned by the optional user argument.
   func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
-    let userIsOwner = switch user {
-      case null false;
-      case (?u) { userOwnsTopic.has(u, id) };
+    if (not maybeUserIsOwner(user, id) and state.modStatus != #approved) {
+      return null;
+    } else {
+      ?viewTopic_(user, id, state);
     };
-    if (not userIsOwner and state.modStatus != #approved) { return null };
+  };
+
+  // No access control here for user, only customization.
+  // Each use of this helper has its own access control logic.
+  func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -141,7 +157,7 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?user) {
         {
-          isOwner = userIsOwner;
+          isOwner = maybeUserIsOwner(?user, id);
           yourVote = switch (userTopicVotes.get(user, id)) {
             case null #none;
             case (?v) v;
@@ -150,7 +166,7 @@ shared ({ caller = installer }) actor class Main() {
       };
     };
     let #topic rawId = id;
-    ?{
+    {
       state.edit and userFields with
       id = rawId;
       importId = state.importId;
@@ -162,6 +178,14 @@ shared ({ caller = installer }) actor class Main() {
       status = state.status;
       modStatus = state.modStatus;
     };
+  };
+
+  // returns some topic view when topic is #pending.
+  // returns null otherwise.
+  func viewTopicAsModerator(user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    if (state.modStatus == #pending) {
+      ?viewTopic_(?user, id, state);
+    } else null;
   };
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
@@ -224,6 +248,41 @@ shared ({ caller = installer }) actor class Main() {
             };
           };
         };
+      },
+    );
+  };
+
+  public query ({ caller }) func getModeratorTopics() : async [Types.Topic.View] {
+    assertCallerIsModerator(caller);
+    let user = findUserUnwrap(caller);
+    func view((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
+      viewTopicAsModerator(user, topic, state);
+    };
+    let unsorted = Iter.toArray(
+      // If Iter had filterMap this could be more efficient.
+      // The outer map, filter and inner map could be one pass.
+      Iter.map(
+        Iter.filter(
+          Iter.map(topics.entries(), view),
+          Option.isSome,
+        ),
+        func(x : ?Types.Topic.View) : Types.Topic.View {
+          switch x {
+            case null { assert false; loop {} };
+            case (?v) v;
+          };
+        },
+      ),
+    );
+    Array.sort(
+      unsorted,
+      func(
+        t1 : Types.Topic.View,
+        t2 : Types.Topic.View,
+      ) : Order.Order {
+        // Prefer topics with recent edits.
+        // In all cases "bigger time" is "less" (earlier).
+        Int.compare(t2.editTime, t1.editTime);
       },
     );
   };
