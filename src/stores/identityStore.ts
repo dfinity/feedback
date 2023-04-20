@@ -63,11 +63,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         .getState()
         .search()
         .catch((err) => handleError(err, 'Error while fetching topics!'));
-      // handlePromise(
-      //    useTopicStore.getState().fetch(),
-      //   'Fetching...',
-      //   'Error while fetching topics!',
-      // );
     });
   }
 
