@@ -321,6 +321,10 @@ shared ({ caller = installer }) actor class Main() {
     topic;
   };
 
+  public query func validateTopic(edit : Types.Topic.Edit) : async Bool {
+    Validate.Topic.edit(edit);
+  };
+
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
