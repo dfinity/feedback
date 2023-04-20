@@ -54,6 +54,13 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  func findUserUnwrap(caller : Principal) : Types.User.Id {
+    switch (findUser(caller)) {
+      case null { assert false; loop {} };
+      case (?u) u;
+    };
+  };
+
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
       case null { assert false; loop {} };
@@ -81,12 +88,24 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  func maybeUserIsOwner(user : ?Types.User.Id, topic : Types.Topic.Id) : Bool {
+    switch user { case null false; case (?u) { userOwnsTopic.has(u, topic) } };
+  };
+
   // returns some topic view when user owns the topic, or when the topic is approved.
   // returns null when a topic is unapproved and not owned by the optional user argument.
   func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
-    let userIsOwner =
-      switch user { case null false; case (?u) { userOwnsTopic.has(u, id) } };
-    if (not userIsOwner and state.modStatus != #approved) { return null };
+    if (not maybeUserIsOwner(user, id) and state.modStatus != #approved) {
+      return null;
+    } else {
+      ?viewTopic_(user, id, state);
+    };
+  };
+
+  // No access control here for user, only customization.
+  // Each use of this helper has its own access control logic.
+  func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
+
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -105,7 +124,7 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?user) {
         {
-          isOwner = userIsOwner;
+          isOwner = maybeUserIsOwner(?user, id);
           yourVote = switch (userTopicVotes.get(user, id)) {
             case null #none;
             case (?v) v;
@@ -114,7 +133,7 @@ shared ({ caller = installer }) actor class Main() {
       };
     };
     let #topic rawId = id;
-    ?{
+    {
       state.edit and userFields with
       id = rawId;
       importId = state.importId;
@@ -128,6 +147,14 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  // returns some topic view when topic is #pending.
+  // returns null otherwise.
+  func viewTopicAsModerator(user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    if (state.modStatus == #pending) {
+      ?viewTopic_(?user, id, state);
+    } else null;
+  };
+
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
     assertCallerIsModerator(caller);
     ignore do ? {
@@ -136,7 +163,7 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  public type SearchSort = { #votes ; #activity };
+  public type SearchSort = { #votes; #activity };
 
   public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
@@ -147,38 +174,82 @@ shared ({ caller = installer }) actor class Main() {
       // If Iter had filterMap this could be more efficient.
       // The outer map, filter and inner map could be one pass.
       Iter.map(
-        Iter.filter(Iter.map(topics.entries(), viewAsCaller),
-                    Option.isSome),
-        func (x:?Types.Topic.View) : Types.Topic.View {
-        switch x {
-        case null { assert false; loop { } };
-        case (?v) v
-        }})
+        Iter.filter(
+          Iter.map(topics.entries(), viewAsCaller),
+          Option.isSome,
+        ),
+        func(x : ?Types.Topic.View) : Types.Topic.View {
+          switch x {
+            case null { assert false; loop {} };
+            case (?v) v;
+          };
+        },
+      ),
     );
     Array.sort(
       unsorted,
-      func(t1 : Types.Topic.View,
-           t2 : Types.Topic.View) : Order.Order {
+      func(
+        t1 : Types.Topic.View,
+        t2 : Types.Topic.View,
+      ) : Order.Order {
         switch searchSort {
-        case (#votes) {
-                 // Compare size of net votes.
-                 // More goes first, meaning bigger is "less".
-                 Int.compare(t2.upVoters : Int - t2.downVoters,
-                             t1.upVoters : Int - t1.downVoters)
-             };
-        case (#activity) {
-                 // Prefer topics with recent votes.
-                 // If no votes at all, then use edit time.
-                 // In all cases "bigger time" is "less."
-                 switch (t1.voteTime, t2.voteTime) {
-                 case (?time1, ?time2) Int.compare(time2, time1);
-                 case (?_, _) #less;
-                 case (_, ?_) #greater;
-                 case _ Int.compare(t2.editTime, t1.editTime);
-                 }
-             };
-        }
-    });
+          case (#votes) {
+            // Compare size of net votes.
+            // More goes first, meaning bigger is "less".
+            Int.compare(
+              t2.upVoters : Int - t2.downVoters,
+              t1.upVoters : Int - t1.downVoters,
+            );
+          };
+          case (#activity) {
+            // Prefer topics with recent votes.
+            // If no votes at all, then use edit time.
+            // In all cases "bigger time" is "less."
+            switch (t1.voteTime, t2.voteTime) {
+              case (?time1, ?time2) Int.compare(time2, time1);
+              case (?_, _) #less;
+              case (_, ?_) #greater;
+              case _ Int.compare(t2.editTime, t1.editTime);
+            };
+          };
+        };
+      },
+    );
+  };
+
+  public query ({ caller }) func getModeratorTopics() : async [Types.Topic.View] {
+    assertCallerIsModerator(caller);
+    let user = findUserUnwrap(caller);
+    func view((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
+      viewTopicAsModerator(user, topic, state);
+    };
+    let unsorted = Iter.toArray(
+      // If Iter had filterMap this could be more efficient.
+      // The outer map, filter and inner map could be one pass.
+      Iter.map(
+        Iter.filter(
+          Iter.map(topics.entries(), view),
+          Option.isSome,
+        ),
+        func(x : ?Types.Topic.View) : Types.Topic.View {
+          switch x {
+            case null { assert false; loop {} };
+            case (?v) v;
+          };
+        },
+      ),
+    );
+    Array.sort(
+      unsorted,
+      func(
+        t1 : Types.Topic.View,
+        t2 : Types.Topic.View,
+      ) : Order.Order {
+        // Prefer topics with recent edits.
+        // In all cases "bigger time" is "less" (earlier).
+        Int.compare(t2.editTime, t1.editTime);
+      },
+    );
   };
 
   public query ({ caller }) func getTopic(id : Types.Topic.RawId) : async ?Types.Topic.View {
@@ -233,9 +304,15 @@ shared ({ caller = installer }) actor class Main() {
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
     assertCallerOwnsTopic(caller, #topic id);
-    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
-        { topic with edit ;
-          internal = { topic.internal with editTime = Time.now() / 1_000_000 } } });
+    topics.update(
+      #topic id,
+      func(topic : Types.Topic.State) : Types.Topic.State {
+        {
+          topic with edit;
+          internal = { topic.internal with editTime = Time.now() / 1_000_000 };
+        };
+      },
+    );
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
@@ -244,8 +321,16 @@ shared ({ caller = installer }) actor class Main() {
       ignore topics.get(#topic id)!;
       let user = principals.get(caller)!;
       userTopicVotes.put(user, #topic id, userVote);
-      topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State {
-          { topic with internal = { topic.internal with voteTime = ?(Time.now() / 1_000_000) } } });
+      topics.update(
+        #topic id,
+        func(topic : Types.Topic.State) : Types.Topic.State {
+          {
+            topic with internal = {
+              topic.internal with voteTime = ?(Time.now() / 1_000_000)
+            };
+          };
+        },
+      );
 
     };
   };
