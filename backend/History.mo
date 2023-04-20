@@ -2,6 +2,8 @@ import Types "Types";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
+import Error "mo:base/Error";
+
 import Seq "mo:sequence/Sequence";
 import Stream "mo:sequence/Stream";
 
@@ -54,6 +56,7 @@ module {
     #okWithUser : { user : UserId };
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
+    #errInvalidTopicEdit;
   };
 
   public type AccessPredicate = {
@@ -161,6 +164,12 @@ module {
     public func errAccess(a : AccessPredicate) {
       clearRequest();
       add(#response(#errAccess(a)));
+    };
+
+    public func errInvalidTopicEdit() : async* None {
+      clearRequest();
+      add(#response(#errInvalidTopicEdit));
+      throw Error.reject("invalid topic edit.");
     };
 
     // -- Internal helpers --

@@ -324,8 +324,12 @@ shared ({ caller = installer }) actor class Main() {
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
-    let id = createTopic_(user, null, edit);
-    log.okWithTopicId(id);
+    if (userIsModerator.has(user) or Validate.Topic.edit(edit)) {
+      let id = createTopic_(user, null, edit);
+      log.okWithTopicId(id);
+    } else {
+      await* log.errInvalidTopicEdit();
+    };
   };
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
