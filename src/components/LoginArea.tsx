@@ -43,7 +43,7 @@ export default function LoginArea({ label }: LoginAreaProps) {
   });
 
   const onLoginError = (err: any) => {
-    handleError(err, 'Error while logging in!');
+    handleError(err, 'Error while signing in!');
   };
 
   return (
