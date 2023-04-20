@@ -37,6 +37,7 @@ export interface TopicState {
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   changeStatus(id: string, status: TopicStatus): Promise<void>;
+  getModeratorQueue(): Promise<Topic[]>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -81,8 +82,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
     topics: [],
     sort: 'activity',
     async search() {
-      const results = await backend.searchTopics({ [get().sort]: null } as any);
-      const topics: Topic[] = results.map(mapTopic);
+      const topics = (
+        await backend.searchTopics({ [get().sort]: null } as any)
+      ).map(mapTopic);
       set({ topics });
       if (import.meta.env.DEV) {
         console.log('Topics:', get().topics);
@@ -145,6 +147,14 @@ export const useTopicStore = create<TopicState>((set, get) => {
         updateTopic({ ...topic, status });
       }
       backend.setTopicStatus(BigInt(id), statusMap[status]);
+    },
+    async getModeratorQueue() {
+      const topics = (await backend.getModeratorTopics()).map(mapTopic);
+      // set({ moderatorTopics });
+      if (import.meta.env.DEV) {
+        console.log('Queue:', topics);
+      }
+      return topics;
     },
   };
 });

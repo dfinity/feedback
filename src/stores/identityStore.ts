@@ -6,10 +6,14 @@ import {
   ERROR_USER_INTERRUPT,
 } from '@dfinity/auth-client';
 import { create } from 'zustand';
-import { UserView } from '../../.dfx/local/canisters/backend/backend.did';
 import { backend } from '../declarations/backend';
 import { handleError } from '../utils/handlers';
 import { useTopicStore } from './topicStore';
+
+export interface UserDetail {
+  id: string;
+  isModerator: boolean;
+}
 
 export type User = (
   | {
@@ -21,7 +25,7 @@ export type User = (
       auth0: Auth0User;
     }
 ) & {
-  view: UserView;
+  detail: UserDetail;
 };
 
 // TODO: refactor
@@ -42,15 +46,15 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       try {
         if (await client.isAuthenticated()) {
           await updateIdentity(client);
-          const view = await getUserView();
+          const detail = await getUserDetail();
           if (import.meta.env.DEV) {
-            console.log('User:', view);
+            console.log('User:', detail);
           }
           set({
             user: {
               type: 'ic',
               client,
-              view,
+              detail,
             },
           });
         }
@@ -93,15 +97,15 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       //   'Signing in...',
       //   'Error while signing in!',
       // );
-      const view = await getUserView();
+      const detail = await getUserDetail();
       if (import.meta.env.DEV) {
-        console.log('User:', view);
+        console.log('User:', detail);
       }
       set({
         user: {
           type: 'ic',
           client,
-          view,
+          detail,
         },
       });
     }
@@ -115,12 +119,15 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     ).replaceIdentity(client.getIdentity());
   };
 
-  const getUserView = async () => {
-    const [view] = await backend.fastLogin();
-    if (view !== undefined) {
-      return view;
+  const getUserDetail = async () => {
+    let [view] = await backend.fastLogin();
+    if (view === undefined) {
+      view = await backend.login();
     }
-    return await backend.login();
+    return {
+      ...view,
+      id: String(view.id),
+    };
   };
 
   return {

@@ -56,6 +56,7 @@ export default function Navbar() {
         <div tw="flex-1 flex items-center">
           <NavItem to="/">Browse</NavItem>
           <NavItem to="/submit">Submit</NavItem>
+          {!!user?.detail.isModerator && <NavItem to="/queue">Queue</NavItem>}
         </div>
         {isMobile || user ? (
           <Tooltip content="Profile">
