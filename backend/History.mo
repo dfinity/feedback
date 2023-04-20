@@ -94,11 +94,8 @@ module {
   /// Of particular interest are access control checks, and their outcomes.
   ///
   public class Log(history : History) {
-    // request var is local state to
-    // ensure logs are well-formed
-    // (Request, followed by zero or more Internal events, ended by a Response).
+
     let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(Int.abs(Time.now()));
-    var request_ : ?Request = null;
 
     public func getEvents(start : Nat, size : Nat) : [Event] {
       let (_, slice, _) = Seq.slice(history.events, start, size);
@@ -110,7 +107,71 @@ module {
       Seq.size(history.events);
     };
 
-    public func add(event : Event) {
+    /// # Logging API
+    ///
+    /// Logs are well-formed when they consist of
+    /// The following pattern, once per actor message:
+    /// - request(), followed by
+    /// - zero or more internal(), followed by
+    /// - response, as either okX() or errX(), of some form.
+    ///
+    /// In dev mode, these API points check that this format is followed:
+    /// - It is an error to have a request without a matching response.
+    /// - It is an error to have internal checks without a matching request.
+    /// - It is an error to have a response without a matching request.
+    ///
+    /// In production mode, we disable these checks, and tolerate
+    /// the potential of ill-formed logs to avoid sanity-checking assertion
+    /// failures that prevent the canister from functioning otherwise normally.
+
+    public func request(caller : Principal, request : Request) {
+      setRequest(request);
+      add(#request { time = Time.now(); caller; request });
+    };
+
+    public func internal(i : Internal) {
+      assertRequest();
+      add(#internal i);
+    };
+
+    public func ok() {
+      clearRequest();
+      add(#response(#ok));
+    };
+
+    public func okIf(b : Bool) {
+      clearRequest();
+      if b { ok() } else {
+        add(#response(#err));
+      };
+    };
+
+    public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
+      clearRequest();
+      add(#response(#okWithTopic({ topic = #topic i })));
+      i;
+    };
+
+    public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
+      clearRequest();
+      add(#response(#okWithUser({ user = #user i })));
+      i;
+    };
+
+    public func errAccess(a : AccessPredicate) {
+      clearRequest();
+      add(#response(#errAccess(a)));
+    };
+
+    // -- Internal helpers --
+
+    // request var is local state to
+    // ensure logs are well-formed
+    // (Request, followed by zero or more Internal events, ended by a Response).
+
+    var request_ : ?Request = null;
+
+    func add(event : Event) {
       history.events := Seq.pushBack<Event>(
         history.events,
         levels.next(),
@@ -118,49 +179,22 @@ module {
       );
     };
 
-    public func request(caller : Principal, request : Request) {
-      assert request_ == null;
-      request_ := ?request;
-      add(#request { time = Time.now(); caller; request });
-    };
-
-    public func internal(i : Internal) {
-      assert request_ != null;
-      add(#internal i);
-    };
-
-    public func ok() {
-      assert request_ != null;
-      request_ := null;
-      add(#response(#ok));
-    };
-
-    public func okIf(b : Bool) {
-      assert request_ != null;
-      request_ := null;
-      if b { ok() } else {
-        add(#response(#err));
+    func setRequest(r : Request) {
+      debug {
+        assert request_ == null;
+        request_ := ?r;
       };
     };
-
-    public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
-      assert request_ != null;
-      request_ := null;
-      add(#response(#okWithTopic({ topic = #topic i })));
-      i;
+    func assertRequest() {
+      debug {
+        assert request_ != null;
+      };
     };
-
-    public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
-      assert request_ != null;
-      request_ := null;
-      add(#response(#okWithUser({ user = #user i })));
-      i;
-    };
-
-    public func errAccess(a : AccessPredicate) {
-      assert request_ != null;
-      request_ := null;
-      add(#response(#errAccess(a)));
+    func clearRequest() {
+      debug {
+        assert request_ != null;
+        request_ := null;
+      };
     };
 
   };
