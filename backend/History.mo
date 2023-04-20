@@ -165,12 +165,6 @@ module {
 
     // -- Internal helpers --
 
-    // request var is local state to
-    // ensure logs are well-formed
-    // (Request, followed by zero or more Internal events, ended by a Response).
-
-    var request_ : ?Request = null;
-
     func add(event : Event) {
       history.events := Seq.pushBack<Event>(
         history.events,
@@ -178,6 +172,12 @@ module {
         event,
       );
     };
+
+    // request var is local state to
+    // ensure logs are well-formed
+    // (Request, followed by zero or more Internal events, ended by a Response).
+
+    var request_ : ?Request = null;
 
     func setRequest(r : Request) {
       debug {
