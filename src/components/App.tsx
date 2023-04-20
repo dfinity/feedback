@@ -16,11 +16,11 @@ export default function App() {
           <Navbar />
           <div tw="max-w-[800px] mx-auto p-4 mt-1">
             <Routes>
-              <Route path="/" element={<TopicsPage />} />
               <Route path="/topic/:id" element={<TopicPage />} />
               <Route path="/submit" element={<SubmitPage />} />
               <Route path="/queue" element={<QueuePage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/" element={<TopicsPage />} />
             </Routes>
           </div>
         </Router>
