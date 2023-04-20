@@ -7,7 +7,7 @@ import {
 } from '@dfinity/auth-client';
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { handleError, handlePromise } from '../utils/handlers';
+import { handleError } from '../utils/handlers';
 import { useTopicStore } from './topicStore';
 
 export type User =
@@ -87,11 +87,12 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       }
 
       await updateIdentity(client);
-      const userId = await handlePromise(
-        fetchUser(),
-        'Signing in...',
-        'Error while signing in!',
-      );
+      // const userId = await handlePromise(
+      //   fetchUser(),
+      //   'Signing in...',
+      //   'Error while signing in!',
+      // );
+      const userId = await fetchUser();
       if (import.meta.env.DEV) {
         console.log('User ID:', userId);
       }
