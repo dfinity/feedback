@@ -14,6 +14,7 @@ import Option "mo:base/Option";
 
 import Types "Types";
 import State "State";
+import History "History";
 import Relate "Relate";
 
 shared ({ caller = installer }) actor class Main() {
@@ -23,9 +24,15 @@ shared ({ caller = installer }) actor class Main() {
 
   stable var state_v0 : State.State = State.init(installer);
 
+  stable var history_v0 : History.History = History.init(installer);
+
   stable var nextUserId : Types.User.RawId = 1;
   stable var nextTeamId : Types.Team.RawId = 1;
   stable var nextTopicId : Types.Topic.RawId = 1;
+
+  // # OO Wrapper for log.
+
+  let log = History.Log(history_v0);
 
   // # OO Wrappers for entities.
   //
@@ -63,16 +70,32 @@ shared ({ caller = installer }) actor class Main() {
 
   func assertCallerIsUser(caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
-      case null { assert false; loop {} };
-      case (?user) user;
+      case null {
+        log.errAccess(#callerIsUser);
+        assert false;
+        loop {};
+      };
+      case (?user) {
+        log.internal(#callerIsUser user);
+        user;
+      };
     };
   };
 
   func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
     switch (findUser(caller)) {
-      case null { assert false };
+      case null {
+        log.errAccess(#callerIsUser);
+        assert false;
+      };
       case (?user) {
-        assert userOwnsTopic.has(user, topic);
+        let a = #callerOwnsTopic { user; topic };
+        if (userOwnsTopic.has(user, topic)) {
+          log.internal(#okAccess a);
+        } else {
+          log.errAccess(a);
+          assert false;
+        };
       };
     };
   };
@@ -80,11 +103,22 @@ shared ({ caller = installer }) actor class Main() {
   func assertCallerIsModerator(caller : Principal) {
     if (caller != installer) {
       switch (findUser(caller)) {
-        case null { assert false };
+        case null {
+          log.errAccess(#callerIsUser);
+          assert false;
+        };
         case (?user) {
-          assert userIsModerator.has(user);
+          let a = #callerIsModerator;
+          if (userIsModerator.has(user)) {
+            log.internal(#okAccess a);
+          } else {
+            log.errAccess(a);
+            assert false;
+          };
         };
       };
+    } else {
+      log.internal(#callerIsInstaller);
     };
   };
 
@@ -105,7 +139,6 @@ shared ({ caller = installer }) actor class Main() {
   // No access control here for user, only customization.
   // Each use of this helper has its own access control logic.
   func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
-
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -156,11 +189,13 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
+    log.request(caller, #setUserIsModerator { user = #user id; isMod });
     assertCallerIsModerator(caller);
     ignore do ? {
       ignore users.get(#user id)!;
       userIsModerator.put(#user id);
     };
+    log.ok();
   };
 
   public type SearchSort = { #votes; #activity };
@@ -218,7 +253,10 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public query ({ caller }) func getModeratorTopics() : async [Types.Topic.View] {
+    log.request(caller, #moderatorQuery);
     assertCallerIsModerator(caller);
+    log.ok();
+
     let user = findUserUnwrap(caller);
     func view((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
       viewTopicAsModerator(user, topic, state);
@@ -283,15 +321,19 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
+    log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
-    createTopic_(user, null, edit);
+    let id = createTopic_(user, null, edit);
+    log.okWithTopicId(id);
   };
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
+    log.request(caller, #bulkCreateTopics { edits });
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
       ignore createTopic_(user, ?edit.importId, edit);
     };
+    log.ok();
   };
 
   /// TEMPORARY
@@ -302,7 +344,32 @@ shared ({ caller = installer }) actor class Main() {
     userTopicVotes.clear();
   };
 
+  /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
+  public query ({ caller }) func getLogEvents__dev_tmp(start : Nat, size : Nat) : async [History.Event] {
+    log.getEvents(start, size);
+  };
+
+  /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
+  public query ({ caller }) func getLogEventCount__dev_tmp() : async Nat {
+    log.getSize();
+  };
+
+  public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
+    log.request(caller, #moderatorQuery);
+    assertCallerIsModerator(caller);
+    log.ok();
+    log.getEvents(start, size);
+  };
+
+  public query ({ caller }) func getLogEventCount() : async Nat {
+    log.request(caller, #moderatorQuery);
+    assertCallerIsModerator(caller);
+    log.ok();
+    log.getSize();
+  };
+
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
+    log.request(caller, #editTopic { topic = #topic id; edit });
     assertCallerOwnsTopic(caller, #topic id);
     topics.update(
       #topic id,
@@ -313,10 +380,12 @@ shared ({ caller = installer }) actor class Main() {
         };
       },
     );
+    log.ok();
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
-    ignore do ? {
+    log.request(caller, #voteTopic { topic = #topic id; userVote });
+    let success = do ? {
       // validates arguments before updating relation.
       ignore topics.get(#topic id)!;
       let user = principals.get(caller)!;
@@ -331,13 +400,15 @@ shared ({ caller = installer }) actor class Main() {
           };
         },
       );
-
     };
+    log.okIf(success == ?());
   };
 
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
+    log.request(caller, #setTopicStatus { topic = #topic id; status });
     assertCallerOwnsTopic(caller, #topic id);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
+    log.ok();
   };
 
   public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
@@ -348,7 +419,8 @@ shared ({ caller = installer }) actor class Main() {
   /// Create (or get) a user Id for the given caller Id.
   /// Once created, the user Id for a given caller Id is stored and fixed.
   public shared ({ caller }) func login() : async Types.User.RawId {
-    switch (principals.get(caller)) {
+    log.request(caller, #login);
+    let u = switch (principals.get(caller)) {
       case null {
         let user = nextUserId;
         nextUserId += 1;
@@ -357,6 +429,7 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?(#user u)) u;
     };
+    log.okWithUserId(u);
   };
 
   /// Get the (optional) user Id for the given caller Id.
