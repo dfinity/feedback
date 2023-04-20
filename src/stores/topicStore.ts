@@ -4,7 +4,7 @@ import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
-export type ModStatus = 'pending' | 'approved' | 'spam';
+export type ModStatus = 'pending' | 'approved' | 'rejected';
 export type VoteStatus = 1 | 0 | -1;
 export type SearchSort = 'votes' | 'activity';
 
@@ -38,6 +38,7 @@ export interface TopicState {
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   changeStatus(id: string, status: TopicStatus): Promise<void>;
   getModeratorQueue(): Promise<Topic[]>;
+  setModeratorStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -155,6 +156,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
         console.log('Queue:', topics);
       }
       return topics;
+    },
+    async setModeratorStatus(topic: Topic, modStatus: ModStatus) {
+      await backend.setTopicModStatus(BigInt(topic.id), {
+        [modStatus]: undefined,
+      } as any);
     },
   };
 });

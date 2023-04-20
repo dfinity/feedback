@@ -1,15 +1,19 @@
-import 'twin.macro';
-import { Topic, useTopicStore } from '../../stores/topicStore';
-import TopicView from '../TopicView';
 import { useEffect, useState } from 'react';
-import { handlePromise } from '../../utils/handlers';
+import tw from 'twin.macro';
 import { useIdentityStore } from '../../stores/identityStore';
+import { ModStatus, Topic, useTopicStore } from '../../stores/topicStore';
+import { handleError, handlePromise } from '../../utils/handlers';
+import TopicView from '../TopicView';
+import { FaCheck, FaTimes } from 'react-icons/fa';
+
+const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-xl rounded-full cursor-pointer border-2 bg-[#fffd] border-gray-300 hover:scale-105`;
 
 export default function QueuePage() {
   const [topics, setTopics] = useState<Topic[]>([]);
 
   const user = useIdentityStore((state) => state.user);
   const getModeratorQueue = useTopicStore((state) => state.getModeratorQueue);
+  const setModeratorStatus = useTopicStore((state) => state.setModeratorStatus);
 
   useEffect(() => {
     if (user) {
@@ -21,11 +25,30 @@ export default function QueuePage() {
     }
   }, [getModeratorQueue, user]);
 
+  const changeStatus = (topic: Topic, modStatus: ModStatus) => {
+    setModeratorStatus(topic, modStatus).catch((err) => {
+      handleError(err, 'Error while approving topic!');
+    });
+    setTopics(topics.filter((t) => t !== topic));
+  };
+
   return (
     <>
-      <div tw="flex flex-col gap-4">
+      <div tw="flex flex-col gap-4 mx-auto">
         {topics.map((topic) => (
-          <TopicView key={topic.id} topic={topic} expanded={true} />
+          <div key={topic.id}>
+            <div tw="flex-1">
+              <TopicView key={topic.id} topic={topic} expanded={true} />
+            </div>
+            <div tw="flex gap-2 mt-2">
+              <ModeratorButton onClick={() => changeStatus(topic, 'approved')}>
+                <FaCheck tw="text-green-600" />
+              </ModeratorButton>
+              <ModeratorButton onClick={() => changeStatus(topic, 'rejected')}>
+                <FaTimes tw="text-orange-600" />
+              </ModeratorButton>
+            </div>
+          </div>
         ))}
       </div>
     </>

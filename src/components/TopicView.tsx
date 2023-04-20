@@ -98,10 +98,10 @@ export default function TopicView({
     <div
       tw="bg-gray-100 rounded-2xl [box-shadow: 0 4px .5rem #0005]"
       css={
-        topic.modStatus === 'spam'
-          ? tw`border-[4px] border-orange-500`
-          : topic.modStatus === 'pending'
+        topic.modStatus === 'pending'
           ? tw`border-[4px] border-teal-500`
+          : topic.modStatus === 'rejected'
+          ? tw`border-[4px] border-orange-500`
           : null
       }
     >
