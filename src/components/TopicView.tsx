@@ -3,6 +3,7 @@ import { isMobile } from 'react-device-detect';
 import {
   FaCaretDown,
   FaCaretUp,
+  FaClock,
   FaEdit,
   FaGithub,
   FaJira,
@@ -10,9 +11,10 @@ import {
   FaRegDotCircle,
   FaRegPlayCircle,
   FaRegTimesCircle,
+  FaTimes,
 } from 'react-icons/fa';
 import tw from 'twin.macro';
-import { useIdentityStore } from '../stores/identityStore';
+import useIdentity from '../hooks/useIdentity';
 import {
   Topic,
   TopicInfo,
@@ -23,8 +25,8 @@ import {
 import { handleInfo, handlePromise } from '../utils/handlers';
 import Markdown from './Markdown';
 import Tag from './Tag';
-import TopicForm from './TopicForm';
 import Tooltip from './Tooltip';
+import TopicForm from './TopicForm';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -39,18 +41,20 @@ export interface TopicViewProps {
   topic: Topic;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
+  hideModerationInfo?: boolean;
 }
 
 export default function TopicView({
   topic,
   expanded,
   onChangeExpanded,
+  hideModerationInfo,
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
-  const changeStatus = useTopicStore((state) => state.changeStatus);
+  const changeStatus = useTopicStore((state) => state.setStatus);
 
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
   const vote = useTopicStore((state) => state.vote);
 
   const maxPreviewTags = isMobile || expanded ? 0 : 2;
@@ -85,7 +89,7 @@ export default function TopicView({
     );
   };
 
-  const onSubmitEdit = async (info: TopicInfo) => {
+  const onSubmitEdit = (info: TopicInfo) => {
     /* await */ handlePromise(
       edit(topic.id, info),
       'Saving changes...',
@@ -95,7 +99,16 @@ export default function TopicView({
   };
 
   return (
-    <div tw="bg-gray-100 rounded-2xl [box-shadow: 0 4px .5rem #0005]">
+    <div
+      tw="bg-gray-100 rounded-2xl [box-shadow: 0 4px .5rem #0005]"
+      css={
+        topic.modStatus === 'pending'
+          ? tw`border-[4px] border-teal-500`
+          : topic.modStatus === 'rejected'
+          ? tw`border-[4px] border-orange-500`
+          : null
+      }
+    >
       <div
         tw="p-3 text-lg flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
         onClick={() => onChangeExpanded?.(!expanded)}
@@ -160,11 +173,11 @@ export default function TopicView({
                   <div>
                     <Markdown>{topic.description}</Markdown>
                   </div>
-                  <hr tw="my-3" />
                 </>
               )}
               {topic.links.length > 0 && (
                 <>
+                  <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
                       <div key={i} tw="flex gap-2 items-center">
@@ -195,6 +208,26 @@ export default function TopicView({
                     {topic.tags.map((tag, i) => (
                       <Tag key={i}>{tag}</Tag>
                     ))}
+                  </div>
+                </>
+              )}
+              {!hideModerationInfo && topic.modStatus !== 'approved' && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex gap-2 items-center font-bold text-[#000a]">
+                    {topic.modStatus === 'pending' ? (
+                      <>
+                        <FaClock tw="text-teal-500" />
+                        <div>Under review</div>
+                      </>
+                    ) : topic.modStatus === 'rejected' ? (
+                      <>
+                        <FaTimes tw="text-orange-500" />
+                        <div>Changes requested</div>
+                      </>
+                    ) : (
+                      false
+                    )}
                   </div>
                 </>
               )}

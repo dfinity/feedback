@@ -35,27 +35,30 @@ export default function Navbar() {
   return (
     <div tw="bg-gray-100 text-gray-800">
       <div tw="flex gap-3 px-5 items-stretch max-w-[800px] mx-auto">
-        <Tooltip
-          content={
-            <div tw="text-center">
-              Powered by the
-              <br />
-              <span tw="text-green-300">Internet Computer</span>
-            </div>
-          }
-        >
-          <a
-            tw="flex items-center hover:scale-105"
-            href="https://internetcomputer.org"
-            target="_blank"
-            rel="noreferrer"
+        {(!isMobile || !user?.detail.isModerator) && (
+          <Tooltip
+            content={
+              <div tw="text-center">
+                Powered by the
+                <br />
+                <span tw="text-green-300">Internet Computer</span>
+              </div>
+            }
           >
-            <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
-          </a>
-        </Tooltip>
+            <a
+              tw="flex items-center hover:scale-105"
+              href="https://internetcomputer.org"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <img src={icpLogo} alt="Internet Computer" tw="h-[24px]" />
+            </a>
+          </Tooltip>
+        )}
         <div tw="flex-1 flex items-center">
           <NavItem to="/">Browse</NavItem>
           <NavItem to="/submit">Submit</NavItem>
+          {!!user?.detail.isModerator && <NavItem to="/queue">Queue</NavItem>}
         </div>
         {isMobile || user ? (
           <Tooltip content="Profile">
