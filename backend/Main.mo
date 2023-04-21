@@ -388,7 +388,8 @@ shared ({ caller = installer }) actor class Main() {
       #topic id,
       func(topic : Types.Topic.State) : Types.Topic.State {
         {
-          topic with edit;
+          topic with
+          edit;
           internal = { topic.internal with editTime = Time.now() / 1_000_000 };
         };
       },
