@@ -20,6 +20,7 @@ export default function TopicPage() {
   const [searchParams] = useSearchParams();
 
   const topics = useTopicStore((state) => state.topics);
+  // const search = useTopicStore((state) => state.search);
   const navigate = useNavigate();
 
   const filter = (topic: Topic) => !!filterStates[topic.status];
@@ -32,6 +33,10 @@ export default function TopicPage() {
       navigate(`/topic/${id}`);
     }
   }, [navigate, searchParams, topics]);
+
+  // useEffect(() => {
+  //   search().catch((err) => handleError(err, 'Error while fetching topics!'));
+  // }, [search]);
 
   return (
     <>
