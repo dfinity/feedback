@@ -71,11 +71,12 @@ export default function TopicView({
     }
     handlePromise(
       vote(topic, voteStatus),
-      voteStatus === 1
-        ? 'Upvoting...'
-        : voteStatus === -1
-        ? 'Downvoting...'
-        : 'Removing vote...',
+      // voteStatus === 1
+      //   ? 'Upvoting...'
+      //   : voteStatus === -1
+      //   ? 'Downvoting...'
+      //   : 'Removing vote...',
+      undefined,
       'Error occurred while voting!',
     );
   };
