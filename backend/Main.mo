@@ -398,7 +398,7 @@ shared ({ caller = installer }) actor class Main() {
     let success = do ? {
       // validates arguments before updating relation.
       ignore topics.get(#topic id)!;
-      let user = principals.get(caller)!;
+      let user = assertCallerIsUser(caller);
       userTopicVotes.put(user, #topic id, userVote);
       topics.update(
         #topic id,
