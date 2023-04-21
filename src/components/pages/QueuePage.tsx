@@ -57,13 +57,19 @@ export default function QueuePage() {
                 hideModerationInfo
               />
             </div>
-            <div tw="flex gap-2 mt-2">
-              <ModeratorButton onClick={() => changeStatus(topic, 'approved')}>
-                <FaCheck tw="text-green-600" />
-              </ModeratorButton>
-              <ModeratorButton onClick={() => changeStatus(topic, 'rejected')}>
-                <FaTimes tw="text-orange-600" />
-              </ModeratorButton>
+            <div tw="flex">
+              <div tw="flex gap-2 mt-2 mx-auto">
+                <ModeratorButton
+                  onClick={() => changeStatus(topic, 'approved')}
+                >
+                  <FaCheck tw="text-green-600" />
+                </ModeratorButton>
+                <ModeratorButton
+                  onClick={() => changeStatus(topic, 'rejected')}
+                >
+                  <FaTimes tw="text-orange-600" />
+                </ModeratorButton>
+              </div>
             </div>
           </div>
         ))}
