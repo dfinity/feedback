@@ -65,6 +65,10 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
+  func userIsModerator_(caller : Principal, user : Types.User.Id) : Bool {
+    caller == installer or userIsModerator.has(user);
+  };
+
   func findUserUnwrap(caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
       case null { assert false; loop {} };
@@ -331,7 +335,7 @@ shared ({ caller = installer }) actor class Main() {
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
-    if (userIsModerator.has(user) or Validate.Topic.edit(edit)) {
+    if (userIsModerator_(caller, user) or Validate.Topic.edit(edit)) {
       let id = createTopic_(user, null, edit);
       log.okWithTopicId(id);
     } else {
@@ -450,7 +454,7 @@ shared ({ caller = installer }) actor class Main() {
     };
     {
       id = log.okWithUserId(u);
-      isModerator = userIsModerator.has(#user u);
+      isModerator = userIsModerator_(caller, #user u);
     };
   };
 
@@ -461,7 +465,7 @@ shared ({ caller = installer }) actor class Main() {
       case null null;
       case (?(#user u)) ?{
         id = u;
-        isModerator = userIsModerator.has(#user u);
+        isModerator = userIsModerator_(caller, #user u);
       };
     };
   };
