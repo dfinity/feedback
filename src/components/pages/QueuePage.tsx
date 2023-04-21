@@ -13,8 +13,8 @@ export default function QueuePage() {
   const [topics, setTopics] = useState<Topic[] | undefined>();
 
   const user = useIdentityStore((state) => state.user);
-  const getModeratorQueue = useTopicStore((state) => state.getModeratorQueue);
-  const setModeratorStatus = useTopicStore((state) => state.setModeratorStatus);
+  const getModeratorQueue = useTopicStore((state) => state.getModQueue);
+  const setModStatus = useTopicStore((state) => state.setModStatus);
 
   useEffect(() => {
     if (user) {
@@ -27,7 +27,7 @@ export default function QueuePage() {
   }, [getModeratorQueue, user]);
 
   const changeStatus = (topic: Topic, modStatus: ModStatus) => {
-    setModeratorStatus(topic, modStatus).catch((err) => {
+    setModStatus(topic, modStatus).catch((err) => {
       handleError(err, 'Error while approving topic!');
     });
     if (topics) {

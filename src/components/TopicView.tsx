@@ -52,7 +52,7 @@ export default function TopicView({
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
-  const changeStatus = useTopicStore((state) => state.changeStatus);
+  const changeStatus = useTopicStore((state) => state.setStatus);
 
   const user = useIdentityStore((state) => state.user);
   const vote = useTopicStore((state) => state.vote);

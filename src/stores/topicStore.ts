@@ -39,9 +39,9 @@ export interface TopicState {
   bulkCreate(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
-  changeStatus(id: string, status: TopicStatus): Promise<void>;
-  getModeratorQueue(): Promise<Topic[]>;
-  setModeratorStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
+  setStatus(id: string, status: TopicStatus): Promise<void>;
+  getModQueue(): Promise<Topic[]>;
+  setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -148,19 +148,23 @@ export const useTopicStore = create<TopicState>((set, get) => {
           : { none: null },
       );
     },
-    async changeStatus(id: string, status: TopicStatus) {
+    async setStatus(id: string, status: TopicStatus) {
       const topic = get().topics.find((topic) => topic.id === id);
       if (topic) {
         updateTopic({ ...topic, status });
       }
       backend.setTopicStatus(BigInt(id), statusMap[status]);
     },
-    async getModeratorQueue() {
+    async getModQueue() {
       const topics = (await backend.getModeratorTopics()).map(mapTopic);
       console.log('Queue:', topics);
       return topics;
     },
-    async setModeratorStatus(topic: Topic, modStatus: ModStatus) {
+    async setModStatus(topic: Topic, modStatus: ModStatus) {
+      updateTopic({
+        ...topic,
+        modStatus,
+      });
       await backend.setTopicModStatus(BigInt(topic.id), {
         [modStatus]: null,
       } as any);
