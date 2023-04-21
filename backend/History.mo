@@ -57,6 +57,7 @@ module {
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
     #errInvalidTopicEdit;
+    #errLimitTopicCreate;
   };
 
   public type AccessPredicate = {
@@ -170,6 +171,12 @@ module {
       clearRequest();
       add(#response(#errInvalidTopicEdit));
       throw Error.reject("invalid topic edit.");
+    };
+
+    public func errLimitTopicCreate() : async* None {
+      clearRequest();
+      add(#response(#errLimitTopicCreate));
+      throw Error.reject("reached rate limit for topic creation.");
     };
 
     // -- Internal helpers --

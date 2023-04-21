@@ -17,6 +17,7 @@ import State "State";
 import History "History";
 import Relate "Relate";
 import Validate "Validate";
+import RateLimit "RateLimit";
 
 shared ({ caller = installer }) actor class Main() {
 
@@ -41,6 +42,7 @@ shared ({ caller = installer }) actor class Main() {
 
   let users = Relate.OO.Map(state_v0.users, Types.User.idHash, Types.User.idEqual);
   let topics = Relate.OO.Map(state_v0.topics, Types.Topic.idHash, Types.Topic.idEqual);
+  let topicRateLimit = RateLimit.New(137, 60); // 137 per min.
   let teams = Relate.OO.Map(state_v0.teams, Types.Team.idHash, Types.Team.idEqual);
   let principals = Relate.OO.Map(state_v0.principals, Principal.hash, Principal.equal);
 
@@ -328,6 +330,12 @@ shared ({ caller = installer }) actor class Main() {
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
+    switch (topicRateLimit.tick()) {
+      case (#ok) {};
+      case (#wait) {
+        await* log.errLimitTopicCreate();
+      };
+    };
     if (userIsModerator.has(user) or Validate.Topic.edit(edit)) {
       let id = createTopic_(user, null, edit);
       log.okWithTopicId(id);
