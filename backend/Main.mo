@@ -445,8 +445,10 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
+    log.request(caller, #setTopicModStatus({topic = #topic id; modStatus}));
     assertCallerIsModerator(caller);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus } });
+    log.ok()
   };
 
   /// Create (or get) a user Id for the given caller Id.
