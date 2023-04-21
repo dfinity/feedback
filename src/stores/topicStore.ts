@@ -124,7 +124,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
       if (topic) {
-        updateTopic({ ...topic, ...info });
+        updateTopic({
+          ...topic,
+          ...info,
+          // modStatus: 'pending',
+        });
       }
       await backend.editTopic(BigInt(id), info);
     },
