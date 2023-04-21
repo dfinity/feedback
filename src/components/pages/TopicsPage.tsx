@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
+import 'twin.macro';
 import {
+  SEARCH_SORTS,
   SearchSort,
   Topic,
   TopicStatus,
@@ -10,7 +12,6 @@ import {
 import { capitalize } from '../../utils/capitalize';
 import { handleError } from '../../utils/handlers';
 import TopicList from '../TopicList';
-import 'twin.macro';
 
 const filterStatuses: TopicStatus[] = ['open', 'next', 'completed', 'closed'];
 
@@ -23,7 +24,7 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
 
 export default function TopicPage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const topics = useTopicStore((state) => state.topics);
   const sort = useTopicStore((state) => state.sort);
@@ -44,13 +45,27 @@ export default function TopicPage() {
   //   search().catch((err) => handleError(err, 'Error while fetching topics!'));
   // }, [search]);
 
-  const onChangeSort = (sort: SearchSort) => {
-    useTopicStore.setState({ sort });
-    useTopicStore
-      .getState()
-      .search()
-      .catch((err) => handleError(err, 'Error while updating search results!'));
-  };
+  const onChangeSort = useCallback(
+    (sort: SearchSort) => {
+      useTopicStore.setState({ sort });
+      useTopicStore
+        .getState()
+        .search()
+        .catch((err) =>
+          handleError(err, 'Error while updating search results!'),
+        );
+      searchParams.set('sort', sort);
+      setSearchParams(searchParams);
+    },
+    [searchParams, setSearchParams],
+  );
+
+  useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam && sortParam !== sort && SEARCH_SORTS.includes(sortParam)) {
+      onChangeSort(sortParam as SearchSort);
+    }
+  }, [onChangeSort, searchParams, sort]);
 
   return (
     <>
@@ -82,7 +97,7 @@ export default function TopicPage() {
             value={{ value: sort, label: capitalize(sort) }}
             onChange={(option) => option && onChangeSort(option.value)}
             isSearchable={false}
-            options={['activity', 'votes'].map((s) => {
+            options={SEARCH_SORTS.map((s) => {
               return {
                 value: s,
                 label: capitalize(s),

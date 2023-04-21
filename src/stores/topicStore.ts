@@ -11,6 +11,8 @@ export type ModStatus = 'pending' | 'approved' | 'rejected';
 export type VoteStatus = 1 | 0 | -1;
 export type SearchSort = 'votes' | 'activity';
 
+export const SEARCH_SORTS = ['activity', 'votes'];
+
 export interface TopicInfo {
   title: string;
   description: string;
@@ -90,7 +92,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
       set({ topics });
-      console.log('Topics:', get().topics);
+      // console.log('Topics:', get().topics);
       return topics;
     },
     async find(id: string) {
