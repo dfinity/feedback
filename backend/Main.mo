@@ -16,6 +16,7 @@ import Types "Types";
 import State "State";
 import History "History";
 import Relate "Relate";
+import Validate "Validate";
 
 shared ({ caller = installer }) actor class Main() {
 
@@ -323,15 +324,24 @@ shared ({ caller = installer }) actor class Main() {
     topic;
   };
 
+  public query func validateTopic(edit : Types.Topic.Edit) : async Bool {
+    Validate.Topic.edit(edit);
+  };
+
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     log.request(caller, #createTopic { edit });
     let user = assertCallerIsUser(caller);
-    let id = createTopic_(user, null, edit);
-    log.okWithTopicId(id);
+    if (userIsModerator.has(user) or Validate.Topic.edit(edit)) {
+      let id = createTopic_(user, null, edit);
+      log.okWithTopicId(id);
+    } else {
+      await* log.errInvalidTopicEdit();
+    };
   };
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
     log.request(caller, #bulkCreateTopics { edits });
+    assertCallerIsModerator(caller);
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
       ignore createTopic_(user, ?edit.importId, edit);
@@ -391,7 +401,7 @@ shared ({ caller = installer }) actor class Main() {
     let success = do ? {
       // validates arguments before updating relation.
       ignore topics.get(#topic id)!;
-      let user = principals.get(caller)!;
+      let user = assertCallerIsUser(caller);
       userTopicVotes.put(user, #topic id, userVote);
       topics.update(
         #topic id,
