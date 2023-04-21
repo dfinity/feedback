@@ -11,7 +11,7 @@
       "main": "backend/Main.mo"
     },
     "frontend": {
-      "dependencies": ["backend"],
+      "dependencies": ["backend", "internet_identity"],
       "type": "assets",
       "frontend": {
         "entrypoint": "dist/index.html"
