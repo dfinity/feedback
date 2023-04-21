@@ -338,6 +338,7 @@ shared ({ caller = installer }) actor class Main() {
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
     log.request(caller, #bulkCreateTopics { edits });
+    assertCallerIsModerator(caller);
     let user = assertCallerIsUser(caller);
     for (edit in edits.vals()) {
       ignore createTopic_(user, ?edit.importId, edit);
