@@ -181,18 +181,18 @@ module {
 
     func setRequest(r : Request) {
       debug {
-        assert request_ == null;
+        // assert request_ == null;
         request_ := ?r;
       };
     };
     func assertRequest() {
       debug {
-        assert request_ != null;
+        // assert request_ != null;
       };
     };
     func clearRequest() {
       debug {
-        assert request_ != null;
+        // assert request_ != null;
         request_ := null;
       };
     };

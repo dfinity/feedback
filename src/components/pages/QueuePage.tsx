@@ -5,11 +5,12 @@ import { ModStatus, Topic, useTopicStore } from '../../stores/topicStore';
 import { handleError, handlePromise } from '../../utils/handlers';
 import TopicView from '../TopicView';
 import { FaCheck, FaTimes } from 'react-icons/fa';
+import Loading from '../Loading';
 
 const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-xl rounded-full cursor-pointer border-2 bg-[#fffd] border-gray-300 hover:scale-105`;
 
 export default function QueuePage() {
-  const [topics, setTopics] = useState<Topic[]>([]);
+  const [topics, setTopics] = useState<Topic[] | undefined>();
 
   const user = useIdentityStore((state) => state.user);
   const getModeratorQueue = useTopicStore((state) => state.getModeratorQueue);
@@ -29,8 +30,14 @@ export default function QueuePage() {
     setModeratorStatus(topic, modStatus).catch((err) => {
       handleError(err, 'Error while approving topic!');
     });
-    setTopics(topics.filter((t) => t !== topic));
+    if (topics) {
+      setTopics(topics.filter((t) => t !== topic));
+    }
   };
+
+  if (!topics) {
+    return <Loading />;
+  }
 
   return (
     <>

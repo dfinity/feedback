@@ -3,6 +3,9 @@ import { backend } from '../declarations/backend';
 import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
+// Dev console access
+(window as any).BACKEND = backend;
+
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type ModStatus = 'pending' | 'approved' | 'rejected';
 export type VoteStatus = 1 | 0 | -1;
@@ -87,9 +90,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
       set({ topics });
-      if (import.meta.env.DEV) {
-        console.log('Topics:', get().topics);
-      }
+      console.log('Topics:', get().topics);
       return topics;
     },
     async find(id: string) {
@@ -151,15 +152,12 @@ export const useTopicStore = create<TopicState>((set, get) => {
     },
     async getModeratorQueue() {
       const topics = (await backend.getModeratorTopics()).map(mapTopic);
-      // set({ moderatorTopics });
-      if (import.meta.env.DEV) {
-        console.log('Queue:', topics);
-      }
+      console.log('Queue:', topics);
       return topics;
     },
     async setModeratorStatus(topic: Topic, modStatus: ModStatus) {
       await backend.setTopicModStatus(BigInt(topic.id), {
-        [modStatus]: undefined,
+        [modStatus]: null,
       } as any);
     },
   };

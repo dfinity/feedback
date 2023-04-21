@@ -47,9 +47,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         if (await client.isAuthenticated()) {
           await updateIdentity(client);
           const detail = await getUserDetail();
-          if (import.meta.env.DEV) {
-            console.log('User:', detail);
-          }
+          console.log('User:', detail);
           set({
             user: {
               type: 'ic',
@@ -98,9 +96,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       //   'Error while signing in!',
       // );
       const detail = await getUserDetail();
-      if (import.meta.env.DEV) {
-        console.log('User:', detail);
-      }
+      console.log('User:', detail);
       set({
         user: {
           type: 'ic',
