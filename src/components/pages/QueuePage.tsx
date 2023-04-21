@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import tw from 'twin.macro';
-import { useIdentityStore } from '../../stores/identityStore';
+import useIdentity from '../../hooks/useIdentity';
 import { ModStatus, Topic, useTopicStore } from '../../stores/topicStore';
 import { handleError } from '../../utils/handlers';
 import Loading from '../Loading';
@@ -12,7 +12,7 @@ const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-
 export default function QueuePage() {
   const [topics, setTopics] = useState<Topic[] | undefined>();
 
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
   const getModeratorQueue = useTopicStore((state) => state.getModQueue);
   const setModStatus = useTopicStore((state) => state.setModStatus);
 

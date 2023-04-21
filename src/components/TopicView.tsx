@@ -14,7 +14,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import tw from 'twin.macro';
-import { useIdentityStore } from '../stores/identityStore';
+import useIdentity from '../hooks/useIdentity';
 import {
   Topic,
   TopicInfo,
@@ -54,7 +54,7 @@ export default function TopicView({
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.setStatus);
 
-  const user = useIdentityStore((state) => state.user);
+  const user = useIdentity();
   const vote = useTopicStore((state) => state.vote);
 
   const maxPreviewTags = isMobile || expanded ? 0 : 2;
