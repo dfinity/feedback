@@ -11,6 +11,7 @@ import Trie "mo:base/Trie";
 import Array "mo:base/Array";
 import Order "mo:base/Order";
 import Option "mo:base/Option";
+import Error "mo:base/Error";
 
 import Types "Types";
 import State "State";
@@ -333,7 +334,8 @@ shared ({ caller = installer }) actor class Main() {
     switch (topicRateLimit.tick()) {
       case (#ok) {};
       case (#wait) {
-        await* log.errLimitTopicCreate();
+        log.errLimitTopicCreate();
+        throw Error.reject("reached rate limit for topic creation."); // putting this throw within errLimitTopicCreate leads to compiler bug.
       };
     };
     if (userIsModerator.has(user) or Validate.Topic.edit(edit)) {

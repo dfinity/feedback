@@ -173,10 +173,9 @@ module {
       throw Error.reject("invalid topic edit.");
     };
 
-    public func errLimitTopicCreate() : async* None {
+    public func errLimitTopicCreate() {
       clearRequest();
       add(#response(#errLimitTopicCreate));
-      throw Error.reject("reached rate limit for topic creation.");
     };
 
     // -- Internal helpers --
