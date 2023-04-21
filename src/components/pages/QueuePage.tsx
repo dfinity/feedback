@@ -50,7 +50,12 @@ export default function QueuePage() {
         {topics.map((topic) => (
           <div key={topic.id}>
             <div tw="flex-1">
-              <TopicView key={topic.id} topic={topic} expanded={true} />
+              <TopicView
+                key={topic.id}
+                topic={topic}
+                expanded={true}
+                hideModerationInfo
+              />
             </div>
             <div tw="flex gap-2 mt-2">
               <ModeratorButton onClick={() => changeStatus(topic, 'approved')}>

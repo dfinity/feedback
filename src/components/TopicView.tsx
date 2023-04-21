@@ -3,6 +3,7 @@ import { isMobile } from 'react-device-detect';
 import {
   FaCaretDown,
   FaCaretUp,
+  FaClock,
   FaEdit,
   FaGithub,
   FaJira,
@@ -10,6 +11,7 @@ import {
   FaRegDotCircle,
   FaRegPlayCircle,
   FaRegTimesCircle,
+  FaTimes,
 } from 'react-icons/fa';
 import tw from 'twin.macro';
 import { useIdentityStore } from '../stores/identityStore';
@@ -39,12 +41,14 @@ export interface TopicViewProps {
   topic: Topic;
   expanded?: boolean;
   onChangeExpanded?(expanded: boolean): void;
+  hideModerationInfo?: boolean;
 }
 
 export default function TopicView({
   topic,
   expanded,
   onChangeExpanded,
+  hideModerationInfo,
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
@@ -169,11 +173,11 @@ export default function TopicView({
                   <div>
                     <Markdown>{topic.description}</Markdown>
                   </div>
-                  <hr tw="my-3" />
                 </>
               )}
               {topic.links.length > 0 && (
                 <>
+                  <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
                       <div key={i} tw="flex gap-2 items-center">
@@ -204,6 +208,26 @@ export default function TopicView({
                     {topic.tags.map((tag, i) => (
                       <Tag key={i}>{tag}</Tag>
                     ))}
+                  </div>
+                </>
+              )}
+              {!hideModerationInfo && topic.modStatus !== 'approved' && (
+                <>
+                  <hr tw="my-3" />
+                  <div tw="flex gap-2 items-center font-bold text-[#000a]">
+                    {topic.modStatus === 'pending' ? (
+                      <>
+                        <FaClock tw="text-teal-500" />
+                        <div>Under review</div>
+                      </>
+                    ) : topic.modStatus === 'rejected' ? (
+                      <>
+                        <FaTimes tw="text-orange-500" />
+                        <div>Changes requested</div>
+                      </>
+                    ) : (
+                      false
+                    )}
                   </div>
                 </>
               )}

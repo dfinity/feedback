@@ -127,7 +127,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
         updateTopic({
           ...topic,
           ...info,
-          // modStatus: 'pending',
+          modStatus:
+            topic.modStatus === 'rejected' ? 'pending' : topic.modStatus,
         });
       }
       await backend.editTopic(BigInt(id), info);

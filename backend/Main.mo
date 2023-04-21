@@ -391,7 +391,11 @@ shared ({ caller = installer }) actor class Main() {
           topic with
           edit;
           internal = { topic.internal with editTime = Time.now() / 1_000_000 };
-          // modStatus = #pending; // TODO: moderation for topic edits
+          // TODO: moderation for approved topic edits
+          modStatus = switch (topic.modStatus) {
+            case (#rejected) #pending;
+            case (s) s;
+          };
         };
       },
     );
