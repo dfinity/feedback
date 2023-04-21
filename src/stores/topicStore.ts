@@ -3,8 +3,11 @@ import { backend } from '../declarations/backend';
 import { ImportId, Status } from '../declarations/backend/backend.did';
 import { View } from '../../.dfx/local/canisters/backend/backend.did';
 
+// Dev console access
+(window as any).BACKEND = backend;
+
 export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
-export type ModStatus = 'pending' | 'approved' | 'spam';
+export type ModStatus = 'pending' | 'approved' | 'rejected';
 export type VoteStatus = 1 | 0 | -1;
 export type SearchSort = 'votes' | 'activity';
 
@@ -36,7 +39,9 @@ export interface TopicState {
   bulkCreate(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
-  changeStatus(id: string, status: TopicStatus): Promise<void>;
+  setStatus(id: string, status: TopicStatus): Promise<void>;
+  getModQueue(): Promise<Topic[]>;
+  setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -81,12 +86,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
     topics: [],
     sort: 'activity',
     async search() {
-      const results = await backend.searchTopics({ [get().sort]: null } as any);
-      const topics: Topic[] = results.map(mapTopic);
+      const topics = (
+        await backend.searchTopics({ [get().sort]: null } as any)
+      ).map(mapTopic);
       set({ topics });
-      if (import.meta.env.DEV) {
-        console.log('Topics:', get().topics);
-      }
+      console.log('Topics:', get().topics);
       return topics;
     },
     async find(id: string) {
@@ -120,7 +124,12 @@ export const useTopicStore = create<TopicState>((set, get) => {
     async edit(id: string, info: TopicInfo) {
       const topic = get().topics.find((topic) => topic.id === id);
       if (topic) {
-        updateTopic({ ...topic, ...info });
+        updateTopic({
+          ...topic,
+          ...info,
+          modStatus:
+            topic.modStatus === 'rejected' ? 'pending' : topic.modStatus,
+        });
       }
       await backend.editTopic(BigInt(id), info);
     },
@@ -139,12 +148,26 @@ export const useTopicStore = create<TopicState>((set, get) => {
           : { none: null },
       );
     },
-    async changeStatus(id: string, status: TopicStatus) {
+    async setStatus(id: string, status: TopicStatus) {
       const topic = get().topics.find((topic) => topic.id === id);
       if (topic) {
         updateTopic({ ...topic, status });
       }
       backend.setTopicStatus(BigInt(id), statusMap[status]);
+    },
+    async getModQueue() {
+      const topics = (await backend.getModeratorTopics()).map(mapTopic);
+      console.log('Queue:', topics);
+      return topics;
+    },
+    async setModStatus(topic: Topic, modStatus: ModStatus) {
+      updateTopic({
+        ...topic,
+        modStatus,
+      });
+      await backend.setTopicModStatus(BigInt(topic.id), {
+        [modStatus]: null,
+      } as any);
     },
   };
 });

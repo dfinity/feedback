@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { FaCircleNotch } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import 'twin.macro';
 import { Topic, useTopicStore } from '../../stores/topicStore';
 import { handleError } from '../../utils/handlers';
+import Loading from '../Loading';
 import TopicView from '../TopicView';
 
 let fetchId: string | undefined;
@@ -38,11 +38,7 @@ export default function TopicPage() {
   }, [find, id, navigate]);
 
   if (!topic) {
-    return (
-      <div className="flex justify-center my-5 opacity-50 text-3xl text-white">
-        <FaCircleNotch tw="animate-spin [animation-duration: 2s]" />
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
