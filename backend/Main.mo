@@ -20,6 +20,9 @@ import Validate "Validate";
 
 shared ({ caller = installer }) actor class Main() {
 
+  type TopicView = Types.Topic.View;
+  type UserView = Types.User.View;
+
   /// Stable canister state, version 0.
   /// Rather than use this directly, we use instead use the OO wrappers defined from its projections.
 
@@ -129,7 +132,7 @@ shared ({ caller = installer }) actor class Main() {
 
   // returns some topic view when user owns the topic, or when the topic is approved.
   // returns null when a topic is unapproved and not owned by the optional user argument.
-  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+  func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?TopicView {
     if (not maybeUserIsOwner(user, id) and state.modStatus != #approved) {
       return null;
     } else {
@@ -139,7 +142,7 @@ shared ({ caller = installer }) actor class Main() {
 
   // No access control here for user, only customization.
   // Each use of this helper has its own access control logic.
-  func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : Types.Topic.View {
+  func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : TopicView {
     var upVoters : Nat = 0;
     var downVoters : Nat = 0;
     for ((_, vote) in userTopicVotes.getRelatedRight(id)) {
@@ -385,8 +388,14 @@ shared ({ caller = installer }) actor class Main() {
       #topic id,
       func(topic : Types.Topic.State) : Types.Topic.State {
         {
-          topic with edit;
+          topic with
+          edit;
           internal = { topic.internal with editTime = Time.now() / 1_000_000 };
+          // TODO: moderation for approved topic edits
+          modStatus = switch (topic.modStatus) {
+            case (#rejected) #pending;
+            case (s) s;
+          };
         };
       },
     );
@@ -428,7 +437,7 @@ shared ({ caller = installer }) actor class Main() {
 
   /// Create (or get) a user Id for the given caller Id.
   /// Once created, the user Id for a given caller Id is stored and fixed.
-  public shared ({ caller }) func login() : async Types.User.RawId {
+  public shared ({ caller }) func login() : async UserView {
     log.request(caller, #login);
     let u = switch (principals.get(caller)) {
       case null {
@@ -439,15 +448,21 @@ shared ({ caller = installer }) actor class Main() {
       };
       case (?(#user u)) u;
     };
-    log.okWithUserId(u);
+    {
+      id = log.okWithUserId(u);
+      isModerator = userIsModerator.has(#user u);
+    };
   };
 
   /// Get the (optional) user Id for the given caller Id.
   /// Returns null when none exists yet (see `login()`).
-  public query ({ caller }) func fastLogin() : async ?Types.User.RawId {
+  public query ({ caller }) func fastLogin() : async ?UserView {
     switch (principals.get(caller)) {
       case null null;
-      case (?(#user u)) ?u;
+      case (?(#user u)) ?{
+        id = u;
+        isModerator = userIsModerator.has(#user u);
+      };
     };
   };
 

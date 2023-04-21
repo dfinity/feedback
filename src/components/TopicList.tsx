@@ -15,15 +15,15 @@ export default function TopicList({ topics }: TopicListProps) {
 
   return (
     <div tw="flex flex-col gap-4">
-      {sortedTopics.map((item) => (
+      {sortedTopics.map((topic) => (
         <TopicView
-          key={item.id}
-          topic={item}
-          expanded={item.id === expandedId}
+          key={topic.id}
+          topic={topic}
+          expanded={topic.id === expandedId}
           onChangeExpanded={(expanded) => {
-            setExpandedId(expanded ? item.id : undefined);
+            setExpandedId(expanded ? topic.id : undefined);
             if (expanded) {
-              setSearchParams({ topic: item.id });
+              setSearchParams({ topic: topic.id });
             } else {
               searchParams.delete('topic');
               setSearchParams(searchParams);
