@@ -82,13 +82,12 @@ export default function TopicPage() {
             value={{ value: sort, label: capitalize(sort) }}
             onChange={(option) => option && onChangeSort(option.value)}
             isSearchable={false}
-            options={['activity', 'votes'].map(
-              (s) =>
-                ({
-                  value: s,
-                  label: capitalize(s),
-                } as any),
-            )}
+            options={['activity', 'votes'].map((s) => {
+              return {
+                value: s,
+                label: capitalize(s),
+              } as any;
+            })}
           />
         </div>
       </div>
