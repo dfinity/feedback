@@ -344,12 +344,13 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
-    let log = logger.Begin(caller, #bulkCreateTopics { edits });
+  public shared ({ caller }) func importTopics(edits : [Types.Topic.ImportEdit]) {
+    let log = logger.Begin(caller, #importTopics { edits });
     assertCallerIsModerator(log, caller);
     let user = assertCallerIsUser(log, caller);
     for (edit in edits.vals()) {
-      ignore createTopic_(user, ?edit.importId, edit);
+      let id = createTopic_(user, ?edit.importId, edit);
+      topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status = edit.status } });
     };
     log.ok();
   };

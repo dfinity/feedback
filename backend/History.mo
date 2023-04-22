@@ -20,7 +20,7 @@ module {
     #createTopic : {
       edit : Types.Topic.Edit;
     };
-    #bulkCreateTopics : {
+    #importTopics : {
       edits : [Types.Topic.ImportEdit];
     };
     #clearTopics;

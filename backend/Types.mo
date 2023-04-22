@@ -27,7 +27,10 @@ module {
       tags : [Text];
     };
 
-    public type ImportEdit = { importId : ImportId } and Edit;
+    public type ImportEdit = Edit and {
+      importId : ImportId;
+      status : Status;
+    };
 
     public type ImportId = { #jira : Text };
 
