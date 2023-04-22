@@ -356,11 +356,13 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   /// TEMPORARY
-  public shared func clearTopics() {
-    topics.clear();
-    userOwnsTopic.clear();
-    userSubmitsTopic.clear();
-    userTopicVotes.clear();
+  public shared ({ caller }) func clearTopics__dev_tmp() {
+    debug {
+      topics.clear();
+      userOwnsTopic.clear();
+      userSubmitsTopic.clear();
+      userTopicVotes.clear();
+    };
   };
 
   /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
