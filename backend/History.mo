@@ -65,18 +65,27 @@ module {
     #callerOwnsTopic : { user : UserId; topic : TopicId };
   };
 
+  public type RequestId = Nat;
+
   public type Event = {
     #install : {
       time : Int; // nano seconds
       installer : Principal;
     };
     #request : {
+      requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
       request : Request;
     };
-    #internal : Internal;
-    #response : Response;
+    #internal : {
+      requestId : RequestId;
+      internal : Internal;
+    };
+    #response : {
+      requestId : RequestId;
+      response : Response;
+    };
   };
 
   /// # Feedback board history representation.
@@ -85,18 +94,32 @@ module {
   /// Can be stored in a stable variable.
   ///
   public type History = {
+    var nextRequestId : Nat;
     var events : Seq.Sequence<Event>;
   };
 
   public func init(installer : Principal) : History {
-    { var events = Seq.make(#install { time = Time.now(); installer }) };
+    {
+      var nextRequestId = 1;
+      var events = Seq.make(#install { time = Time.now(); installer });
+    };
+  };
+
+  public type ReqLog = {
+    internal : Internal -> ();
+    ok : () -> ();
+    okIf : Bool -> ();
+    okWithTopicId : Types.Topic.RawId -> Types.Topic.RawId;
+    okWithUserId : Types.User.RawId -> Types.User.RawId;
+    errAccess : AccessPredicate -> ();
+    errInvalidTopicEdit : () -> async* None;
   };
 
   ///
   /// OO interface for `Main` canister to log all of its state-affecting update behavior.
   /// Of particular interest are access control checks, and their outcomes.
   ///
-  public class Log(history : History) {
+  public class Logger(history : History) {
 
     let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(Int.abs(Time.now()));
 
@@ -110,11 +133,19 @@ module {
       Seq.size(history.events);
     };
 
+    func add(event : Event) {
+      history.events := Seq.pushBack<Event>(
+        history.events,
+        levels.next(),
+        event,
+      );
+    };
+
     /// # Logging API
     ///
     /// Logs are well-formed when they consist of
     /// The following pattern, once per actor message:
-    /// - request(), followed by
+    /// - Request(), followed by
     /// - zero or more internal(), followed by
     /// - response, as either okX() or errX(), of some form.
     ///
@@ -126,85 +157,50 @@ module {
     /// In production mode, we disable these checks, and tolerate
     /// the potential of ill-formed logs to avoid sanity-checking assertion
     /// failures that prevent the canister from functioning otherwise normally.
+    public class Begin(caller : Principal, request : Request) : ReqLog {
 
-    public func request(caller : Principal, request : Request) {
-      setRequest(request);
-      add(#request { time = Time.now(); caller; request });
-    };
+      let requestId = history.nextRequestId;
+      do {
+        history.nextRequestId += 1;
+        add(#request { time = Time.now(); caller; request; requestId });
+      };
 
-    public func internal(i : Internal) {
-      assertRequest();
-      add(#internal i);
-    };
+      func addResponse(response : Response) {
+        add(#response({ requestId; response }));
+      };
 
-    public func ok() {
-      clearRequest();
-      add(#response(#ok));
-    };
+      public func internal(internal : Internal) {
+        add(#internal { requestId; internal });
+      };
 
-    public func okIf(b : Bool) {
-      clearRequest();
-      if b { ok() } else {
-        add(#response(#err));
+      public func ok() {
+        addResponse(#ok);
+      };
+
+      public func okIf(b : Bool) {
+        if b { ok() } else {
+          addResponse(#err);
+        };
+      };
+
+      public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
+        addResponse(#okWithTopic({ topic = #topic i }));
+        i;
+      };
+
+      public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
+        addResponse(#okWithUser({ user = #user i }));
+        i;
+      };
+
+      public func errAccess(a : AccessPredicate) {
+        addResponse(#errAccess(a));
+      };
+
+      public func errInvalidTopicEdit() : async* None {
+        addResponse(#errInvalidTopicEdit);
+        throw Error.reject("invalid topic edit.");
       };
     };
-
-    public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
-      clearRequest();
-      add(#response(#okWithTopic({ topic = #topic i })));
-      i;
-    };
-
-    public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
-      clearRequest();
-      add(#response(#okWithUser({ user = #user i })));
-      i;
-    };
-
-    public func errAccess(a : AccessPredicate) {
-      clearRequest();
-      add(#response(#errAccess(a)));
-    };
-
-    public func errInvalidTopicEdit() : async* None {
-      clearRequest();
-      add(#response(#errInvalidTopicEdit));
-      throw Error.reject("invalid topic edit.");
-    };
-
-    // -- Internal helpers --
-
-    func add(event : Event) {
-      history.events := Seq.pushBack<Event>(
-        history.events,
-        levels.next(),
-        event,
-      );
-    };
-
-    // request var is local state to
-    // ensure logs are well-formed
-    // (Request, followed by zero or more Internal events, ended by a Response).
-
-    var request_ : ?Request = null;
-
-    func setRequest(r : Request) {
-      debug {
-        // assert request_ == null;
-        request_ := ?r;
-      };
-    };
-    func assertRequest() {
-      debug {
-        // assert request_ != null;
-      };
-    };
-    func clearRequest() {
-      debug {
-        // assert request_ != null;
-        request_ := null;
-      };
-    };
-
   };
 };

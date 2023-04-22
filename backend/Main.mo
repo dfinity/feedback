@@ -36,7 +36,8 @@ shared ({ caller = installer }) actor class Main() {
 
   // # OO Wrapper for log.
 
-  let log = History.Log(history_v0);
+  let logger = History.Logger(history_v0);
+  type ReqLog = History.ReqLog;
 
   // # OO Wrappers for entities.
   //
@@ -76,7 +77,7 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  func assertCallerIsUser(caller : Principal) : Types.User.Id {
+  func assertCallerIsUser(log : ReqLog, caller : Principal) : Types.User.Id {
     switch (findUser(caller)) {
       case null {
         log.errAccess(#callerIsUser);
@@ -90,7 +91,7 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  func assertCallerOwnsTopic(caller : Principal, topic : Types.Topic.Id) {
+  func assertCallerOwnsTopic(log : ReqLog, caller : Principal, topic : Types.Topic.Id) {
     switch (findUser(caller)) {
       case null {
         log.errAccess(#callerIsUser);
@@ -108,7 +109,7 @@ shared ({ caller = installer }) actor class Main() {
     };
   };
 
-  func assertCallerIsModerator(caller : Principal) {
+  func assertCallerIsModerator(log : ReqLog, caller : Principal) {
     if (caller != installer) {
       switch (findUser(caller)) {
         case null {
@@ -197,8 +198,8 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) {
-    log.request(caller, #setUserIsModerator { user = #user id; isMod });
-    assertCallerIsModerator(caller);
+    let log = logger.Begin(caller, #setUserIsModerator { user = #user id; isMod });
+    assertCallerIsModerator(log, caller);
     ignore do ? {
       ignore users.get(#user id)!;
       userIsModerator.put(#user id);
@@ -261,8 +262,8 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public query ({ caller }) func getModeratorTopics() : async [Types.Topic.View] {
-    log.request(caller, #moderatorQuery);
-    assertCallerIsModerator(caller);
+    let log = logger.Begin(caller, #moderatorQuery);
+    assertCallerIsModerator(log, caller);
     log.ok();
 
     let user = findUserUnwrap(caller);
@@ -333,8 +334,8 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
-    log.request(caller, #createTopic { edit });
-    let user = assertCallerIsUser(caller);
+    let log = logger.Begin(caller, #createTopic { edit });
+    let user = assertCallerIsUser(log, caller);
     if (userIsModerator_(caller, user) or Validate.Topic.edit(edit)) {
       let id = createTopic_(user, null, edit);
       log.okWithTopicId(id);
@@ -344,9 +345,9 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func bulkCreateTopics(edits : [Types.Topic.ImportEdit]) {
-    log.request(caller, #bulkCreateTopics { edits });
-    assertCallerIsModerator(caller);
-    let user = assertCallerIsUser(caller);
+    let log = logger.Begin(caller, #bulkCreateTopics { edits });
+    assertCallerIsModerator(log, caller);
+    let user = assertCallerIsUser(log, caller);
     for (edit in edits.vals()) {
       ignore createTopic_(user, ?edit.importId, edit);
     };
@@ -363,31 +364,31 @@ shared ({ caller = installer }) actor class Main() {
 
   /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
   public query ({ caller }) func getLogEvents__dev_tmp(start : Nat, size : Nat) : async [History.Event] {
-    log.getEvents(start, size);
+    logger.getEvents(start, size);
   };
 
   /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
   public query ({ caller }) func getLogEventCount__dev_tmp() : async Nat {
-    log.getSize();
+    logger.getSize();
   };
 
   public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
-    log.request(caller, #moderatorQuery);
-    assertCallerIsModerator(caller);
+    let log = logger.Begin(caller, #moderatorQuery);
+    assertCallerIsModerator(log, caller);
     log.ok();
-    log.getEvents(start, size);
+    logger.getEvents(start, size);
   };
 
   public query ({ caller }) func getLogEventCount() : async Nat {
-    log.request(caller, #moderatorQuery);
-    assertCallerIsModerator(caller);
+    let log = logger.Begin(caller, #moderatorQuery);
+    assertCallerIsModerator(log, caller);
     log.ok();
-    log.getSize();
+    logger.getSize();
   };
 
   public shared ({ caller }) func editTopic(id : Types.Topic.RawId, edit : Types.Topic.Edit) : async () {
-    log.request(caller, #editTopic { topic = #topic id; edit });
-    assertCallerOwnsTopic(caller, #topic id);
+    let log = logger.Begin(caller, #editTopic { topic = #topic id; edit });
+    assertCallerOwnsTopic(log, caller, #topic id);
     topics.update(
       #topic id,
       func(topic : Types.Topic.State) : Types.Topic.State {
@@ -407,11 +408,11 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func voteTopic(id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : async () {
-    log.request(caller, #voteTopic { topic = #topic id; userVote });
+    let log = logger.Begin(caller, #voteTopic { topic = #topic id; userVote });
     let success = do ? {
       // validates arguments before updating relation.
       ignore topics.get(#topic id)!;
-      let user = assertCallerIsUser(caller);
+      let user = assertCallerIsUser(log, caller);
       userTopicVotes.put(user, #topic id, userVote);
       topics.update(
         #topic id,
@@ -428,21 +429,23 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
-    log.request(caller, #setTopicStatus { topic = #topic id; status });
-    assertCallerOwnsTopic(caller, #topic id);
+    let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
+    assertCallerOwnsTopic(log, caller, #topic id);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
     log.ok();
   };
 
   public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
-    assertCallerIsModerator(caller);
+    let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
+    assertCallerIsModerator(log, caller);
     topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus } });
+    log.ok();
   };
 
   /// Create (or get) a user Id for the given caller Id.
   /// Once created, the user Id for a given caller Id is stored and fixed.
   public shared ({ caller }) func login() : async UserView {
-    log.request(caller, #login);
+    let log = logger.Begin(caller, #login);
     let u = switch (principals.get(caller)) {
       case null {
         let user = nextUserId;
