@@ -30,6 +30,11 @@ export interface Topic extends TopicInfo {
   importId?: { type: string; id: string } | undefined;
 }
 
+export interface ImportTopic extends TopicInfo {
+  importId: ImportId;
+  status: TopicStatus;
+}
+
 export interface TopicState {
   topics: Topic[];
   sort: SearchSort;
@@ -117,9 +122,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }));
       // await get().search();
     },
-    async importAll(
-      infoArray: (TopicInfo & { importId: ImportId; status: TopicStatus })[],
-    ) {
+    async importAll(infoArray: ImportTopic[]) {
       await backend.importTopics(
         infoArray.map((info) => ({
           ...info,

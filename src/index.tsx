@@ -21,7 +21,7 @@ root.render(
         redirect_uri: window.location.origin,
       }}
     >
-      <ToastContainer />
+      <ToastContainer position="bottom-right" />
       <App />
     </Auth0Provider>
   </StrictMode>,
