@@ -65,12 +65,17 @@ module {
     #callerOwnsTopic : { user : UserId; topic : TopicId };
   };
 
+  public type RequestId = {
+    #request : Nat;
+  };
+
   public type Event = {
     #install : {
       time : Int; // nano seconds
       installer : Principal;
     };
     #request : {
+      id : RequestId;
       time : Int; // nano seconds
       caller : Principal;
       request : Request;
@@ -146,70 +151,40 @@ module {
     /// failures that prevent the canister from functioning otherwise normally.
     public class Begin(caller : Principal, request : Request) : ReqLog {
 
-      // request var is local state to
-      // ensure logs are well-formed
-      // (Request, followed by zero or more Internal events, ended by a Response).
-      var request_ : ?Request = null;
-
-      func setRequest(r : Request) {
-        debug {
-          // assert request_ == null;
-          request_ := ?r;
-        };
-      };
-      func assertRequest() {
-        debug {
-          // assert request_ != null;
-        };
-      };
-      func clearRequest() {
-        debug {
-          // assert request_ != null;
-          request_ := null;
-        };
-      };
-
       do {
-        setRequest(request);
-        add(#request { time = Time.now(); caller; request });
+        let id = #request(getSize());
+        add(#request { time = Time.now(); caller; request; id });
       };
 
       public func internal(i : Internal) {
-        assertRequest();
         add(#internal i);
       };
 
       public func ok() {
-        clearRequest();
         add(#response(#ok));
       };
 
       public func okIf(b : Bool) {
-        clearRequest();
         if b { ok() } else {
           add(#response(#err));
         };
       };
 
       public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
-        clearRequest();
         add(#response(#okWithTopic({ topic = #topic i })));
         i;
       };
 
       public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
-        clearRequest();
         add(#response(#okWithUser({ user = #user i })));
         i;
       };
 
       public func errAccess(a : AccessPredicate) {
-        clearRequest();
         add(#response(#errAccess(a)));
       };
 
       public func errInvalidTopicEdit() : async* None {
-        clearRequest();
         add(#response(#errInvalidTopicEdit));
         throw Error.reject("invalid topic edit.");
       };
