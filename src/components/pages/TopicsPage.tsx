@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import 'twin.macro';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import {
   SEARCH_SORTS,
   SearchSort,
@@ -24,15 +25,22 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
 
 export default function TopicPage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
+  const [filterText, setFilterText] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
+  const breakpoint = useBreakpoint();
 
   const topics = useTopicStore((state) => state.topics);
   const sort = useTopicStore((state) => state.sort);
   const navigate = useNavigate();
 
-  const filter = (topic: Topic) => !!filterStates[topic.status];
-
-  const visibleTopics = topics.filter(filter);
+  const visibleTopics = topics.filter((topic: Topic) => {
+    if (filterText) {
+      // TODO: per-word filter
+      const text = topic.title.toLowerCase();
+      return text.includes(filterText.toLowerCase());
+    }
+    return !!filterStates[topic.status];
+  });
 
   useEffect(() => {
     const id = searchParams.get('topic');
@@ -67,10 +75,36 @@ export default function TopicPage() {
     }
   }, [onChangeSort, searchParams, sort]);
 
+  const sortDropdown = (
+    <Select
+      tw="opacity-95"
+      value={{ value: sort, label: capitalize(sort) }}
+      onChange={(option) => option && onChangeSort(option.value)}
+      isSearchable={false}
+      options={SEARCH_SORTS.map((s) => {
+        return {
+          value: s,
+          label: capitalize(s),
+        } as any;
+      })}
+    />
+  );
+  const inlineSort = breakpoint === 'xs';
+
   return (
     <>
-      <div tw="md:flex items-center pb-5 text-white">
-        <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4">
+      <div tw="flex mb-5 gap-2 items-center">
+        <input
+          tw="w-full text-lg rounded-3xl px-4 py-2 sm:py-3 opacity-90 hover:opacity-95 focus:opacity-95"
+          type="text"
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          placeholder="Search..."
+        />
+        {inlineSort && <div tw="shrink-0">{sortDropdown}</div>}
+      </div>
+      <div tw="sm:flex items-center pb-5">
+        <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4 text-white">
           {filterStatuses.map((status) => (
             <div key={status}>
               <label tw="select-none cursor-pointer">
@@ -90,21 +124,14 @@ export default function TopicPage() {
             </div>
           ))}
         </div>
-        <div tw="flex gap-2 items-center">
-          <label tw="font-semibold text-lg">Sort by:</label>
-          <Select
-            tw="text-black opacity-95"
-            value={{ value: sort, label: capitalize(sort) }}
-            onChange={(option) => option && onChangeSort(option.value)}
-            isSearchable={false}
-            options={SEARCH_SORTS.map((s) => {
-              return {
-                value: s,
-                label: capitalize(s),
-              } as any;
-            })}
-          />
-        </div>
+        {!inlineSort && (
+          <div tw="flex gap-2 items-center">
+            <label tw="font-semibold text-lg text-white opacity-80">
+              Sort by:
+            </label>
+            {sortDropdown}
+          </div>
+        )}
       </div>
       <TopicList topics={visibleTopics} />
     </>
