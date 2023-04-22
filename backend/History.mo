@@ -94,11 +94,15 @@ module {
   /// Can be stored in a stable variable.
   ///
   public type History = {
+    var nextRequestId : Nat;
     var events : Seq.Sequence<Event>;
   };
 
   public func init(installer : Principal) : History {
-    { var events = Seq.make(#install { time = Time.now(); installer }) };
+    {
+      var nextRequestId = 1;
+      var events = Seq.make(#install { time = Time.now(); installer });
+    };
   };
 
   public type ReqLog = {
@@ -155,8 +159,11 @@ module {
     /// failures that prevent the canister from functioning otherwise normally.
     public class Begin(caller : Principal, request : Request) : ReqLog {
 
-      let requestId = getSize() : Nat;
-      add(#request { time = Time.now(); caller; request; requestId });
+      let requestId = history.nextRequestId;
+      do {
+        history.nextRequestId += 1;
+        add(#request { time = Time.now(); caller; request; requestId });
+      };
 
       func addResponse(response : Response) {
         add(#response({ requestId; response }));
