@@ -65,9 +65,7 @@ module {
     #callerOwnsTopic : { user : UserId; topic : TopicId };
   };
 
-  public type RequestId = {
-    #requestId : Nat;
-  };
+  public type RequestId = Nat;
 
   public type Event = {
     #install : {
@@ -157,7 +155,7 @@ module {
     /// failures that prevent the canister from functioning otherwise normally.
     public class Begin(caller : Principal, request : Request) : ReqLog {
 
-      let requestId = #requestId(getSize() : Nat);
+      let requestId = getSize() : Nat;
       add(#request { time = Time.now(); caller; request; requestId });
 
       func addResponse(response : Response) {
