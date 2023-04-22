@@ -66,7 +66,7 @@ module {
   };
 
   public type RequestId = {
-    #request : Nat;
+    #requestId : Nat;
   };
 
   public type Event = {
@@ -75,13 +75,19 @@ module {
       installer : Principal;
     };
     #request : {
-      id : RequestId;
+      requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
       request : Request;
     };
-    #internal : Internal;
-    #response : Response;
+    #internal : {
+      requestId : RequestId;
+      internal : Internal;
+    };
+    #response : {
+      requestId : RequestId;
+      response : Response;
+    };
   };
 
   /// # Feedback board history representation.
@@ -151,41 +157,43 @@ module {
     /// failures that prevent the canister from functioning otherwise normally.
     public class Begin(caller : Principal, request : Request) : ReqLog {
 
-      do {
-        let id = #request(getSize());
-        add(#request { time = Time.now(); caller; request; id });
+      let requestId = #requestId(getSize() : Nat);
+      add(#request { time = Time.now(); caller; request; requestId });
+
+      func addResponse(response : Response) {
+        add(#response({ requestId; response }));
       };
 
-      public func internal(i : Internal) {
-        add(#internal i);
+      public func internal(internal : Internal) {
+        add(#internal { requestId; internal });
       };
 
       public func ok() {
-        add(#response(#ok));
+        addResponse(#ok);
       };
 
       public func okIf(b : Bool) {
         if b { ok() } else {
-          add(#response(#err));
+          addResponse(#err);
         };
       };
 
       public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
-        add(#response(#okWithTopic({ topic = #topic i })));
+        addResponse(#okWithTopic({ topic = #topic i }));
         i;
       };
 
       public func okWithUserId(i : Types.User.RawId) : Types.User.RawId {
-        add(#response(#okWithUser({ user = #user i })));
+        addResponse(#okWithUser({ user = #user i }));
         i;
       };
 
       public func errAccess(a : AccessPredicate) {
-        add(#response(#errAccess(a)));
+        addResponse(#errAccess(a));
       };
 
       public func errInvalidTopicEdit() : async* None {
-        add(#response(#errInvalidTopicEdit));
+        addResponse(#errInvalidTopicEdit);
         throw Error.reject("invalid topic edit.");
       };
     };
