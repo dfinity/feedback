@@ -17,7 +17,7 @@ module {
     #topic : (TopicId, Types.Topic.State);
     #team : (TeamId, Types.Team.State);
     #principalIsUser : (Principal, Types.User.Id);
-    #userTeamMember : (UserId, Types.Team.Id);
+    #userTeamMember : (UserId, TeamId);
     #userIsModerator : UserId;
     #userSubmitsTopic : (UserId, Types.Topic.Id);
     #userOwnsTopic : (UserId, TopicId);
@@ -38,6 +38,13 @@ module {
     public func principalIsUser((p : Principal, u : UserId)) : Entry {
       #principalIsUser(p, u);
     };
+
+    // to do:
+    // #userTeamMember : (UserId, TeamId);
+    // #userIsModerator : UserId;
+    // #userSubmitsTopic : (UserId, Types.Topic.Id);
+    // #userOwnsTopic : (UserId, TopicId);
+    // #userTopicVote : (UserId, TopicId, TopicUserVote);
   };
 
   public type Chunk = [Entry];
@@ -90,6 +97,13 @@ module {
       Trie.iter(s.principals.map),
       Cons.principalIsUser,
     );
+
+    // to do:
+    // #userTeamMember : (UserId, TeamId);
+    // #userIsModerator : UserId;
+    // #userSubmitsTopic : (UserId, Types.Topic.Id);
+    // #userOwnsTopic : (UserId, TopicId);
+    // #userTopicVote : (UserId, TopicId, TopicUserVote);
 
     let all = iterAll([users, topics, teams, principalIsUser]);
     Iter.toArray(all);
