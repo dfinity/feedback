@@ -98,38 +98,43 @@ export default function BrowsePage() {
 
   return (
     <>
-      <div tw="flex mb-5 gap-2 items-center">
-        <input
-          tw="w-full text-lg rounded-3xl px-4 py-2 sm:py-3 opacity-90 hover:opacity-95 focus:opacity-95"
-          type="text"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Search..."
-        />
-        {inlineSort && <div tw="shrink-0">{sortDropdown}</div>}
-      </div>
-      <div tw="sm:flex items-center pb-5">
-        <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4 text-white">
-          {filterStatuses.map((status) => (
-            <div key={status}>
-              <label tw="select-none cursor-pointer">
-                <input
-                  tw="mr-2"
-                  type="checkbox"
-                  checked={filterStates[status]}
-                  onChange={() =>
-                    setFilterStates({
-                      ...filterStates,
-                      [status]: !filterStates[status],
-                    })
-                  }
-                />
-                {capitalize(status)}
-              </label>
+      <div tw="h-[100px] mb-2 sm:h-[130px]" />
+      <div tw="fixed bg-background top-[60px] left-0 right-0 pt-5 z-50 shadow-md shadow-background">
+        <div tw="max-w-[800px] mx-auto px-5">
+          <div tw="flex mb-4 gap-2 items-center">
+            <input
+              tw="w-full text-lg rounded-3xl px-4 py-2 sm:py-3 opacity-90 hover:opacity-95 focus:opacity-95"
+              type="text"
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              placeholder="Search..."
+            />
+            {inlineSort && <div tw="shrink-0">{sortDropdown}</div>}
+          </div>
+          <div tw="sm:flex items-center pb-4">
+            <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4 text-white">
+              {filterStatuses.map((status) => (
+                <div key={status}>
+                  <label tw="select-none cursor-pointer">
+                    <input
+                      tw="mr-2"
+                      type="checkbox"
+                      checked={filterStates[status]}
+                      onChange={() =>
+                        setFilterStates({
+                          ...filterStates,
+                          [status]: !filterStates[status],
+                        })
+                      }
+                    />
+                    {capitalize(status)}
+                  </label>
+                </div>
+              ))}
             </div>
-          ))}
+            {!inlineSort && sortDropdown}
+          </div>
         </div>
-        {!inlineSort && sortDropdown}
       </div>
       <TopicList topics={visibleTopics} />
     </>
