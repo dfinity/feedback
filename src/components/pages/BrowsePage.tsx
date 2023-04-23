@@ -81,7 +81,7 @@ export default function BrowsePage() {
         Sort by:
       </label>
       <Select
-        tw="opacity-95 z-[100]"
+        tw="opacity-95 z-10"
         value={{ value: sort, label: capitalize(sort) }}
         onChange={(option) => option && onChangeSort(option.value)}
         isSearchable={false}
