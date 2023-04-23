@@ -15,6 +15,7 @@ import Option "mo:base/Option";
 import Types "Types";
 import State "State";
 import History "History";
+import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
 
