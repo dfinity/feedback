@@ -32,13 +32,18 @@ export interface Topic extends TopicInfo {
   importId?: { type: string; id: string } | undefined;
 }
 
+export interface ImportTopic extends TopicInfo {
+  importId: ImportId;
+  status: TopicStatus;
+}
+
 export interface TopicState {
   topics: Topic[];
   sort: SearchSort;
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
-  bulkCreate(infoArray: TopicInfo[]): Promise<void>;
+  importAll(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
@@ -119,8 +124,13 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }));
       // await get().search();
     },
-    async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
-      await backend.bulkCreateTopics(infoArray);
+    async importAll(infoArray: ImportTopic[]) {
+      await backend.importTopics(
+        infoArray.map((info) => ({
+          ...info,
+          status: { [info.status]: null } as Status,
+        })),
+      );
       await get().search();
     },
     async edit(id: string, info: TopicInfo) {

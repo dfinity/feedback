@@ -42,7 +42,7 @@ export function FileDropZone({ children }: FileDropZoneProps) {
             }
             console.log('Importing from Jira XML file:', infoArray);
             handlePromise(
-              useTopicStore.getState().bulkCreate(infoArray),
+              useTopicStore.getState().importAll(infoArray),
               `Importing topic${
                 infoArray.length === 1 ? '' : 's'
               } from Jira...`,

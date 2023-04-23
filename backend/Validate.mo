@@ -29,9 +29,8 @@ module {
       t.size() > 0 and t.size() < 10000
     };
 
+    // prettier-ignore
     public func edit(e : Types.Topic.Edit) : Bool {
-
-      // prettier-ignore
       isTitle(e.title) and isDescription(e.description) and
         arrayAll(e.links, isLink) and arrayAll(e.tags, isTag)
     };
