@@ -23,7 +23,7 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
   closed: false,
 };
 
-export default function TopicPage() {
+export default function BrowsePage() {
   const [filterStates, setFilterStates] = useState(defaultFilterStates);
   const [filterText, setFilterText] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
