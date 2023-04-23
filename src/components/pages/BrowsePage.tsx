@@ -98,7 +98,7 @@ export default function BrowsePage() {
 
   return (
     <>
-      <div tw="h-[100px] mb-2 sm:h-[130px]" />
+      <div tw="h-[100px] mb-2 sm:h-[122px]" />
       <div tw="fixed bg-background top-[60px] left-0 right-0 pt-5 z-50 shadow-md shadow-background">
         <div tw="max-w-[800px] mx-auto px-5">
           <div tw="flex mb-4 gap-2 items-center">
