@@ -53,6 +53,7 @@ export default function HistoryPage() {
       (async () => {
         try {
           const events = await backend.getLogEvents(BigInt(0), BigInt(1000));
+          console.log('Events:', events);
           setEvents(events);
         } catch (err) {
           handleError(err, 'Error while fetching history!');
