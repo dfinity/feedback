@@ -38,7 +38,7 @@ export default function Navbar() {
   return (
     <>
       <div tw="h-[60px]" />
-      <div tw="fixed top-0 left-0 right-0 z-50 bg-gray-100 text-gray-800">
+      <div tw="fixed top-0 left-0 right-0 z-50 bg-gray-100 text-gray-800 shadow-lg shadow-background">
         <div tw="flex gap-3 px-5 items-stretch max-w-[800px] mx-auto">
           {(!isMobile || !user?.detail.isModerator) && (
             <Tooltip
