@@ -50,11 +50,13 @@ module {
   };
 
   public func getAll(s : State.State) : Chunk {
+    // compiler says it cannot infer type args.
     let users = Iter.map<(UserId, Types.User.State), Entry>(
       Trie.iter(s.users.map),
       Cons.user,
     );
 
+    // compiler says it cannot infer type args.
     let topics = Iter.map<(TopicId, Types.Topic.State), Entry>(
       Trie.iter(s.topics.map),
       Cons.topic,
