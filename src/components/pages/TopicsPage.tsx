@@ -77,7 +77,7 @@ export default function TopicPage() {
 
   const sortDropdown = (
     <Select
-      tw="opacity-95"
+      tw="opacity-95 z-[100]"
       value={{ value: sort, label: capitalize(sort) }}
       onChange={(option) => option && onChangeSort(option.value)}
       isSearchable={false}
