@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { ImportId, Status } from '../declarations/backend/backend.did';
-import { View } from '../../.dfx/local/canisters/backend/backend.did';
+import { ImportId, Status, View } from '../declarations/backend/backend.did';
 
 // Dev console access
 (window as any).BACKEND = backend;
