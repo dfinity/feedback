@@ -76,18 +76,23 @@ export default function TopicPage() {
   }, [onChangeSort, searchParams, sort]);
 
   const sortDropdown = (
-    <Select
-      tw="opacity-95 z-[100]"
-      value={{ value: sort, label: capitalize(sort) }}
-      onChange={(option) => option && onChangeSort(option.value)}
-      isSearchable={false}
-      options={SEARCH_SORTS.map((s) => {
-        return {
-          value: s,
-          label: capitalize(s),
-        } as any;
-      })}
-    />
+    <div tw="flex gap-2 items-center">
+      <label tw="font-semibold sm:text-lg text-white opacity-80">
+        Sort by:
+      </label>
+      <Select
+        tw="opacity-95 z-[100]"
+        value={{ value: sort, label: capitalize(sort) }}
+        onChange={(option) => option && onChangeSort(option.value)}
+        isSearchable={false}
+        options={SEARCH_SORTS.map((s) => {
+          return {
+            value: s,
+            label: capitalize(s),
+          } as any;
+        })}
+      />
+    </div>
   );
   const inlineSort = breakpoint === 'xs';
 
@@ -124,14 +129,7 @@ export default function TopicPage() {
             </div>
           ))}
         </div>
-        {!inlineSort && (
-          <div tw="flex gap-2 items-center">
-            <label tw="font-semibold text-lg text-white opacity-80">
-              Sort by:
-            </label>
-            {sortDropdown}
-          </div>
-        )}
+        {!inlineSort && sortDropdown}
       </div>
       <TopicList topics={visibleTopics} />
     </>
