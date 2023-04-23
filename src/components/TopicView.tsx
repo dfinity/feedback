@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import {
   FaCaretDown,
   FaCaretUp,
@@ -14,6 +13,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import tw from 'twin.macro';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import useIdentity from '../hooks/useIdentity';
 import {
   Topic,
@@ -53,11 +53,12 @@ export default function TopicView({
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
   const changeStatus = useTopicStore((state) => state.setStatus);
+  const breakpoint = useBreakpoint();
 
   const user = useIdentity();
   const vote = useTopicStore((state) => state.vote);
 
-  const maxPreviewTags = isMobile || expanded ? 0 : 2;
+  const maxPreviewTags = breakpoint === 'xs' || expanded ? 0 : 2;
 
   useEffect(() => {
     if (!expanded) {
@@ -71,11 +72,12 @@ export default function TopicView({
     }
     handlePromise(
       vote(topic, voteStatus),
-      voteStatus === 1
-        ? 'Upvoting...'
-        : voteStatus === -1
-        ? 'Downvoting...'
-        : 'Removing vote...',
+      // voteStatus === 1
+      //   ? 'Upvoting...'
+      //   : voteStatus === -1
+      //   ? 'Downvoting...'
+      //   : 'Removing vote...',
+      undefined,
       'Error occurred while voting!',
     );
   };
