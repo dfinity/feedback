@@ -240,20 +240,23 @@ shared ({ caller = installer }) actor class Main() {
           case (#votes) {
             // Compare size of net votes.
             // More goes first, meaning bigger is "less".
-            Int.compare(
-              t2.upVoters : Int - t2.downVoters,
-              t1.upVoters : Int - t1.downVoters,
-            );
+            let net1 = t1.upVoters : Int - t1.downVoters;
+            let net2 = t2.upVoters : Int - t2.downVoters;
+            if (net1 == net2) #equal else if (net1 > net2) #less else #greater;
           };
           case (#activity) {
             // Prefer topics with recent votes.
             // If no votes at all, then use edit time.
             // In all cases "bigger time" is "less."
             switch (t1.voteTime, t2.voteTime) {
-              case (?time1, ?time2) Int.compare(time2, time1);
+              case (?time1, ?time2) if (time1 == time2) #equal else if (time1 > time2) #less else #greater;
               case (?_, _) #less;
               case (_, ?_) #greater;
-              case _ Int.compare(t2.editTime, t1.editTime);
+              case _ {
+                let time1 = t1.editTime;
+                let time2 = t2.editTime;
+                if (time1 == time2) #equal else if (time1 > time2) #less else #greater;
+              };
             };
           };
         };
@@ -294,7 +297,9 @@ shared ({ caller = installer }) actor class Main() {
       ) : Order.Order {
         // Prefer topics with recent edits.
         // In all cases "bigger time" is "less" (earlier).
-        Int.compare(t2.editTime, t1.editTime);
+        let time1 = t1.editTime;
+        let time2 = t2.editTime;
+        if (time1 == time2) #equal else if (time1 > time2) #less else #greater;
       },
     );
   };
