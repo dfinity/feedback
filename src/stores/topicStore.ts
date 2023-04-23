@@ -35,6 +35,8 @@ export interface Topic extends TopicInfo {
 export interface ImportTopic extends TopicInfo {
   importId: ImportId;
   status: TopicStatus;
+  createTime: number;
+  editTime: number;
 }
 
 export interface TopicState {
@@ -129,6 +131,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
         infoArray.map((info) => ({
           ...info,
           status: { [info.status]: null } as Status,
+          createTime: BigInt(info.createTime),
+          editTime: BigInt(info.editTime),
         })),
       );
       await get().search();
