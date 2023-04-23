@@ -1,28 +1,47 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
-import 'twin.macro';
+import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
 import { Event } from '../../declarations/backend/backend.did';
 import useIdentity from '../../hooks/useIdentity';
 import { handleError } from '../../utils/handlers';
 import Loading from '../Loading';
 
+const EventCard = tw.div`bg-gray-100 px-5 py-3 rounded-xl`;
+
 interface EventItemProps {
   event: Event;
 }
 
 function EventItem({ event }: EventItemProps) {
-  return (
-    <div>
-      {/* TODO */}
-      <pre>{JSON.stringify(event, null, 2)}</pre>
-    </div>
-  );
+  if ('request' in event) {
+    const { request } = event;
+    return (
+      <EventCard>
+        <label>Request</label>
+        <div>
+          <label>ID:</label> {request.requestId.toString()}
+        </div>
+        <div>
+          <label>Caller:</label> {request.caller.toString()}
+        </div>
+        <div>
+          <label>Time:</label> {new Date(Number(request.time) / 1e6).toString()}
+        </div>
+      </EventCard>
+    );
+  }
+
+  // Default
+  return <EventCard tw="opacity-60">Unknown event type</EventCard>;
 }
 
 const StyledEventItem = styled(EventItem)`
   /* TODO: custom CSS */
-  background: #eee;
+
+  label {
+    font-weight: bold;
+  }
 `;
 
 export default function HistoryPage() {
@@ -56,9 +75,7 @@ export default function HistoryPage() {
       )}
       <div tw="flex flex-col gap-4 mx-auto">
         {events.map((event, i) => (
-          <div key={i}>
-            <StyledEventItem event={event} />
-          </div>
+          <StyledEventItem key={i} event={event} />
         ))}
       </div>
     </>
