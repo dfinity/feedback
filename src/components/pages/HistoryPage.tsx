@@ -45,6 +45,7 @@ const EventCard = styled.div`
 
 export default function HistoryPage() {
   const [events, setEvents] = useState<Event[] | undefined>();
+  const [maxEventCount] = useState(1000); // TODO: adjustable?
 
   const user = useIdentity();
 
@@ -52,7 +53,13 @@ export default function HistoryPage() {
     if (user) {
       (async () => {
         try {
-          const events = await backend.getLogEvents(BigInt(0), BigInt(1000));
+          const eventCount = await backend.getLogEventCount();
+          const minEventNumber = eventCount - BigInt(maxEventCount);
+          const events = await backend.getLogEvents(
+            minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
+            eventCount,
+          );
+          events.reverse(); // Most recent events first
           console.log('Events:', events);
           setEvents(events);
         } catch (err) {
@@ -60,7 +67,7 @@ export default function HistoryPage() {
         }
       })();
     }
-  }, [user]);
+  }, [maxEventCount, user]);
 
   if (!events) {
     return <Loading />;
