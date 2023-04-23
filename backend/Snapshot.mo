@@ -3,7 +3,7 @@ import State "State";
 import Trie "mo:base/Trie";
 import Iter "mo:base/Iter";
 
-// maybe nest this module within Relate module?
+// maybe nest this module within State module (since it mirrors much of that structure)?
 // OTOH, deep indentation is annoying.
 module {
   type UserId = State.UserId;
