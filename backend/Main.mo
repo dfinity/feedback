@@ -367,6 +367,11 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
+  public query ({ caller }) func getSnapshot__dev_tmp() : async [Snapshot.Entry] {
+    Snapshot.getAll(state_v0);
+  };
+
+  /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
   public query ({ caller }) func getLogEvents__dev_tmp(start : Nat, size : Nat) : async [History.Event] {
     logger.getEvents(start, size);
   };
@@ -374,6 +379,13 @@ shared ({ caller = installer }) actor class Main() {
   /// TEMPORARY -- a version without access control, to use with Candid UI during dev/testing.
   public query ({ caller }) func getLogEventCount__dev_tmp() : async Nat {
     logger.getSize();
+  };
+
+  public query ({ caller }) func getSnapshot() : async [Snapshot.Entry] {
+    let log = logger.Begin(caller, #moderatorQuery);
+    assertCallerIsModerator(log, caller);
+    log.ok();
+    Snapshot.getAll(state_v0);
   };
 
   public query ({ caller }) func getLogEvents(start : Nat, size : Nat) : async [History.Event] {
