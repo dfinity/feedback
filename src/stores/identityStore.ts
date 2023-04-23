@@ -58,6 +58,8 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         }
       } catch (err) {
         handleError(err, 'Error while fetching user info!');
+        window.indexedDB.deleteDatabase('auth-client-db'); // Clear login cache
+        return;
       }
 
       // Fetch topics after authenticating
