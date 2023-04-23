@@ -7,8 +7,6 @@ import useIdentity from '../../hooks/useIdentity';
 import { handleError } from '../../utils/handlers';
 import Loading from '../Loading';
 
-const EventCard = tw.div`bg-gray-100 px-5 py-3 rounded-xl`;
-
 interface EventItemProps {
   event: Event;
 }
@@ -18,7 +16,7 @@ function EventItem({ event }: EventItemProps) {
     const { request } = event;
     return (
       <EventCard>
-        <label>Request</label>
+        <label tw="text-lg text-blue-500">Request</label>
         <div>
           <label>ID:</label> {request.requestId.toString()}
         </div>
@@ -36,9 +34,10 @@ function EventItem({ event }: EventItemProps) {
   return <EventCard tw="opacity-60">Unknown event type</EventCard>;
 }
 
-const StyledEventItem = styled(EventItem)`
-  /* TODO: custom CSS */
+const EventCard = styled.div`
+  ${tw`bg-gray-100 px-5 py-3 rounded-xl`}
 
+  // TODO: custom CSS styling
   label {
     font-weight: bold;
   }
@@ -75,7 +74,7 @@ export default function HistoryPage() {
       )}
       <div tw="flex flex-col gap-4 mx-auto">
         {events.map((event, i) => (
-          <StyledEventItem key={i} event={event} />
+          <EventItem key={i} event={event} />
         ))}
       </div>
     </>
