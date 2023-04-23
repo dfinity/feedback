@@ -14,7 +14,7 @@ export default function App() {
       <div tw="w-screen overflow-x-hidden">
         <Router>
           <Navbar />
-          <div tw="max-w-[800px] mx-auto p-4 mt-1">
+          <div tw="max-w-[800px] min-h-[400px] mx-auto p-4 mt-1">
             <Routes>
               <Route path="/" element={<TopicsPage />} />
               <Route path="/topic/:id" element={<TopicPage />} />
