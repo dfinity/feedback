@@ -59,6 +59,8 @@ export default function parseJiraXml(xml: string): ImportTopic[] {
     return {
       importId: { jira: getField(item, 'key') },
       status,
+      createTime: new Date(getField(item, 'created')).getTime(),
+      editTime: new Date(getField(item, 'updated')).getTime(),
       title,
       description,
       links,

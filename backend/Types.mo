@@ -30,6 +30,8 @@ module {
     public type ImportEdit = Edit and {
       importId : ImportId;
       status : Status;
+      createTime : Int;
+      editTime : Int;
     };
 
     public type ImportId = { #jira : Text };

@@ -350,7 +350,20 @@ shared ({ caller = installer }) actor class Main() {
     let user = assertCallerIsUser(log, caller);
     for (edit in edits.vals()) {
       let id = createTopic_(user, ?edit.importId, edit);
-      topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status = edit.status } });
+      topics.update(
+        #topic id,
+        func(topic : Types.Topic.State) : Types.Topic.State {
+          {
+            topic with
+            status = edit.status;
+            internal = {
+              topic.internal with
+              createTime = edit.createTime;
+              editTime = edit.editTime;
+            };
+          };
+        },
+      );
     };
     log.ok();
   };
