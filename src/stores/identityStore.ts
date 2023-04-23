@@ -45,16 +45,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     AuthClient.create().then(async (client) => {
       try {
         if (await client.isAuthenticated()) {
-          await updateIdentity(client);
-          const detail = await getUserDetail();
-          console.log('User:', detail);
-          set({
-            user: {
-              type: 'ic',
-              client,
-              detail,
-            },
-          });
+          await finishLoginIC(client);
         }
       } catch (err) {
         handleError(err, 'Error while fetching user info!');
@@ -78,7 +69,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
       try {
         await new Promise((onSuccess: any, onError) =>
           client.login({
-            maxTimeToLive: BigInt(Date.now() + 7 * 24 * 60 * 60 * 1e9),
+            maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1e9),
             ...(options || {}),
             onSuccess,
             onError,
@@ -91,30 +82,26 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         throw err;
       }
 
-      await updateIdentity(client);
-      // const userId = await handlePromise(
-      //   fetchUser(),
-      //   'Signing in...',
-      //   'Error while signing in!',
-      // );
-      const detail = await getUserDetail();
-      console.log('User:', detail);
-      set({
-        user: {
-          type: 'ic',
-          client,
-          detail,
-        },
-      });
+      await finishLoginIC(client);
     }
     return client;
   };
 
-  const updateIdentity = async (client: AuthClient) => {
-    (
-      (backend as any)[Symbol.for('ic-agent-metadata')].config
-        .agent as HttpAgent
-    ).replaceIdentity(client.getIdentity());
+  const finishLoginIC = async (client: AuthClient) => {
+    const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
+      .agent as HttpAgent;
+    agent.replaceIdentity(client.getIdentity());
+
+    const detail = await getUserDetail();
+    console.log('User:', detail);
+    set({
+      user: {
+        type: 'ic',
+        client,
+        detail,
+      },
+    });
+    await useTopicStore.getState().search(); // TODO: refactor
   };
 
   const getUserDetail = async () => {
