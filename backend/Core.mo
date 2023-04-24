@@ -58,41 +58,30 @@ module {
     };
 
     func assertCallerOwnsTopic(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
-      switch (findUser(caller)) {
-        case null {
-          log.errAccess(#callerIsUser);
-        };
-        case (?user) {
-          let a = #callerOwnsTopic { user; topic };
-          if (state.userOwnsTopic.has(user, topic)) {
-            log.internal(#okAccess a);
-            ?();
-          } else {
-            log.errAccess(a);
-          };
+      do ? {
+        let user = findUser(caller)!;
+        let a = #callerOwnsTopic { user; topic };
+        if (state.userOwnsTopic.has(user, topic)) {
+          log.internal(#okAccess a);
+        } else {
+          log.errAccess(a)!;
         };
       };
     };
 
     public func assertCallerIsModerator(log : ReqLog, caller : Principal) : ?() {
-      if (caller != installer) {
-        switch (findUser(caller)) {
-          case null {
-            log.errAccess(#callerIsUser);
+      do ? {
+        if (caller != installer) {
+          let user = findUser(caller)!;
+          let a = #callerIsModerator;
+          if (state.userIsModerator.has(user)) {
+            log.internal(#okAccess a);
+          } else {
+            log.errAccess(a)!;
           };
-          case (?user) {
-            let a = #callerIsModerator;
-            if (state.userIsModerator.has(user)) {
-              log.internal(#okAccess a);
-              ?();
-            } else {
-              log.errAccess(a);
-            };
-          };
+        } else {
+          log.internal(#callerIsInstaller);
         };
-      } else {
-        log.internal(#callerIsInstaller);
-        ?();
       };
     };
 
