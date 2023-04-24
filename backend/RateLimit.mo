@@ -5,16 +5,22 @@ module {
 
   public class New(limit_count : Nat, limit_seconds : Nat) {
 
-    // check if the rate limit is reached.
-    // returns #ok when the rate limit has not been reached.
-    // returns #wait when it has.
-    public func check() : { #wait; #ok } {
+    public func doCount() : Nat {
       let t0 = start();
       var count = 0;
       for (time in entries.vals()) {
         if (time >= t0) count += 1;
       };
-      if (count > limit_count) #wait else #ok;
+      count;
+    };
+
+    // check if the rate limit is reached.
+    // returns #ok when the rate limit has not been reached.
+    // returns #wait when it has.
+    public func check() : { #wait; #ok } {
+      if (doCount() >= limit_count) {
+        #wait;
+      } else { #ok };
     };
 
     // attempt to "tick" the current time.
@@ -27,9 +33,10 @@ module {
       };
     };
 
-    public func debugGet() : { entries : [Int]; entry_index : Nat } = {
+    public func debugGet() : { entries : [Int]; entry_index : Nat; count : Nat } = {
       entries = Array.freeze(entries);
       entry_index;
+      count = doCount();
     };
 
     // -- internals helpers --
@@ -38,7 +45,7 @@ module {
 
     // The start of the current time window.
     func start() : Int {
-      Time.now() - limit_seconds * 1_000_000;
+      Time.now() - limit_seconds * 1_000_000_000;
     };
 
     // all initial time entries are far enough in the
