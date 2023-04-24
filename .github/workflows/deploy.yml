@@ -31,10 +31,10 @@ jobs:
         run: dfx start --background
       - run: npm run setup
       - run: npm test
-      - name: Create identity
-        run: echo '${{ secrets.DFX_IDENTITY_DEPLOY }}' >> ../deploy.pem
       - name: Import identity
-        run: dfx identity import --storage-mode=plaintext deploy ../deploy.pem
-      - run: dfx identity use deploy --network ic
-      - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic --identity deploy
+        run: |
+          echo '${{ secrets.DFX_IDENTITY_DEPLOY }}' >> ../deploy.pem
+          dfx identity import --storage-mode=plaintext deploy ../deploy.pem --network ic
+          dfx identity use deploy --network ic
+      - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic
       - run: dfx deploy --network ic
