@@ -30,7 +30,6 @@ jobs:
       - name: Start dfx
         run: dfx start --background
       - run: npm run setup
-      - run: dfx deploy
       - run: npm test
       - name: Create identity
         run: echo '${{ secrets.DFX_IDENTITY_DEPLOY }}' >> ../deploy.pem

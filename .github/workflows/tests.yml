@@ -30,5 +30,4 @@ jobs:
       - name: Start dfx
         run: dfx start --background
       - run: npm run setup
-      - run: dfx deploy
       - run: npm test
