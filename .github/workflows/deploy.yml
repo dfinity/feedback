@@ -2,10 +2,10 @@ name: Deploy
 
 on:
   push:
-    branches: [ "deploy" ]
+    branches: ['deploy']
   pull_request: ### TEMPORARY
 
-concurrency: 
+concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
@@ -19,20 +19,20 @@ jobs:
       DFX_VERSION: 0.13.1
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - name: Install dfx
-      run: echo y | DFX_VERSION=$DFX_VERSION bash -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
-    - name: Start dfx
-      run: dfx start --background
-    - run: npm run setup
-    - run: npm test
-    - run: printf "$DFX_IDENTITY_DEPLOY" >> ../deploy.pem
-    - run: dfx identity import deploy ../deploy.pem
-    - run: dfx identity use deploy --network ic
-    - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic
-    - run: dfx deploy --network ic
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dfx
+        run: echo y | DFX_VERSION=$DFX_VERSION bash -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+      - name: Start dfx
+        run: dfx start --background
+      - run: npm run setup
+      - run: npm test
+      - run: echo '${{ secrets.DFX_IDENTITY_DEPLOY_TEST }}' >> ../deploy.pem
+      - run: dfx identity import deploy ../deploy.pem
+      - run: dfx identity use deploy --network ic
+      - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic
+      - run: dfx deploy --network ic
