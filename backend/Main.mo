@@ -283,14 +283,6 @@ shared ({ caller = installer }) actor class Main() {
     );
   };
 
-  public query func debugTopicRateLimit() : async {
-    entries : [Int];
-    entry_index : Nat;
-    count : Nat;
-  } {
-    topicRateLimit.debugGet();
-  };
-
   public query ({ caller }) func getModeratorTopics() : async [Types.Topic.View] {
     let log = logger.Begin(caller, #moderatorQuery);
     assertCallerIsModerator(log, caller);
