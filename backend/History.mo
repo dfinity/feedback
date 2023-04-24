@@ -113,7 +113,7 @@ module {
     okWithTopicId : Types.Topic.RawId -> Types.Topic.RawId;
     okWithUserId : Types.User.RawId -> Types.User.RawId;
     errAccess : AccessPredicate -> ();
-    errInvalidTopicEdit : () -> async* None;
+    errInvalidTopicEdit : () -> ?None;
   };
 
   ///
@@ -198,9 +198,9 @@ module {
         addResponse(#errAccess(a));
       };
 
-      public func errInvalidTopicEdit() : async* None {
+      public func errInvalidTopicEdit() : ?None {
         addResponse(#errInvalidTopicEdit);
-        throw Error.reject("invalid topic edit.");
+        null;
       };
 
       public func errLimitTopicCreate() {
