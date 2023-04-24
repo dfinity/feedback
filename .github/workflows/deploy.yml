@@ -1,9 +1,9 @@
-name: Tests
+name: Deploy
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
+    branches: [ "deploy" ]
+  pull_request: ### TEMPORARY
 
 concurrency: 
   group: ${{ github.head_ref || github.run_id }}
@@ -31,3 +31,8 @@ jobs:
       run: dfx start --background
     - run: npm run setup
     - run: npm test
+    - run: printf "$DFX_IDENTITY_DEPLOY_TEST" >> ../deploy.pem
+    - run: dfx identity import deploy ../deploy.pem
+    - run: dfx identity use deploy --network ic
+    - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic
+    - run: dfx deploy --network ic
