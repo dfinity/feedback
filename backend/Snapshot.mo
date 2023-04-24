@@ -110,11 +110,14 @@ module {
   // to do -- open PR for motoko-base.
   func iterAll<X>(iters : [Iter<X>]) : Iter<X> {
     var all = object { public func next() : ?X { null } };
-    for (j in Iter.revRange(0, iters.size())) {
-      let jj = Int.abs(j);
-      all := iterAppend(iters[jj], all);
+    var i : Int = iters.size() - 1;
+    loop {
+      all := iterAppend(iters[Int.abs(i)], all);
+      i := i - 1;
+      if (i < 0) {
+        return all;
+      };
     };
-    all;
   };
 
   public func getAll(s : State.State) : Chunk {
