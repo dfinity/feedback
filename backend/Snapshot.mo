@@ -16,10 +16,10 @@ module {
     #user : (UserId, Types.User.State);
     #topic : (TopicId, Types.Topic.State);
     #team : (TeamId, Types.Team.State);
-    #principalIsUser : (Principal, Types.User.Id);
+    #principalIsUser : (Principal, UserId);
     #userTeamMember : (UserId, TeamId);
     #userIsModerator : UserId;
-    #userSubmitsTopic : (UserId, Types.Topic.Id);
+    #userSubmitsTopic : (UserId, TopicId);
     #userOwnsTopic : (UserId, TopicId);
     #userTopicVote : (UserId, TopicId, TopicUserVote);
   };
@@ -38,18 +38,62 @@ module {
     public func principalIsUser((p : Principal, u : UserId)) : Entry {
       #principalIsUser(p, u);
     };
+    public func userTeamMember((u : UserId, t : TeamId, ())) : Entry {
+      #userTeamMember(u, t);
+    };
+    public func userIsModerator((u : UserId, ())) : Entry {
+      #userIsModerator(u);
+    };
+    public func userSubmitsTopic((u : UserId, t : TopicId, ())) : Entry {
+      #userSubmitsTopic(u, t);
+    };
+    public func userOwnsTopic((u : UserId, t : TopicId, ())) : Entry {
+      #userOwnsTopic(u, t);
+    };
+    public func userTopicVote((u : UserId, t : TopicId, v : TopicUserVote)) : Entry {
+      #userTopicVote(u, t, v);
+    };
 
-    // to do:
-    // #userTeamMember : (UserId, TeamId);
-    // #userIsModerator : UserId;
-    // #userSubmitsTopic : (UserId, Types.Topic.Id);
-    // #userOwnsTopic : (UserId, TopicId);
-    // #userTopicVote : (UserId, TopicId, TopicUserVote);
   };
 
   public type Chunk = [Entry];
 
   type Iter<X> = Iter.Iter<X>;
+
+  // to do -- open PR for motoko-base.
+  func iterTrie2D<X, Y, Z>(t : Trie.Trie2D<X, Y, Z>) : Iter<(X, Y, Z)> {
+    // maybe there's a way to elimninate some type args, but they
+    // seemed required at the time of authoring them.
+    iterFlatten(
+      Iter.map<(X, Trie.Trie<Y, Z>), Iter<(X, Y, Z)>>(
+        Trie.iter<X, Trie.Trie<Y, Z>>(t),
+        func(x : X, t2 : Trie.Trie<Y, Z>) : Iter<(X, Y, Z)> {
+          Iter.map<(Y, Z), (X, Y, Z)>(
+            Trie.iter<Y, Z>(t2),
+            func(y : Y, z : Z) : (X, Y, Z) { (x, y, z) },
+          );
+        },
+      )
+    );
+  };
+
+  // to do -- open PR for motoko-base.
+  func iterFlatten<X>(i : Iter<Iter<X>>) : Iter<X> {
+    object {
+      var inner = i.next();
+      public func next() : ?X {
+        switch inner {
+          case null null;
+          case (?j) {
+            switch (j.next()) {
+              case (?x) ?x;
+              case null { inner := i.next(); next() };
+            };
+          };
+        };
+      };
+    };
+  };
 
   // to do -- open PR for motoko-base.
   func iterAppend<X>(i1 : Iter<X>, i2 : Iter<X>) : Iter<X> {
@@ -74,38 +118,52 @@ module {
   };
 
   public func getAll(s : State.State) : Chunk {
-    // compiler says it cannot infer type args.
-    let users = Iter.map<(UserId, Types.User.State), Entry>(
+    let users = Iter.map(
       Trie.iter(s.users.map),
       Cons.user,
     );
 
-    // compiler says it cannot infer type args.
-    let topics = Iter.map<(TopicId, Types.Topic.State), Entry>(
+    let topics = Iter.map(
       Trie.iter(s.topics.map),
       Cons.topic,
     );
 
-    // compiler says it cannot infer type args.
-    let teams = Iter.map<(TeamId, Types.Team.State), Entry>(
+    let teams = Iter.map(
       Trie.iter(s.teams.map),
       Cons.team,
     );
 
-    // compiler says it cannot infer type args.
-    let principalIsUser = Iter.map<(Principal, UserId), Entry>(
+    let principalIsUser = Iter.map(
       Trie.iter(s.principals.map),
       Cons.principalIsUser,
     );
 
-    // to do:
-    // #userTeamMember : (UserId, TeamId);
-    // #userIsModerator : UserId;
-    // #userSubmitsTopic : (UserId, Types.Topic.Id);
-    // #userOwnsTopic : (UserId, TopicId);
-    // #userTopicVote : (UserId, TopicId, TopicUserVote);
+    let userTeamMember = Iter.map(
+      iterTrie2D(s.userTeamMember.aB),
+      Cons.userTeamMember,
+    );
 
-    let all = iterAll([users, topics, teams, principalIsUser]);
+    let userIsModerator = Iter.map(
+      Trie.iter(s.userIsModerator.map),
+      Cons.userIsModerator,
+    );
+
+    let userSubmitsTopic = Iter.map(
+      iterTrie2D(s.userSubmitsTopic.aB),
+      Cons.userSubmitsTopic,
+    );
+
+    let userOwnsTopic = Iter.map(
+      iterTrie2D(s.userOwnsTopic.aB),
+      Cons.userOwnsTopic,
+    );
+
+    let userTopicVote = Iter.map(
+      iterTrie2D(s.userTopicVotes.aB),
+      Cons.userTopicVote,
+    );
+
+    let all = iterAll([users, topics, teams, principalIsUser, userTeamMember, userIsModerator, userSubmitsTopic, userOwnsTopic, userTopicVote]);
     Iter.toArray(all);
   };
 };
