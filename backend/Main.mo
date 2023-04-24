@@ -48,7 +48,8 @@ shared ({ caller = installer }) actor class Main() {
 
   let users = Relate.OO.Map(state_v0.users, Types.User.idHash, Types.User.idEqual);
   let topics = Relate.OO.Map(state_v0.topics, Types.Topic.idHash, Types.Topic.idEqual);
-  let topicRateLimit = RateLimit.New(137, 60); // 137 per min.
+//  let topicRateLimit = RateLimit.New(137, 60); // 137 per min.
+  let topicRateLimit = RateLimit.New(1, 2); // 1 per 2 sec.
   let teams = Relate.OO.Map(state_v0.teams, Types.Team.idHash, Types.Team.idEqual);
   let principals = Relate.OO.Map(state_v0.principals, Principal.hash, Principal.equal);
 
