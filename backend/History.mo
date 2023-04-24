@@ -45,9 +45,9 @@ module {
   };
 
   public type Internal = {
-    #callerIsInstaller;
-    #callerIsUser : UserId;
-    #okAccess : AccessPredicate;
+    #callerIsInstaller; // Implies all access checks will pass.
+    #callerIsUser : UserId; // like AccessPredicate, but always successful, and carries UserId.
+    #okAccess : AccessPredicate; // record successsful access check.
   };
 
   public type Response = {
