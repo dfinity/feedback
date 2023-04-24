@@ -285,6 +285,7 @@ shared ({ caller = installer }) actor class Main() {
   public query func debugTopicRateLimit() : async {
     entries : [Int];
     entry_index : Nat;
+    count : Nat;
   } {
     topicRateLimit.debugGet();
   };
