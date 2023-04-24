@@ -30,16 +30,19 @@ module {
     public type ImportEdit = Edit and {
       importId : ImportId;
       status : Status;
+      createTime : Int;
+      editTime : Int;
     };
 
     public type ImportId = { #jira : Text };
 
+    // milliseconds since Unix epoch
     public type Internal = {
-      // submitter : User.Id; -- Use separate relation?
-      // owner : User.Id;  -- Use separate relation?
-      createTime : Int; // milliseconds since Unix epoch
-      editTime : Int; // milliseconds since Unix epoch
-      voteTime : ?Int; // milliseconds since Unix epoch
+      createTime : Int;
+      editTime : Int; // initially = createTime
+      voteTime : ?Int; // initially null
+      modTime : ?Int; // initially null
+      statusTime : Int; // initially = createTime
     };
 
     public type State = {
@@ -59,6 +62,8 @@ module {
       createTime : Int; // milliseconds since Unix epoch
       editTime : Int; // milliseconds since Unix epoch
       voteTime : ?Int; // milliseconds since Unix epoch
+      modTime : ?Int; // initially null
+      statusTime : Int; // initially = createTime
       upVoters : Nat;
       downVoters : Nat;
       yourVote : UserVote;

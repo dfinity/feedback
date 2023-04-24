@@ -13,18 +13,18 @@ export default function QueuePage() {
   const [topics, setTopics] = useState<Topic[] | undefined>();
 
   const user = useIdentity();
-  const getModeratorQueue = useTopicStore((state) => state.getModQueue);
+  const getModQueue = useTopicStore((state) => state.getModQueue);
   const setModStatus = useTopicStore((state) => state.setModStatus);
 
   useEffect(() => {
     if (user) {
-      getModeratorQueue()
+      getModQueue()
         .then((topics) => setTopics(topics))
         .catch((err) =>
           handleError(err, 'Error while fetching moderator queue!'),
         );
     }
-  }, [getModeratorQueue, user]);
+  }, [getModQueue, user]);
 
   const changeStatus = (topic: Topic, modStatus: ModStatus) => {
     setModStatus(topic, modStatus).catch((err) => {
