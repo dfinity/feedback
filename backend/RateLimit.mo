@@ -38,7 +38,7 @@ module {
 
     // The start of the current time window.
     func start() : Int {
-      Time.now() - limit_seconds * 1_000_000;
+      Time.now() - limit_seconds * 1_000_000_000;
     };
 
     // all initial time entries are far enough in the
