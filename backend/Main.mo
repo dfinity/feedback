@@ -11,6 +11,7 @@ import Trie "mo:base/Trie";
 import Array "mo:base/Array";
 import Order "mo:base/Order";
 import Option "mo:base/Option";
+import Error "mo:base/Error";
 
 import Types "Types";
 import State "State";
@@ -18,6 +19,7 @@ import History "History";
 import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
+import RateLimit "RateLimit";
 
 shared ({ caller = installer }) actor class Main() {
 
@@ -48,6 +50,8 @@ shared ({ caller = installer }) actor class Main() {
   let topics = Relate.OO.Map(state_v0.topics, Types.Topic.idHash, Types.Topic.idEqual);
   let teams = Relate.OO.Map(state_v0.teams, Types.Team.idHash, Types.Team.idEqual);
   let principals = Relate.OO.Map(state_v0.principals, Principal.hash, Principal.equal);
+
+  let topicRateLimit = RateLimit.New(5, 5); // 5 per 5 seconds.
 
   // # OO Wrappers for relations.
   //
@@ -227,6 +231,7 @@ shared ({ caller = installer }) actor class Main() {
         case (?t1, ?t2) Int.max(t1, t2);
         case (_, ?t2) t2;
         case (?t1, _) t1;
+        case (_, _) t0;
       },
     );
   };
@@ -356,6 +361,13 @@ shared ({ caller = installer }) actor class Main() {
   public shared ({ caller }) func createTopic(edit : Types.Topic.Edit) : async Types.Topic.RawId {
     let log = logger.Begin(caller, #createTopic { edit });
     let user = assertCallerIsUser(log, caller);
+    switch (topicRateLimit.tick()) {
+      case (#ok) {};
+      case (#wait) {
+        log.errLimitTopicCreate();
+        throw Error.reject("reached rate limit for topic creation."); // putting this throw within errLimitTopicCreate leads to compiler bug.
+      };
+    };
     if (userIsModerator_(caller, user) or Validate.Topic.edit(edit)) {
       let id = createTopic_(user, null, edit);
       log.okWithTopicId(id);

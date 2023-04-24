@@ -57,6 +57,7 @@ module {
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
     #errInvalidTopicEdit;
+    #errLimitTopicCreate;
   };
 
   public type AccessPredicate = {
@@ -200,6 +201,10 @@ module {
       public func errInvalidTopicEdit() : async* None {
         addResponse(#errInvalidTopicEdit);
         throw Error.reject("invalid topic edit.");
+      };
+
+      public func errLimitTopicCreate() {
+        addResponse(#errLimitTopicCreate);
       };
     };
   };
