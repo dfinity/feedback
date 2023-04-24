@@ -182,6 +182,8 @@ shared ({ caller = installer }) actor class Main() {
       createTime = state.internal.createTime;
       editTime = state.internal.editTime;
       voteTime = state.internal.voteTime;
+      modTime = state.internal.modTime;
+      statusTime = state.internal.statusTime;
       upVoters;
       downVoters;
       status = state.status;
@@ -208,6 +210,25 @@ shared ({ caller = installer }) actor class Main() {
   };
 
   public type SearchSort = { #votes; #activity };
+
+  // The most-recent time among all time stamps.
+  func topicTime(t : Types.Topic.Internal) : Int {
+    let t0 = Int.max(
+      t.editTime,
+      Int.max(
+        t.createTime,
+        t.statusTime,
+      ),
+    );
+    Int.max(
+      t0,
+      switch (t.voteTime, t.modTime) {
+        case (?t1, ?t2) Int.max(t1, t2);
+        case (_, ?t2) t2;
+        case (?t1, _) t1;
+      },
+    );
+  };
 
   public query ({ caller }) func searchTopics(searchSort : SearchSort) : async [Types.Topic.View] {
     let maybeUser = findUser(caller);
@@ -249,12 +270,7 @@ shared ({ caller = installer }) actor class Main() {
             // Prefer topics with recent votes.
             // If no votes at all, then use edit time.
             // In all cases "bigger time" is "less."
-            switch (t1.voteTime, t2.voteTime) {
-              case (?time1, ?time2) Int.compare(time2, time1);
-              case (?_, _) #less;
-              case (_, ?_) #greater;
-              case _ Int.compare(t2.editTime, t1.editTime);
-            };
+            Int.compare(topicTime(t2), topicTime(t1));
           };
         };
       },
@@ -294,7 +310,7 @@ shared ({ caller = installer }) actor class Main() {
       ) : Order.Order {
         // Prefer topics with recent edits.
         // In all cases "bigger time" is "less" (earlier).
-        Int.compare(t2.editTime, t1.editTime);
+        Int.compare(topicTime(t2), topicTime(t1));
       },
     );
   };
@@ -309,9 +325,12 @@ shared ({ caller = installer }) actor class Main() {
   func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
     let topic = nextTopicId;
     nextTopicId += 1;
+    let timeNow = Time.now();
     let internal = {
-      createTime = Time.now() / 1_000_000;
-      editTime = Time.now() / 1_000_000;
+      createTime = timeNow / 1_000_000;
+      modTime = null : ?Int;
+      statusTime = timeNow / 1_000_000;
+      editTime = timeNow / 1_000_000;
       voteTime = null : ?Int;
     };
     topics.put(
@@ -447,14 +466,14 @@ shared ({ caller = installer }) actor class Main() {
   public shared ({ caller }) func setTopicStatus(id : Types.Topic.RawId, status : Types.Topic.Status) : async () {
     let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
     assertCallerOwnsTopic(log, caller, #topic id);
-    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status } });
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; internal = { topic.internal with statusTime = Time.now() } } });
     log.ok();
   };
 
   public shared ({ caller }) func setTopicModStatus(id : Types.Topic.RawId, modStatus : Types.Topic.ModStatus) : async () {
     let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
     assertCallerIsModerator(log, caller);
-    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus } });
+    topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; internal = { topic.internal with modTime = ?Time.now() } } });
     log.ok();
   };
 
