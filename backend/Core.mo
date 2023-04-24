@@ -59,7 +59,7 @@ module {
 
     func assertCallerOwnsTopic(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
       do ? {
-        let user = findUser(caller)!;
+        let user = assertCallerIsUser(log, caller)!;
         let a = #callerOwnsTopic { user; topic };
         if (state.userOwnsTopic.has(user, topic)) {
           log.internal(#okAccess a);
@@ -72,7 +72,7 @@ module {
     public func assertCallerIsModerator(log : ReqLog, caller : Principal) : ?() {
       do ? {
         if (caller != installer) {
-          let user = findUser(caller)!;
+          let user = assertCallerIsUser(log, caller)!;
           let a = #callerIsModerator;
           if (state.userIsModerator.has(user)) {
             log.internal(#okAccess a);
