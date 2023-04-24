@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
-import { ImportId, Status } from '../declarations/backend/backend.did';
-import { View } from '../../.dfx/local/canisters/backend/backend.did';
+import { ImportId, Status, View } from '../declarations/backend/backend.did';
 
 // Dev console access
 (window as any).BACKEND = backend;
@@ -10,6 +9,8 @@ export type TopicStatus = 'open' | 'next' | 'completed' | 'closed';
 export type ModStatus = 'pending' | 'approved' | 'rejected';
 export type VoteStatus = 1 | 0 | -1;
 export type SearchSort = 'votes' | 'activity';
+
+export const SEARCH_SORTS = ['activity', 'votes'];
 
 export interface TopicInfo {
   title: string;
@@ -30,13 +31,20 @@ export interface Topic extends TopicInfo {
   importId?: { type: string; id: string } | undefined;
 }
 
+export interface ImportTopic extends TopicInfo {
+  importId: ImportId;
+  status: TopicStatus;
+  createTime: number;
+  editTime: number;
+}
+
 export interface TopicState {
   topics: Topic[];
   sort: SearchSort;
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
-  bulkCreate(infoArray: TopicInfo[]): Promise<void>;
+  importAll(infoArray: TopicInfo[]): Promise<void>;
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
@@ -90,7 +98,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
       set({ topics });
-      console.log('Topics:', get().topics);
+      // console.log('Topics:', get().topics);
       return topics;
     },
     async find(id: string) {
@@ -117,8 +125,15 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }));
       // await get().search();
     },
-    async bulkCreate(infoArray: (TopicInfo & { importId: ImportId })[]) {
-      await backend.bulkCreateTopics(infoArray);
+    async importAll(infoArray: ImportTopic[]) {
+      await backend.importTopics(
+        infoArray.map((info) => ({
+          ...info,
+          status: { [info.status]: null } as Status,
+          createTime: BigInt(info.createTime),
+          editTime: BigInt(info.editTime),
+        })),
+      );
       await get().search();
     },
     async edit(id: string, info: TopicInfo) {

@@ -1,5 +1,5 @@
-import { TopicInfo } from '../stores/topicStore';
 import Turndown from 'turndown';
+import { ImportTopic, TopicStatus } from '../stores/topicStore';
 
 const turndown = new Turndown();
 
@@ -13,7 +13,7 @@ function htmlToMarkdown(html: string): string {
   return turndown.turndown(html);
 }
 
-export default function parseJiraXml(xml: string): TopicInfo[] {
+export default function parseJiraXml(xml: string): ImportTopic[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xml, 'text/xml');
 
@@ -40,14 +40,27 @@ export default function parseJiraXml(xml: string): TopicInfo[] {
     let description = htmlToMarkdown(htmlDecode(getField(item, 'description')));
 
     const links = getFields(item, 'link');
-    const match = /^\[([^\]]+)\]\n?\(([^)]+)\)$/.exec(description)?.[2];
+    const match = /^\[([^\]]+)\]\n?\(([^) ]+ ?[^)]*)\)$/.exec(description)?.[2];
     if (match) {
       description = '';
       links.unshift(match);
     }
 
+    const jiraStatus = getField(item, 'status');
+    let status: TopicStatus =
+      jiraStatus === 'In Progress' ||
+      jiraStatus === 'In Review' ||
+      jiraStatus === 'Staging'
+        ? 'next'
+        : jiraStatus === 'Done'
+        ? 'completed'
+        : 'open';
+
     return {
       importId: { jira: getField(item, 'key') },
+      status,
+      createTime: new Date(getField(item, 'created')).getTime(),
+      editTime: new Date(getField(item, 'updated')).getTime(),
       title,
       description,
       links,
