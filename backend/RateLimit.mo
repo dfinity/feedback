@@ -27,6 +27,11 @@ module {
       };
     };
 
+    public func debugGet() : { entries : [Int]; entry_index : Nat } = {
+      entries = Array.freeze(entries);
+      entry_index;
+    };
+
     // -- internals helpers --
 
     var entry_index = 0;
