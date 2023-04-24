@@ -21,7 +21,7 @@ if (network === localNetwork) {
 
 if (!existsSync(canisterIdPath)) {
   // Create empty canisters
-  spawnSync('dfx', ['canister', 'create', '--all'], { cwd: __dirname });
+  // spawnSync('dfx', ['canister', 'create', '--all'], { cwd: __dirname });
 
   if (!existsSync(canisterIdPath)) {
     throw new Error(
