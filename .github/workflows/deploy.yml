@@ -37,5 +37,5 @@ jobs:
       - name: Import identity
         run: dfx identity import --storage-mode=plaintext deploy ../deploy.pem
       - run: dfx identity use deploy --network ic
-      # - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic
+      - run: dfx identity set-wallet yyjym-vaaaa-aaaap-aa4va-cai --network ic --identity deploy
       - run: dfx deploy --network ic
