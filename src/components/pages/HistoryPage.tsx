@@ -5,6 +5,7 @@ import { backend } from '../../declarations/backend';
 import { Event } from '../../declarations/backend/backend.did';
 import useIdentity from '../../hooks/useIdentity';
 import { handleError } from '../../utils/handlers';
+import { unwrap } from '../../utils/unwrap';
 import Loading from '../Loading';
 
 interface EventItemProps {
@@ -53,11 +54,13 @@ export default function HistoryPage() {
     if (user) {
       (async () => {
         try {
-          const eventCount = await backend.getLogEventCount();
+          const eventCount = unwrap(await backend.getLogEventCount());
           const minEventNumber = eventCount - BigInt(maxEventCount);
-          const events = await backend.getLogEvents(
-            minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
-            eventCount,
+          const events = unwrap(
+            await backend.getLogEvents(
+              minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
+              eventCount,
+            ),
           );
           events.reverse(); // Most recent events first
           console.log('Events:', events);
