@@ -45,6 +45,18 @@ module {
       caller == installer or state.userIsModerator.has(user);
     };
 
+    func assertUserExists(log : ReqLog, user : Types.User.Id) : ?() {
+      switch (state.users.get(user)) {
+        case null {
+          log.errCheck(#userExists(user));
+        };
+        case (?_) {
+          log.internal(#okCheck(#userExists(user)));
+          ?();
+        };
+      };
+    };
+
     func assertCallerIsUser(log : ReqLog, caller : Principal) : ?Types.User.Id {
       switch (findUser(caller)) {
         case null {
@@ -136,11 +148,17 @@ module {
         topic.edit and userFields with
         id = rawId;
         importId = topic.importId;
-        createTime = topic.internal.createTime;
-        editTime = topic.internal.editTime;
-        voteTime = topic.internal.voteTime;
-        modTime = topic.internal.modTime;
-        statusTime = topic.internal.statusTime;
+        createTime = topic.stamp.createTime / 1000;
+        editTime = topic.stamp.editTime / 1000;
+        voteTime = switch (topic.stamp.voteTime) {
+          case null null;
+          case (?t) ?(t / 1000);
+        };
+        modTime = switch (topic.stamp.modTime) {
+          case null null;
+          case (?t) ?(t / 1000);
+        };
+        statusTime = topic.stamp.statusTime / 1000;
         upVoters;
         downVoters;
         status = topic.status;
@@ -160,7 +178,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setUserIsModerator { user = #user id; isMod });
         assertCallerIsModerator(log, caller)!;
-        ignore state.users.get(#user id)!;
+        assertUserExists(log, #user id)!;
         state.userIsModerator.put(#user id);
         log.ok()!;
       };
@@ -169,7 +187,7 @@ module {
     public type SearchSort = { #votes; #activity };
 
     // The most-recent time among all time stamps.
-    func topicTime(t : Types.Topic.Internal) : Int {
+    func topicTime(t : Types.Topic.Stamp) : Int {
       let t0 = Int.max(
         t.editTime,
         Int.max(
@@ -284,11 +302,11 @@ module {
     func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
       let topic = state.nextTopicId();
       let timeNow = Time.now();
-      let internal = {
-        createTime = timeNow / 1_000_000;
+      let stamp = {
+        createTime = timeNow;
         modTime = null : ?Int;
-        statusTime = timeNow / 1_000_000;
-        editTime = timeNow / 1_000_000;
+        statusTime = timeNow;
+        editTime = timeNow;
         voteTime = null : ?Int;
       };
       state.topics.put(
@@ -297,7 +315,7 @@ module {
           modStatus = #pending;
           edit;
           importId;
-          internal;
+          stamp;
           status = #open;
         },
       );
@@ -342,8 +360,8 @@ module {
               {
                 topic with
                 status = edit.status;
-                internal = {
-                  topic.internal with
+                stamp = {
+                  topic.stamp with
                   createTime = edit.createTime;
                   editTime = edit.editTime;
                 };
@@ -365,8 +383,8 @@ module {
             {
               topic with
               edit;
-              internal = {
-                topic.internal with editTime = Time.now() / 1_000_000
+              stamp = {
+                topic.stamp with editTime = Time.now()
               };
               // TODO: moderation for approved topic edits
               modStatus = switch (topic.modStatus) {
@@ -392,8 +410,8 @@ module {
             #topic id,
             func(topic : Types.Topic.State) : Types.Topic.State {
               {
-                topic with internal = {
-                  topic.internal with voteTime = ?(Time.now() / 1_000_000)
+                topic with stamp = {
+                  topic.stamp with voteTime = ?(Time.now())
                 };
               };
             },
@@ -407,7 +425,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
         assertCallerOwnsTopic(log, caller, #topic id)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; internal = { topic.internal with statusTime = Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
         log.ok()!;
       };
     };
@@ -416,7 +434,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
         assertCallerIsModerator(log, caller)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; internal = { topic.internal with modTime = ?Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?Time.now() } } });
         log.ok()!;
       };
     };
@@ -430,6 +448,16 @@ module {
           case null {
             let user = state.nextUserId();
             state.principals.put(caller, #user user);
+            let initUserState : Types.User.State = {
+              stamp = {
+                createTime = Time.now();
+              };
+              edit = {
+                name = "";
+                bioBlurb = "";
+              };
+            };
+            state.users.put(#user user, initUserState);
             user;
           };
           case (?(#user u)) u;
@@ -437,6 +465,7 @@ module {
         {
           id = log.okWithUserId(u);
           isModerator = userIsModerator_(caller, #user u);
+          isInstaller = caller == installer;
         };
       };
     };
@@ -449,6 +478,7 @@ module {
         case (?(#user u)) ?{
           id = u;
           isModerator = userIsModerator_(caller, #user u);
+          isInstaller = caller == installer;
         };
       };
     };
