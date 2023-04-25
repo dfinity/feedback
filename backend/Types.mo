@@ -100,7 +100,6 @@ module {
     public type View = {
       id : RawId;
       isModerator : Bool;
-      isInstaller : Bool;
     };
   };
 
