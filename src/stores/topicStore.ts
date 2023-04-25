@@ -90,6 +90,13 @@ export const useTopicStore = create<TopicState>((set, get) => {
       : undefined,
   });
 
+  const unwrap = <T>(optional: [T] | []): T => {
+    if (optional.length) {
+      return optional[0];
+    }
+    throw new Error('Received null');
+  };
+
   return {
     topics: [],
     sort: 'activity',
@@ -109,7 +116,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       return mapTopic(result[0]);
     },
     async create(info: TopicInfo) {
-      const id = String(await backend.createTopic(info));
+      const id = String(unwrap(await backend.createTopic(info)));
       const topic: Topic = {
         ...info,
         id,
@@ -126,13 +133,15 @@ export const useTopicStore = create<TopicState>((set, get) => {
       // await get().search();
     },
     async importAll(infoArray: ImportTopic[]) {
-      await backend.importTopics(
-        infoArray.map((info) => ({
-          ...info,
-          status: { [info.status]: null } as Status,
-          createTime: BigInt(info.createTime),
-          editTime: BigInt(info.editTime),
-        })),
+      unwrap(
+        await backend.importTopics(
+          infoArray.map((info) => ({
+            ...info,
+            status: { [info.status]: null } as Status,
+            createTime: BigInt(info.createTime),
+            editTime: BigInt(info.editTime),
+          })),
+        ),
       );
       await get().search();
     },
@@ -146,7 +155,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
             topic.modStatus === 'rejected' ? 'pending' : topic.modStatus,
         });
       }
-      await backend.editTopic(BigInt(id), info);
+      unwrap(await backend.editTopic(BigInt(id), info));
     },
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({
@@ -154,13 +163,15 @@ export const useTopicStore = create<TopicState>((set, get) => {
         votes: topic.votes + vote - topic.yourVote,
         yourVote: vote,
       });
-      await backend.voteTopic(
-        BigInt(topic.id),
-        vote === 1
-          ? { up: null }
-          : vote === -1
-          ? { down: null }
-          : { none: null },
+      unwrap(
+        await backend.voteTopic(
+          BigInt(topic.id),
+          vote === 1
+            ? { up: null }
+            : vote === -1
+            ? { down: null }
+            : { none: null },
+        ),
       );
     },
     async setStatus(id: string, status: TopicStatus) {
@@ -168,10 +179,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
       if (topic) {
         updateTopic({ ...topic, status });
       }
-      backend.setTopicStatus(BigInt(id), statusMap[status]);
+      unwrap(await backend.setTopicStatus(BigInt(id), statusMap[status]));
     },
     async getModQueue() {
-      const topics = (await backend.getModeratorTopics()).map(mapTopic);
+      const topics = unwrap(await backend.getModeratorTopics()).map(mapTopic);
       console.log('Queue:', topics);
       return topics;
     },
@@ -180,9 +191,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...topic,
         modStatus,
       });
-      await backend.setTopicModStatus(BigInt(topic.id), {
-        [modStatus]: null,
-      } as any);
+      unwrap(
+        await backend.setTopicModStatus(BigInt(topic.id), {
+          [modStatus]: null,
+        } as any),
+      );
     },
   };
 });
