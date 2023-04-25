@@ -101,4 +101,8 @@ shared ({ caller = installer }) actor class Main() {
     core.fastLogin(caller);
   };
 
+  public query func getModerators() : async [(Types.User.Id, ())] {
+    Iter.toArray(Trie.iter<Types.User.Id, ()>(state_v0.userIsModerator.map));
+  };
+
 };
