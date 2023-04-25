@@ -105,4 +105,8 @@ shared ({ caller = installer }) actor class Main() {
     core.getModerators(caller);
   };
 
+  public query ({ caller }) func isInstaller() : async Bool {
+    caller == installer;
+  };
+
 };
