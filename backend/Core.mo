@@ -148,17 +148,17 @@ module {
         topic.edit and userFields with
         id = rawId;
         importId = topic.importId;
-        createTime = topic.internal.createTime / 1000;
-        editTime = topic.internal.editTime / 1000;
-        voteTime = switch (topic.internal.voteTime) {
+        createTime = topic.stamp.createTime / 1000;
+        editTime = topic.stamp.editTime / 1000;
+        voteTime = switch (topic.stamp.voteTime) {
           case null null;
           case (?t) ?(t / 1000);
         };
-        modTime = switch (topic.internal.modTime) {
+        modTime = switch (topic.stamp.modTime) {
           case null null;
           case (?t) ?(t / 1000);
         };
-        statusTime = topic.internal.statusTime / 1000;
+        statusTime = topic.stamp.statusTime / 1000;
         upVoters;
         downVoters;
         status = topic.status;
@@ -187,7 +187,7 @@ module {
     public type SearchSort = { #votes; #activity };
 
     // The most-recent time among all time stamps.
-    func topicTime(t : Types.Topic.Internal) : Int {
+    func topicTime(t : Types.Topic.Stamp) : Int {
       let t0 = Int.max(
         t.editTime,
         Int.max(
@@ -302,7 +302,7 @@ module {
     func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
       let topic = state.nextTopicId();
       let timeNow = Time.now();
-      let internal = {
+      let stamp = {
         createTime = timeNow;
         modTime = null : ?Int;
         statusTime = timeNow;
@@ -315,7 +315,7 @@ module {
           modStatus = #pending;
           edit;
           importId;
-          internal;
+          stamp;
           status = #open;
         },
       );
@@ -360,8 +360,8 @@ module {
               {
                 topic with
                 status = edit.status;
-                internal = {
-                  topic.internal with
+                stamp = {
+                  topic.stamp with
                   createTime = edit.createTime;
                   editTime = edit.editTime;
                 };
@@ -383,8 +383,8 @@ module {
             {
               topic with
               edit;
-              internal = {
-                topic.internal with editTime = Time.now()
+              stamp = {
+                topic.stamp with editTime = Time.now()
               };
               // TODO: moderation for approved topic edits
               modStatus = switch (topic.modStatus) {
@@ -410,8 +410,8 @@ module {
             #topic id,
             func(topic : Types.Topic.State) : Types.Topic.State {
               {
-                topic with internal = {
-                  topic.internal with voteTime = ?(Time.now())
+                topic with stamp = {
+                  topic.stamp with voteTime = ?(Time.now())
                 };
               };
             },
@@ -425,7 +425,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
         assertCallerOwnsTopic(log, caller, #topic id)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; internal = { topic.internal with statusTime = Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
         log.ok()!;
       };
     };
@@ -434,7 +434,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
         assertCallerIsModerator(log, caller)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; internal = { topic.internal with modTime = ?Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?Time.now() } } });
         log.ok()!;
       };
     };
@@ -449,7 +449,7 @@ module {
             let user = state.nextUserId();
             state.principals.put(caller, #user user);
             let initUserState : Types.User.State = {
-              internal = {
+              stamp = {
                 createTime = Time.now();
               };
               edit = {

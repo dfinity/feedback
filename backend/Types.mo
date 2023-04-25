@@ -38,7 +38,7 @@ module {
 
     // nanosec since Unix epoch.
     // (raw IC times here).
-    public type Internal = {
+    public type Stamp = {
       createTime : Int;
       editTime : Int; // initially = createTime
       voteTime : ?Int; // initially null
@@ -49,7 +49,7 @@ module {
     public type State = {
       edit : Edit;
       importId : ?ImportId;
-      internal : Internal;
+      stamp : Stamp;
       status : Status;
       modStatus : ModStatus;
     };
@@ -88,13 +88,13 @@ module {
       bioBlurb : Text; // one-liner, like on Twitter
     };
 
-    public type Internal = {
+    public type Stamp = {
       createTime : Int; // milliseconds since Unix epoch
     };
 
     public type State = {
       edit : Edit;
-      internal : Internal;
+      stamp : Stamp;
     };
 
     public type View = {
@@ -118,13 +118,13 @@ module {
       description : Text; // one-liner? may be more than one line?
     };
 
-    public type Internal = {
+    public type Stamp = {
       createTime : Int; // milliseconds since Unix epoch
     };
 
     public type State = {
       edit : Edit;
-      internal : Internal;
+      stamp : Stamp;
     };
   };
 
