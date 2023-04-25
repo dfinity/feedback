@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
 import { ImportId, Status, View } from '../declarations/backend/backend.did';
+import { unwrap } from '../utils/unwrap';
 
 // Dev console access
 (window as any).BACKEND = backend;
@@ -89,13 +90,6 @@ export const useTopicStore = create<TopicState>((set, get) => {
       ? mapImportId(result.importId[0])
       : undefined,
   });
-
-  const unwrap = <T>(optional: [T] | []): T => {
-    if (optional.length) {
-      return optional[0];
-    }
-    throw new Error('Received null');
-  };
 
   return {
     topics: [],
