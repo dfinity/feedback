@@ -32,6 +32,13 @@ export type User = (
 // TODO: refactor
 const applicationName = 'IC Feedback';
 
+// TODO: refactor
+const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
+  .agent as HttpAgent;
+if (import.meta.env.PROD) {
+  (agent as any)._host = 'https://icp0.io/';
+}
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
