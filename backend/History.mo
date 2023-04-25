@@ -45,9 +45,9 @@ module {
   };
 
   public type Internal = {
-    #callerIsInstaller;
-    #callerIsUser : UserId;
-    #okAccess : AccessPredicate;
+    #callerIsInstaller; // Implies all access checks will pass.
+    #callerIsUser : UserId; // like AccessPredicate, but always successful, and carries UserId.
+    #okAccess : AccessPredicate; // record successsful access check.
   };
 
   public type Response = {
@@ -108,12 +108,13 @@ module {
 
   public type ReqLog = {
     internal : Internal -> ();
-    ok : () -> ();
-    okIf : Bool -> ();
+    ok : () -> ?();
+    okIf : Bool -> ?();
+    okWith : <A>(A) -> ?A;
     okWithTopicId : Types.Topic.RawId -> Types.Topic.RawId;
     okWithUserId : Types.User.RawId -> Types.User.RawId;
-    errAccess : AccessPredicate -> ();
-    errInvalidTopicEdit : () -> async* None;
+    errAccess : AccessPredicate -> ?None;
+    errInvalidTopicEdit : () -> ?None;
   };
 
   ///
@@ -174,14 +175,21 @@ module {
         add(#internal { requestId; internal });
       };
 
-      public func ok() {
+      public func ok() : ?() {
         addResponse(#ok);
+        ?();
       };
 
-      public func okIf(b : Bool) {
+      public func okIf(b : Bool) : ?() {
         if b { ok() } else {
           addResponse(#err);
+          null;
         };
+      };
+
+      public func okWith<X>(x : X) : ?X {
+        ignore ok();
+        ?x;
       };
 
       public func okWithTopicId(i : Types.Topic.RawId) : Types.Topic.RawId {
@@ -194,17 +202,19 @@ module {
         i;
       };
 
-      public func errAccess(a : AccessPredicate) {
+      public func errAccess(a : AccessPredicate) : ?None {
         addResponse(#errAccess(a));
+        null;
       };
 
-      public func errInvalidTopicEdit() : async* None {
+      public func errInvalidTopicEdit() : ?None {
         addResponse(#errInvalidTopicEdit);
-        throw Error.reject("invalid topic edit.");
+        null;
       };
 
-      public func errLimitTopicCreate() {
+      public func errLimitTopicCreate() : ?None {
         addResponse(#errLimitTopicCreate);
+        null;
       };
     };
   };
