@@ -465,7 +465,8 @@ module {
       do ? {
         let log = logger.Begin(caller, #moderatorQuery);
         assertCallerIsModerator(log, caller)!;
-        log.okWith(logger.getEvents(start, size))!;
+        log.ok()!; // want this response to be included in the result in next line.
+        logger.getEvents(start, size);
       };
     };
 
@@ -473,7 +474,8 @@ module {
       let log = logger.Begin(caller, #moderatorQuery);
       do ? {
         assertCallerIsModerator(log, caller)!;
-        log.okWith(logger.getSize())!;
+        log.ok()!; // want this response to be included in the result in next line.
+        logger.getSize();
       };
     };
 
