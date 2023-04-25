@@ -465,7 +465,6 @@ module {
         {
           id = log.okWithUserId(u);
           isModerator = userIsModerator_(caller, #user u);
-          isInstaller = caller == installer;
         };
       };
     };
@@ -478,7 +477,6 @@ module {
         case (?(#user u)) ?{
           id = u;
           isModerator = userIsModerator_(caller, #user u);
-          isInstaller = caller == installer;
         };
       };
     };
@@ -506,6 +504,15 @@ module {
         assertCallerIsModerator(log, caller)!;
         log.ok()!; // want this response to be included in the result in next line.
         logger.getSize();
+      };
+    };
+
+    public func getModerators(caller : Principal) : ?[(Types.User.Id, ())] {
+      let log = logger.Begin(caller, #moderatorQuery);
+      do ? {
+        assertCallerIsModerator(log, caller)!;
+        log.ok()!;
+        Iter.toArray(Trie.iter<Types.User.Id, ()>(stableState.userIsModerator.map));
       };
     };
 
