@@ -233,7 +233,7 @@ module {
       };
 
       public func has(a : A) : Bool {
-        Trie.find(stableUnRel.map, key<A>(hash, a), equal) != ?();
+        Trie.find(stableUnRel.map, key<A>(hash, a), equal) == ?();
       };
 
       public func put(a : A) {
