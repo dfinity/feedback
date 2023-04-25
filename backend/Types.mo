@@ -36,7 +36,8 @@ module {
 
     public type ImportId = { #jira : Text };
 
-    // milliseconds since Unix epoch
+    // nanosec since Unix epoch.
+    // (raw IC times here).
     public type Internal = {
       createTime : Int;
       editTime : Int; // initially = createTime
@@ -53,17 +54,18 @@ module {
       modStatus : ModStatus;
     };
 
+    // all times are msec, for frontend.
     public type View = Edit and {
       id : RawId;
       importId : ?ImportId;
       isOwner : Bool;
       // submitterName: Text;
       // ownerName: Text;
-      createTime : Int; // milliseconds since Unix epoch
-      editTime : Int; // milliseconds since Unix epoch
-      voteTime : ?Int; // milliseconds since Unix epoch
-      modTime : ?Int; // initially null
-      statusTime : Int; // initially = createTime
+      createTime : Int; // msec since Unix epoch
+      editTime : Int; // msec
+      voteTime : ?Int; // msec
+      modTime : ?Int; // msec, initially null
+      statusTime : Int; // msec, initially = createTime
       upVoters : Nat;
       downVoters : Nat;
       yourVote : UserVote;
@@ -98,6 +100,7 @@ module {
     public type View = {
       id : RawId;
       isModerator : Bool;
+      isInstaller : Bool;
     };
   };
 

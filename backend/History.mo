@@ -44,10 +44,15 @@ module {
     #moderatorQuery;
   };
 
+  public type Invariant = {
+    #userExists : UserId;
+  };
+
   public type Internal = {
     #callerIsInstaller; // Implies all access checks will pass.
     #callerIsUser : UserId; // like AccessPredicate, but always successful, and carries UserId.
     #okAccess : AccessPredicate; // record successsful access check.
+    #okCheck : Invariant;
   };
 
   public type Response = {
@@ -56,6 +61,7 @@ module {
     #okWithUser : { user : UserId };
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
+    #errCheck : Invariant;
     #errInvalidTopicEdit;
     #errLimitTopicCreate;
   };
@@ -114,6 +120,7 @@ module {
     okWithTopicId : Types.Topic.RawId -> Types.Topic.RawId;
     okWithUserId : Types.User.RawId -> Types.User.RawId;
     errAccess : AccessPredicate -> ?None;
+    errCheck : Invariant -> ?None;
     errInvalidTopicEdit : () -> ?None;
   };
 
@@ -204,6 +211,11 @@ module {
 
       public func errAccess(a : AccessPredicate) : ?None {
         addResponse(#errAccess(a));
+        null;
+      };
+
+      public func errCheck(i : Invariant) : ?None {
+        addResponse(#errCheck(i));
         null;
       };
 
