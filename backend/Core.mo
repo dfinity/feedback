@@ -45,8 +45,14 @@ module {
       caller == installer or state.userIsModerator.has(user);
     };
 
-    func userIsTopicEditor_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
-      caller == installer or state.userIsModerator.has(user) or state.userOwnsTopic.has(user, topic);
+    func userCanEditTopic_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
+      switch (state.topics.get(topic)) {
+        case null false;
+        case (?topicState) {
+          caller == installer or state.userIsModerator.has(user) or (topicState.modStatus != #approved and state.userOwnsTopic.has(user, topic));
+        };
+      };
+
     };
 
     func assertUserExists(log : ReqLog, user : Types.User.Id) : ?() {
@@ -168,7 +174,7 @@ module {
         };
         case (?user) {
           {
-            isEditable = userIsTopicEditor_(caller, user, id);
+            isEditable = userCanEditTopic_(caller, user, id);
             isOwner = maybeUserIsOwner(?user, id);
             yourVote = switch (state.userTopicVotes.get(user, id)) {
               case null #none;
