@@ -45,8 +45,14 @@ module {
       caller == installer or state.userIsModerator.has(user);
     };
 
-    func userIsTopicEditor_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
-      caller == installer or state.userIsModerator.has(user) or state.userOwnsTopic.has(user, topic);
+    func userCanEditTopic_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
+      switch (state.topics.get(topic)) {
+        case null false;
+        case (?topicState) {
+          caller == installer or state.userIsModerator.has(user) or (topicState.modStatus != #approved and state.userOwnsTopic.has(user, topic));
+        };
+      };
+
     };
 
     func assertUserExists(log : ReqLog, user : Types.User.Id) : ?() {
@@ -57,6 +63,18 @@ module {
         case (?_) {
           log.internal(#okCheck(#userExists(user)));
           ?();
+        };
+      };
+    };
+
+    func assertTopicStateExists(log : ReqLog, topic : Types.Topic.Id) : ?Types.Topic.State {
+      switch (state.topics.get(topic)) {
+        case null {
+          log.errCheck(#topicExists(topic));
+        };
+        case (?s) {
+          log.internal(#okCheck(#topicExists(topic)));
+          ?s;
         };
       };
     };
@@ -89,8 +107,11 @@ module {
       do ? {
         if (caller == installer) { return ?() };
         let user = assertCallerIsUser(log, caller)!;
+        let topicState = assertTopicStateExists(log, topic)!;
         let a = #callerCanEditTopic { user; topic };
-        if (state.userOwnsTopic.has(user, topic) or userIsModerator_(caller, user)) {
+        if (
+          state.userOwnsTopic.has(user, topic) and topicState.modStatus != #approved or userIsModerator_(caller, user)
+        ) {
           log.internal(#okAccess a);
         } else {
           log.errAccess(a)!;
@@ -153,7 +174,7 @@ module {
         };
         case (?user) {
           {
-            isEditable = userIsTopicEditor_(caller, user, id);
+            isEditable = userCanEditTopic_(caller, user, id);
             isOwner = maybeUserIsOwner(?user, id);
             yourVote = switch (state.userTopicVotes.get(user, id)) {
               case null #none;
@@ -427,8 +448,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #voteTopic { topic = #topic id; userVote });
         let success = do ? {
-          // validates arguments before updating relation.
-          ignore state.topics.get(#topic id)!;
+          ignore assertTopicStateExists(log, #topic id)!;
           let user = assertCallerIsUser(log, caller)!;
           state.userTopicVotes.put(user, #topic id, userVote);
           state.topics.update(
