@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import {
   FaCaretDown,
   FaCaretUp,
+  FaCheck,
   FaClock,
   FaEdit,
+  FaFlag,
   FaGithub,
   FaJira,
   FaRegCheckCircle,
@@ -53,7 +55,8 @@ export default function TopicView({
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
-  const changeStatus = useTopicStore((state) => state.setStatus);
+  const setStatus = useTopicStore((state) => state.setStatus);
+  const setModStatus = useTopicStore((state) => state.setModStatus);
   const breakpoint = useBreakpoint();
 
   const user = useIdentity();
@@ -85,7 +88,7 @@ export default function TopicView({
 
   const onChangeStatus = (topic: Topic, status: TopicStatus) => {
     handlePromise(
-      changeStatus(topic.id, status),
+      setStatus(topic.id, status),
       // 'Changing status...',
       undefined,
       'Error while changing status!',
@@ -216,72 +219,97 @@ export default function TopicView({
                   )}
                 </div>
               )}
-              {!hideModerationInfo && topic.modStatus !== 'approved' && (
-                <div tw="flex gap-2 items-center font-bold text-[#000a]">
-                  {topic.modStatus === 'pending' ? (
-                    <>
-                      <FaClock tw="text-teal-500" />
-                      <div>Under review</div>
-                    </>
-                  ) : topic.modStatus === 'rejected' ? (
-                    <>
-                      <FaTimes tw="text-orange-500" />
-                      <div>Changes requested</div>
-                    </>
-                  ) : (
-                    false
-                  )}
-                </div>
-              )}
-              {!!topic.isOwner && !hideModerationInfo && (
-                <div tw="flex mt-4">
-                  <div tw="flex flex-1">
-                    <ToolbarButton onClick={() => setEditing(true)}>
-                      <FaEdit />
-                      Edit
-                    </ToolbarButton>
-                  </div>
-                  <div tw="flex gap-2">
-                    {topic.status === 'open' && (
-                      <ToolbarButton
-                        // css={{ background: statusColors.next }}
-                        onClick={() => onChangeStatus(topic, 'next')}
-                      >
-                        <FaRegPlayCircle />
-                        Start
-                      </ToolbarButton>
-                    )}
-                    {topic.status === 'next' && (
-                      <ToolbarButton
-                        // css={{ background: statusColors.completed }}
-                        onClick={() => onChangeStatus(topic, 'completed')}
-                      >
-                        <FaRegCheckCircle />
-                        Complete
-                      </ToolbarButton>
-                    )}
-                    {(topic.status === 'open' || topic.status === 'next') && (
-                      <ToolbarButton
-                        // css={{ background: statusColors.closed }}
-                        onClick={() => onChangeStatus(topic, 'closed')}
-                      >
-                        <FaRegTimesCircle />
-                        Close
-                      </ToolbarButton>
-                    )}
-                    {(topic.status === 'completed' ||
-                      topic.status === 'closed') && (
-                      <ToolbarButton
-                        // css={{ background: statusColors.open }}
-                        onClick={() => onChangeStatus(topic, 'open')}
-                      >
-                        <FaRegDotCircle />
-                        Reopen
-                      </ToolbarButton>
+              {!hideModerationInfo &&
+                !user?.detail.isModerator &&
+                topic.modStatus !== 'approved' && (
+                  <div tw="flex gap-2 items-center font-bold text-[#000a]">
+                    {topic.modStatus === 'pending' ? (
+                      <>
+                        <FaClock tw="text-teal-500" />
+                        <div>Under review</div>
+                      </>
+                    ) : topic.modStatus === 'rejected' ? (
+                      <>
+                        <FaTimes tw="text-orange-500" />
+                        <div>Changes requested</div>
+                      </>
+                    ) : (
+                      false
                     )}
                   </div>
-                </div>
-              )}
+                )}
+              {(!!topic.isOwner || !!user?.detail.isModerator) &&
+                !hideModerationInfo && (
+                  <div tw="flex gap-2 mt-4">
+                    <div tw="flex flex-1">
+                      <ToolbarButton onClick={() => setEditing(true)}>
+                        <FaEdit />
+                        Edit
+                      </ToolbarButton>
+                    </div>
+                    {!!user?.detail.isModerator && (
+                      <div tw="hidden sm:flex gap-2">
+                        {topic.modStatus !== 'approved' && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.next }}
+                            onClick={() => setModStatus(topic, 'approved')}
+                          >
+                            <FaCheck tw="text-green-500" />
+                            Approve
+                          </ToolbarButton>
+                        )}
+                        {topic.modStatus !== 'rejected' && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.next }}
+                            onClick={() => setModStatus(topic, 'rejected')}
+                          >
+                            <FaFlag tw="text-red-600" />
+                            Remove
+                          </ToolbarButton>
+                        )}
+                      </div>
+                    )}
+                    <div tw="flex gap-2">
+                      {topic.status === 'open' && (
+                        <ToolbarButton
+                          // css={{ background: statusColors.next }}
+                          onClick={() => onChangeStatus(topic, 'next')}
+                        >
+                          <FaRegPlayCircle />
+                          Start
+                        </ToolbarButton>
+                      )}
+                      {topic.status === 'next' && (
+                        <ToolbarButton
+                          // css={{ background: statusColors.completed }}
+                          onClick={() => onChangeStatus(topic, 'completed')}
+                        >
+                          <FaRegCheckCircle />
+                          Complete
+                        </ToolbarButton>
+                      )}
+                      {(topic.status === 'open' || topic.status === 'next') && (
+                        <ToolbarButton
+                          // css={{ background: statusColors.closed }}
+                          onClick={() => onChangeStatus(topic, 'closed')}
+                        >
+                          <FaRegTimesCircle />
+                          Close
+                        </ToolbarButton>
+                      )}
+                      {(topic.status === 'completed' ||
+                        topic.status === 'closed') && (
+                        <ToolbarButton
+                          // css={{ background: statusColors.open }}
+                          onClick={() => onChangeStatus(topic, 'open')}
+                        >
+                          <FaRegDotCircle />
+                          Reopen
+                        </ToolbarButton>
+                      )}
+                    </div>
+                  </div>
+                )}
             </Join>
           )}
         </div>
