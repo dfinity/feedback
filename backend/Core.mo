@@ -45,6 +45,10 @@ module {
       caller == installer or state.userIsModerator.has(user);
     };
 
+    func userIsTopicEditor_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
+      caller == installer or state.userIsModerator.has(user) or state.userOwnsTopic.has(user, topic);
+    };
+
     func assertUserExists(log : ReqLog, user : Types.User.Id) : ?() {
       switch (state.users.get(user)) {
         case null {
@@ -106,17 +110,17 @@ module {
 
     // returns some topic view when user owns the topic, or when the topic is approved.
     // returns null when a topic is unapproved and not owned by the optional user argument.
-    func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?TopicView {
+    func viewTopic(caller : Principal, user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?TopicView {
       if (not maybeUserIsOwner(user, id) and state.modStatus != #approved) {
         return null;
       } else {
-        ?viewTopic_(user, id, state);
+        ?viewTopic_(caller, user, id, state);
       };
     };
 
     // No access control here for user, only customization.
     // Each use of this helper has its own access control logic.
-    func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, topic : Types.Topic.State) : TopicView {
+    func viewTopic_(caller : Principal, user : ?Types.User.Id, id : Types.Topic.Id, topic : Types.Topic.State) : TopicView {
       var upVoters : Nat = 0;
       var downVoters : Nat = 0;
       for ((_, vote) in state.userTopicVotes.getRelatedRight(id)) {
@@ -129,12 +133,14 @@ module {
       let userFields = switch user {
         case null {
           {
+            isEditable = false;
             isOwner = false;
             yourVote = #none;
           };
         };
         case (?user) {
           {
+            isEditable = false;
             isOwner = maybeUserIsOwner(?user, id);
             yourVote = switch (state.userTopicVotes.get(user, id)) {
               case null #none;
@@ -168,9 +174,9 @@ module {
 
     // returns some topic view when topic is #pending.
     // returns null otherwise.
-    func viewTopicAsModerator(user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    func viewTopicAsModerator(caller : Principal, user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
       if (state.modStatus == #pending) {
-        ?viewTopic_(?user, id, state);
+        ?viewTopic_(caller, ?user, id, state);
       } else null;
     };
 
@@ -209,7 +215,7 @@ module {
     public func searchTopics(caller : Principal, searchSort : SearchSort) : [Types.Topic.View] {
       let maybeUser = findUser(caller);
       func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
-        viewTopic(maybeUser, topic, state);
+        viewTopic(caller, maybeUser, topic, state);
       };
       let unsorted = Iter.toArray(
         // If Iter had filterMap this could be more efficient.
@@ -265,7 +271,7 @@ module {
         assertCallerIsModerator(log, caller)!;
         let user = assertCallerIsUser(log, caller)!;
         func view((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
-          viewTopicAsModerator(user, topic, state);
+          viewTopicAsModerator(caller, user, topic, state);
         };
         let unsorted = Iter.toArray(
           // If Iter had filterMap this could be more efficient.
@@ -301,7 +307,7 @@ module {
     public func getTopic(caller : Principal, id : Types.Topic.RawId) : ?Types.Topic.View {
       let maybeUser = findUser(caller);
       do ? {
-        viewTopic(maybeUser, #topic id, state.topics.get(#topic id)!)!;
+        viewTopic(caller, maybeUser, #topic id, state.topics.get(#topic id)!)!;
       };
     };
 
