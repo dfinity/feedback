@@ -140,7 +140,7 @@ module {
         };
         case (?user) {
           {
-            isEditable = false;
+            isEditable = userIsTopicEditor_(caller, user, id);
             isOwner = maybeUserIsOwner(?user, id);
             yourVote = switch (state.userTopicVotes.get(user, id)) {
               case null #none;
