@@ -85,6 +85,19 @@ module {
       };
     };
 
+    func assertTopicIsEditable(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
+      do ? {
+        if (caller == installer) { return ?() };
+        let user = assertCallerIsUser(log, caller)!;
+        let a = #callerCanEditTopic { user; topic };
+        if (state.userOwnsTopic.has(user, topic) or userIsModerator_(caller, user)) {
+          log.internal(#okAccess a);
+        } else {
+          log.errAccess(a)!;
+        };
+      };
+    };
+
     public func assertCallerIsModerator(log : ReqLog, caller : Principal) : ?() {
       do ? {
         if (caller != installer) {
@@ -388,7 +401,7 @@ module {
     public func editTopic(caller : Principal, id : Types.Topic.RawId, edit : Types.Topic.Edit) : ?() {
       do ? {
         let log = logger.Begin(caller, #editTopic { topic = #topic id; edit });
-        assertCallerOwnsTopic(log, caller, #topic id)!;
+        assertTopicIsEditable(log, caller, #topic id)!;
         state.topics.update(
           #topic id,
           func(topic : Types.Topic.State) : Types.Topic.State {
