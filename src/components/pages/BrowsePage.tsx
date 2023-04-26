@@ -136,7 +136,7 @@ export default function BrowsePage() {
           </div>
         </div>
       </div>
-      <TopicList topics={visibleTopics} />
+      <TopicList topics={visibleTopics} compact={!!filterText} />
     </>
   );
 }
