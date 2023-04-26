@@ -528,14 +528,14 @@ module {
         switch request {
           case (#clearTopics) {};
           case (#createTopic { edit }) {};
-          case (#editTopic { topic; edit }) {};
-          case (#importTopics { edits }) {};
-          case (#login) {};
-          case (#moderatorQuery) {};
-          case (#setTopicModStatus { modStatus; topic }) {};
-          case (#setTopicStatus { status; topic }) {};
-          case (#setUserIsModerator { isMod; user }) {};
-          case (#voteTopic { topic; userVote }) {};
+          case (#editTopic { topic = #topic id; edit }) { editTopic(caller, id, edit)! };
+          case (#importTopics { edits }) { importTopics(caller, edits)! };
+          case (#login) { ignore login(caller) };
+          case (#moderatorQuery) { };
+          case (#setTopicModStatus { topic = #topic id; modStatus }) { setTopicModStatus(caller, id, modStatus)! };
+          case (#setTopicStatus { topic = #topic id; status }) { setTopicStatus(caller, id, status)! };
+          case (#setUserIsModerator { user = #user id; isMod }) { setUserIsModerator(caller, id, isMod)! };
+          case (#voteTopic { topic = #topic id; userVote }) { voteTopic(caller, id, userVote)! };
           case (#replayRequests) { /* implicitly enter "body". */ };
         };
       };
