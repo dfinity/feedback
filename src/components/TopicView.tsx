@@ -112,12 +112,16 @@ export default function TopicView({
       }
     >
       <div
-        tw="p-3 text-lg flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg flex items-center gap-4 rounded-2xl"
+        css={[
+          onChangeExpanded && tw`cursor-pointer hover:bg-[rgba(0,0,0,.05)]`,
+        ]}
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
           <div
-            tw="flex items-center gap-2 cursor-default select-none"
+            tw="flex items-center gap-2"
+            css={[onChangeExpanded && tw`cursor-default select-none`]}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -135,8 +139,11 @@ export default function TopicView({
             <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
           </div>
           <div
-            tw="flex-1 flex gap-2 items-center overflow-hidden select-none"
-            css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
+            tw="flex-1 flex gap-2 items-center overflow-hidden"
+            css={[
+              !expanded && tw`text-ellipsis whitespace-nowrap`,
+              onChangeExpanded && tw`select-none`,
+            ]}
           >
             {topic.importId?.type === 'jira' && (
               <div>
@@ -175,11 +182,11 @@ export default function TopicView({
                   <div>
                     <Markdown>{topic.description}</Markdown>
                   </div>
+                  <hr tw="my-3" />
                 </>
               )}
               {topic.links.length > 0 && (
                 <>
-                  <hr tw="my-3" />
                   <div>
                     {topic.links.map((link, i) => (
                       <div key={i} tw="flex gap-2 items-center">
@@ -200,22 +207,22 @@ export default function TopicView({
                       </div>
                     ))}
                   </div>
+                  <hr tw="my-3" />
                 </>
               )}
               {topic.tags.length > 0 && (
                 <>
-                  <hr tw="my-3" />
                   <div tw="flex flex-wrap gap-2 items-center">
                     <span tw="font-bold opacity-70">Tags:</span>
                     {topic.tags.map((tag, i) => (
                       <Tag key={i}>{tag}</Tag>
                     ))}
                   </div>
+                  <hr tw="my-3" />
                 </>
               )}
               {!hideModerationInfo && topic.modStatus !== 'approved' && (
                 <>
-                  <hr tw="my-3" />
                   <div tw="flex gap-2 items-center font-bold text-[#000a]">
                     {topic.modStatus === 'pending' ? (
                       <>
@@ -231,11 +238,11 @@ export default function TopicView({
                       false
                     )}
                   </div>
+                  <hr tw="my-3" />
                 </>
               )}
-              {!!topic.isOwner && (
+              {!!topic.isOwner && !hideModerationInfo && (
                 <>
-                  <hr tw="my-3" />
                   <div tw="flex mt-4">
                     <div tw="flex flex-1">
                       <ToolbarButton onClick={() => setEditing(true)}>
