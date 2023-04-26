@@ -27,6 +27,7 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
+import { Join } from './utils/Join';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -172,127 +173,113 @@ export default function TopicView({
         </>
       </div>
       {!!expanded && (
-        <div tw="px-5 pt-3 pb-4">
+        <div tw="px-5 pt-3 pb-4 ">
           {editing ? (
             <TopicForm initial={topic} onSubmit={onSubmitEdit} />
           ) : (
-            <>
+            <Join separator={() => <hr tw="my-3" />}>
               {!!topic.description && (
-                <>
-                  <div>
-                    <Markdown>{topic.description}</Markdown>
-                  </div>
-                  <hr tw="my-3" />
-                </>
+                <div>
+                  <Markdown>{topic.description}</Markdown>
+                </div>
               )}
               {topic.links.length > 0 && (
-                <>
-                  <div>
-                    {topic.links.map((link, i) => (
-                      <div key={i} tw="flex gap-2 items-center">
-                        {!!link.startsWith(
-                          'https://dfinity.atlassian.net/',
-                        ) && <FaJira tw="text-blue-500" />}
-                        {!!link.startsWith('https://github.com/') && (
-                          <FaGithub tw="text-black" />
-                        )}
-                        <a
-                          tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"
-                          href={link}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {link}
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                  <hr tw="my-3" />
-                </>
+                <div>
+                  {topic.links.map((link, i) => (
+                    <div key={i} tw="flex gap-2 items-center">
+                      {!!link.startsWith('https://dfinity.atlassian.net/') && (
+                        <FaJira tw="text-blue-500" />
+                      )}
+                      {!!link.startsWith('https://github.com/') && (
+                        <FaGithub tw="text-black" />
+                      )}
+                      <a
+                        tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {link}
+                      </a>
+                    </div>
+                  ))}
+                </div>
               )}
               {topic.tags.length > 0 && (
-                <>
-                  <div tw="flex flex-wrap gap-2 items-center">
-                    <span tw="font-bold opacity-70">Tags:</span>
-                    {topic.tags.map((tag, i) => (
-                      <Tag key={i}>{tag}</Tag>
-                    ))}
-                  </div>
-                  <hr tw="my-3" />
-                </>
+                <div tw="flex flex-wrap gap-2 items-center">
+                  <span tw="font-bold opacity-70">Tags:</span>
+                  {topic.tags.map((tag, i) => (
+                    <Tag key={i}>{tag}</Tag>
+                  ))}
+                </div>
               )}
               {!hideModerationInfo && topic.modStatus !== 'approved' && (
-                <>
-                  <div tw="flex gap-2 items-center font-bold text-[#000a]">
-                    {topic.modStatus === 'pending' ? (
-                      <>
-                        <FaClock tw="text-teal-500" />
-                        <div>Under review</div>
-                      </>
-                    ) : topic.modStatus === 'rejected' ? (
-                      <>
-                        <FaTimes tw="text-orange-500" />
-                        <div>Changes requested</div>
-                      </>
-                    ) : (
-                      false
-                    )}
-                  </div>
-                  <hr tw="my-3" />
-                </>
+                <div tw="flex gap-2 items-center font-bold text-[#000a]">
+                  {topic.modStatus === 'pending' ? (
+                    <>
+                      <FaClock tw="text-teal-500" />
+                      <div>Under review</div>
+                    </>
+                  ) : topic.modStatus === 'rejected' ? (
+                    <>
+                      <FaTimes tw="text-orange-500" />
+                      <div>Changes requested</div>
+                    </>
+                  ) : (
+                    false
+                  )}
+                </div>
               )}
               {!!topic.isOwner && !hideModerationInfo && (
-                <>
-                  <div tw="flex mt-4">
-                    <div tw="flex flex-1">
-                      <ToolbarButton onClick={() => setEditing(true)}>
-                        <FaEdit />
-                        Edit
-                      </ToolbarButton>
-                    </div>
-                    <div tw="flex gap-2">
-                      {topic.status === 'open' && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.next }}
-                          onClick={() => onChangeStatus(topic, 'next')}
-                        >
-                          <FaRegPlayCircle />
-                          Start
-                        </ToolbarButton>
-                      )}
-                      {topic.status === 'next' && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.completed }}
-                          onClick={() => onChangeStatus(topic, 'completed')}
-                        >
-                          <FaRegCheckCircle />
-                          Complete
-                        </ToolbarButton>
-                      )}
-                      {(topic.status === 'open' || topic.status === 'next') && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.closed }}
-                          onClick={() => onChangeStatus(topic, 'closed')}
-                        >
-                          <FaRegTimesCircle />
-                          Close
-                        </ToolbarButton>
-                      )}
-                      {(topic.status === 'completed' ||
-                        topic.status === 'closed') && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.open }}
-                          onClick={() => onChangeStatus(topic, 'open')}
-                        >
-                          <FaRegDotCircle />
-                          Reopen
-                        </ToolbarButton>
-                      )}
-                    </div>
+                <div tw="flex mt-4">
+                  <div tw="flex flex-1">
+                    <ToolbarButton onClick={() => setEditing(true)}>
+                      <FaEdit />
+                      Edit
+                    </ToolbarButton>
                   </div>
-                </>
+                  <div tw="flex gap-2">
+                    {topic.status === 'open' && (
+                      <ToolbarButton
+                        // css={{ background: statusColors.next }}
+                        onClick={() => onChangeStatus(topic, 'next')}
+                      >
+                        <FaRegPlayCircle />
+                        Start
+                      </ToolbarButton>
+                    )}
+                    {topic.status === 'next' && (
+                      <ToolbarButton
+                        // css={{ background: statusColors.completed }}
+                        onClick={() => onChangeStatus(topic, 'completed')}
+                      >
+                        <FaRegCheckCircle />
+                        Complete
+                      </ToolbarButton>
+                    )}
+                    {(topic.status === 'open' || topic.status === 'next') && (
+                      <ToolbarButton
+                        // css={{ background: statusColors.closed }}
+                        onClick={() => onChangeStatus(topic, 'closed')}
+                      >
+                        <FaRegTimesCircle />
+                        Close
+                      </ToolbarButton>
+                    )}
+                    {(topic.status === 'completed' ||
+                      topic.status === 'closed') && (
+                      <ToolbarButton
+                        // css={{ background: statusColors.open }}
+                        onClick={() => onChangeStatus(topic, 'open')}
+                      >
+                        <FaRegDotCircle />
+                        Reopen
+                      </ToolbarButton>
+                    )}
+                  </div>
+                </div>
               )}
-            </>
+            </Join>
           )}
         </div>
       )}
