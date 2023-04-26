@@ -101,4 +101,12 @@ shared ({ caller = installer }) actor class Main() {
     core.fastLogin(caller);
   };
 
+  public query ({ caller }) func getModerators() : async ?[(Types.User.Id, ())] {
+    core.getModerators(caller);
+  };
+
+  public query ({ caller }) func isInstaller() : async Bool {
+    caller == installer;
+  };
+
 };

@@ -1,12 +1,10 @@
-# DX Feedback Board (name TBD)
+# DX Feedback Board
 
 > #### An IC developer feedback dapp powered by Motoko.
 
 ---
 
-## Context
-
-This application demonstrates a realistic full-stack dapp with a Motoko backend. 
+This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
 
 ## Local Development
 

@@ -32,6 +32,21 @@ export type User = (
 // TODO: refactor
 const applicationName = 'IC Feedback';
 
+// TODO: refactor
+const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
+  .agent as HttpAgent;
+if (import.meta.env.PROD) {
+  (agent as any)._host = 'https://icp0.io/';
+}
+
+// TODO: refactor
+if (
+  window.location.hostname.endsWith('.icp0.io') ||
+  window.location.hostname.endsWith('.ic0.app')
+) {
+  window.location.hostname = 'dx.internetcomputer.org';
+}
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
@@ -86,9 +101,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {
+    const loginPromise = backend.login();
     let [view] = await backend.fastLogin();
     if (view === undefined) {
-      view = unwrap(await backend.login());
+      view = unwrap(await loginPromise);
     }
     return {
       ...view,

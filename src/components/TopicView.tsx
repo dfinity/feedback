@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import {
   FaCaretDown,
   FaCaretUp,
+  FaCheck,
   FaClock,
   FaEdit,
+  FaFlag,
   FaGithub,
   FaJira,
   FaRegCheckCircle,
@@ -27,6 +29,7 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
+import { Join } from './utils/Join';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -52,7 +55,8 @@ export default function TopicView({
 }: TopicViewProps) {
   const [editing, setEditing] = useState(false);
   const edit = useTopicStore((state) => state.edit);
-  const changeStatus = useTopicStore((state) => state.setStatus);
+  const setStatus = useTopicStore((state) => state.setStatus);
+  const setModStatus = useTopicStore((state) => state.setModStatus);
   const breakpoint = useBreakpoint();
 
   const user = useIdentity();
@@ -84,7 +88,7 @@ export default function TopicView({
 
   const onChangeStatus = (topic: Topic, status: TopicStatus) => {
     handlePromise(
-      changeStatus(topic.id, status),
+      setStatus(topic.id, status),
       // 'Changing status...',
       undefined,
       'Error while changing status!',
@@ -112,12 +116,16 @@ export default function TopicView({
       }
     >
       <div
-        tw="p-3 text-lg flex items-center gap-4 rounded-2xl cursor-pointer hover:bg-[rgba(0,0,0,.05)]"
+        tw="p-3 text-lg flex items-center gap-4 rounded-2xl"
+        css={[
+          onChangeExpanded && tw`cursor-pointer hover:bg-[rgba(0,0,0,.05)]`,
+        ]}
         onClick={() => onChangeExpanded?.(!expanded)}
       >
         <>
           <div
-            tw="flex items-center gap-2 cursor-default select-none"
+            tw="flex items-center gap-2"
+            css={[onChangeExpanded && tw`cursor-default select-none`]}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -135,8 +143,11 @@ export default function TopicView({
             <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
           </div>
           <div
-            tw="flex-1 flex gap-2 items-center overflow-hidden select-none"
-            css={[!expanded && tw`text-ellipsis whitespace-nowrap`]}
+            tw="flex-1 flex gap-2 items-center overflow-hidden"
+            css={[
+              !expanded && tw`text-ellipsis whitespace-nowrap`,
+              onChangeExpanded && tw`select-none`,
+            ]}
           >
             {topic.importId?.type === 'jira' && (
               <div>
@@ -165,57 +176,52 @@ export default function TopicView({
         </>
       </div>
       {!!expanded && (
-        <div tw="px-5 pt-3 pb-4">
+        <div tw="px-5 pt-3 pb-4 ">
           {editing ? (
             <TopicForm initial={topic} onSubmit={onSubmitEdit} />
           ) : (
-            <>
+            <Join separator={() => <hr tw="my-3" />}>
               {!!topic.description && (
-                <>
-                  <div>
-                    <Markdown>{topic.description}</Markdown>
-                  </div>
-                </>
+                <div>
+                  <Markdown>{topic.description}</Markdown>
+                </div>
               )}
               {topic.links.length > 0 && (
-                <>
-                  <hr tw="my-3" />
-                  <div>
-                    {topic.links.map((link, i) => (
-                      <div key={i} tw="flex gap-2 items-center">
-                        {!!link.startsWith(
-                          'https://dfinity.atlassian.net/',
-                        ) && <FaJira tw="text-blue-500" />}
-                        {!!link.startsWith('https://github.com/') && (
-                          <FaGithub tw="text-black" />
-                        )}
-                        <a
-                          tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"
-                          href={link}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {link}
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <div>
+                  {topic.links.map((link, i) => (
+                    <div key={i} tw="flex gap-2 items-center">
+                      {!!link.startsWith('https://dfinity.atlassian.net/') && (
+                        <FaJira tw="text-blue-500" />
+                      )}
+                      {!!link.startsWith('https://github.com/') && (
+                        <FaGithub tw="text-black" />
+                      )}
+                      <a
+                        tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {link}
+                      </a>
+                    </div>
+                  ))}
+                </div>
               )}
               {topic.tags.length > 0 && (
-                <>
-                  <hr tw="my-3" />
-                  <div tw="flex flex-wrap gap-2 items-center">
-                    <span tw="font-bold opacity-70">Tags:</span>
-                    {topic.tags.map((tag, i) => (
-                      <Tag key={i}>{tag}</Tag>
-                    ))}
-                  </div>
-                </>
+                <div tw="flex flex-wrap gap-2 items-center">
+                  <span tw="font-bold opacity-70">Tags:</span>
+                  {topic.tags.map((tag, i) => (
+                    <Tag key={i}>{tag}</Tag>
+                  ))}
+                  {user?.detail.isModerator && (
+                    <Tag color="#9195e621">{`#${topic.id}`}</Tag>
+                  )}
+                </div>
               )}
-              {!hideModerationInfo && topic.modStatus !== 'approved' && (
-                <>
-                  <hr tw="my-3" />
+              {!hideModerationInfo &&
+                !user?.detail.isModerator &&
+                topic.modStatus !== 'approved' && (
                   <div tw="flex gap-2 items-center font-bold text-[#000a]">
                     {topic.modStatus === 'pending' ? (
                       <>
@@ -231,18 +237,41 @@ export default function TopicView({
                       false
                     )}
                   </div>
-                </>
-              )}
-              {!!topic.isOwner && (
-                <>
-                  <hr tw="my-3" />
-                  <div tw="flex mt-4">
+                )}
+              {(!!topic.isEditable || !!user?.detail.isModerator) &&
+                !hideModerationInfo && (
+                  <div tw="flex gap-2 mt-4">
                     <div tw="flex flex-1">
                       <ToolbarButton onClick={() => setEditing(true)}>
                         <FaEdit />
                         Edit
                       </ToolbarButton>
                     </div>
+                    {!!user?.detail.isModerator && (
+                      <div tw="hidden sm:flex gap-2">
+                        {topic.modStatus !== 'approved' && (
+                          <Tooltip content="Approve">
+                            <ToolbarButton
+                              // css={{ background: statusColors.next }}
+                              onClick={() => setModStatus(topic, 'approved')}
+                            >
+                              <FaCheck tw="text-green-500" />
+                            </ToolbarButton>
+                          </Tooltip>
+                        )}
+                        {topic.modStatus !== 'rejected' && (
+                          <Tooltip content="Hide">
+                            <ToolbarButton
+                              // css={{ background: statusColors.next }}
+                              onClick={() => setModStatus(topic, 'rejected')}
+                            >
+                              {' '}
+                              <FaFlag tw="text-red-600" />
+                            </ToolbarButton>
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
                     <div tw="flex gap-2">
                       {topic.status === 'open' && (
                         <ToolbarButton
@@ -283,9 +312,8 @@ export default function TopicView({
                       )}
                     </div>
                   </div>
-                </>
-              )}
-            </>
+                )}
+            </Join>
           )}
         </div>
       )}

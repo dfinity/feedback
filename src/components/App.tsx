@@ -1,4 +1,4 @@
-import { Route, HashRouter as Router, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import 'twin.macro';
 import { FileDropZone } from './FileDropZone';
 import Navbar from './Navbar';

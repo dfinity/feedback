@@ -112,7 +112,7 @@ export default function BrowsePage() {
             {inlineSort && <div tw="shrink-0">{sortDropdown}</div>}
           </div>
           <div tw="sm:flex items-center pb-4">
-            <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4 text-white">
+            <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg md:text-xl font-semibold sm:gap-4 text-white">
               {filterStatuses.map((status) => (
                 <div key={status}>
                   <label tw="select-none cursor-pointer">
@@ -136,7 +136,7 @@ export default function BrowsePage() {
           </div>
         </div>
       </div>
-      <TopicList topics={visibleTopics} />
+      <TopicList topics={visibleTopics} compact={!!filterText} />
     </>
   );
 }
