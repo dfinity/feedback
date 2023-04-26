@@ -508,6 +508,7 @@ module {
               };
             };
             state.users.put(#user user, initUserState);
+            log.internal(#createUser(#user user));
             user;
           };
           case (?(#user u)) u;

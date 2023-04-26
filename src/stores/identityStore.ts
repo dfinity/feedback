@@ -101,9 +101,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {
+    const loginPromise = backend.login();
     let [view] = await backend.fastLogin();
     if (view === undefined) {
-      view = unwrap(await backend.login());
+      view = unwrap(await loginPromise);
     }
     return {
       ...view,

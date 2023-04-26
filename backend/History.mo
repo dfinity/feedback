@@ -52,6 +52,7 @@ module {
   public type Internal = {
     #callerIsInstaller; // Implies all access checks will pass.
     #callerIsUser : UserId; // like AccessPredicate, but always successful, and carries UserId.
+    #createUser : UserId; // when a login request creates a user (the first time).
     #okAccess : AccessPredicate; // record successsful access check.
     #okCheck : Invariant;
   };
