@@ -69,6 +69,7 @@ module {
   public type AccessPredicate = {
     #callerIsUser; // caller ID comes from outer Event type.
     #callerIsModerator;
+    #callerCanEditTopic : { user : UserId; topic : TopicId };
     #callerOwnsTopic : { user : UserId; topic : TopicId };
   };
 

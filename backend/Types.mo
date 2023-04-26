@@ -59,6 +59,7 @@ module {
       id : RawId;
       importId : ?ImportId;
       isOwner : Bool;
+      isEditable : Bool;
       // submitterName: Text;
       // ownerName: Text;
       createTime : Int; // msec since Unix epoch
