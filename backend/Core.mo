@@ -61,6 +61,18 @@ module {
       };
     };
 
+    func assertTopicStateExists(log : ReqLog, topic : Types.Topic.Id) : ?Types.Topic.State {
+      switch (state.topics.get(topic)) {
+        case null {
+          log.errCheck(#topicExists(topic));
+        };
+        case (?s) {
+          log.internal(#okCheck(#topicExists(topic)));
+          ?s;
+        };
+      };
+    };
+
     func assertCallerIsUser(log : ReqLog, caller : Principal) : ?Types.User.Id {
       switch (findUser(caller)) {
         case null {
@@ -89,8 +101,11 @@ module {
       do ? {
         if (caller == installer) { return ?() };
         let user = assertCallerIsUser(log, caller)!;
+        let topicState = assertTopicStateExists(log, topic)!;
         let a = #callerCanEditTopic { user; topic };
-        if (state.userOwnsTopic.has(user, topic) or userIsModerator_(caller, user)) {
+        if (
+          state.userOwnsTopic.has(user, topic) and topicState.modStatus != #approved or userIsModerator_(caller, user)
+        ) {
           log.internal(#okAccess a);
         } else {
           log.errAccess(a)!;
@@ -427,8 +442,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #voteTopic { topic = #topic id; userVote });
         let success = do ? {
-          // validates arguments before updating relation.
-          ignore state.topics.get(#topic id)!;
+          ignore assertTopicStateExists(log, #topic id)!;
           let user = assertCallerIsUser(log, caller)!;
           state.userTopicVotes.put(user, #topic id, userVote);
           state.topics.update(
