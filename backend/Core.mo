@@ -237,10 +237,16 @@ module {
             case (#votes) {
               // Compare size of net votes.
               // More goes first, meaning bigger is "less".
-              Int.compare(
-                t2.upVoters : Int - t2.downVoters,
-                t1.upVoters : Int - t1.downVoters,
-              );
+              // For equal vote count, prefer topics with recent activity/votes.
+              switch (
+                Int.compare(
+                  t2.upVoters : Int - t2.downVoters,
+                  t1.upVoters : Int - t1.downVoters,
+                )
+              ) {
+                case (#equal) Int.compare(topicTime(t2), topicTime(t1));
+                case ord ord;
+              };
             };
             case (#activity) {
               // Prefer topics with recent votes.
