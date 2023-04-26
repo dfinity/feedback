@@ -238,7 +238,7 @@ export default function TopicView({
                     )}
                   </div>
                 )}
-              {(!!topic.isOwner || !!user?.detail.isModerator) &&
+              {(!!topic.isEditable || !!user?.detail.isModerator) &&
                 !hideModerationInfo && (
                   <div tw="flex gap-2 mt-4">
                     <div tw="flex flex-1">
