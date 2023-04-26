@@ -386,6 +386,7 @@ module {
         };
         if (userIsModerator_(caller, user) or Validate.Topic.edit(edit)) {
           let id = createTopic_(user, null, edit);
+          voteTopic_(user, id, #up);
           log.okWithTopicId(id);
         } else {
           log.errInvalidTopicEdit()!;
@@ -444,23 +445,27 @@ module {
       };
     };
 
+    public func voteTopic_(user : Types.User.Id, id : Types.Topic.RawId, userVote : Types.Topic.UserVote) {
+      state.userTopicVotes.put(user, #topic id, userVote);
+      state.topics.update(
+        #topic id,
+        func(topic : Types.Topic.State) : Types.Topic.State {
+          {
+            topic with stamp = {
+              topic.stamp with voteTime = ?(Time.now())
+            };
+          };
+        },
+      );
+    };
+
     public func voteTopic(caller : Principal, id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : ?() {
       do ? {
         let log = logger.Begin(caller, #voteTopic { topic = #topic id; userVote });
         let success = do ? {
           ignore assertTopicStateExists(log, #topic id)!;
           let user = assertCallerIsUser(log, caller)!;
-          state.userTopicVotes.put(user, #topic id, userVote);
-          state.topics.update(
-            #topic id,
-            func(topic : Types.Topic.State) : Types.Topic.State {
-              {
-                topic with stamp = {
-                  topic.stamp with voteTime = ?(Time.now())
-                };
-              };
-            },
-          );
+          voteTopic_(user, id, userVote);
         };
         log.okIf(success == ?())!;
       };
