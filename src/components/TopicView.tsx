@@ -250,22 +250,25 @@ export default function TopicView({
                     {!!user?.detail.isModerator && (
                       <div tw="hidden sm:flex gap-2">
                         {topic.modStatus !== 'approved' && (
-                          <ToolbarButton
-                            // css={{ background: statusColors.next }}
-                            onClick={() => setModStatus(topic, 'approved')}
-                          >
-                            <FaCheck tw="text-green-500" />
-                            Approve
-                          </ToolbarButton>
+                          <Tooltip content="Approve">
+                            <ToolbarButton
+                              // css={{ background: statusColors.next }}
+                              onClick={() => setModStatus(topic, 'approved')}
+                            >
+                              <FaCheck tw="text-green-500" />
+                            </ToolbarButton>
+                          </Tooltip>
                         )}
                         {topic.modStatus !== 'rejected' && (
-                          <ToolbarButton
-                            // css={{ background: statusColors.next }}
-                            onClick={() => setModStatus(topic, 'rejected')}
-                          >
-                            <FaFlag tw="text-red-600" />
-                            Remove
-                          </ToolbarButton>
+                          <Tooltip content="Hide">
+                            <ToolbarButton
+                              // css={{ background: statusColors.next }}
+                              onClick={() => setModStatus(topic, 'rejected')}
+                            >
+                              {' '}
+                              <FaFlag tw="text-red-600" />
+                            </ToolbarButton>
+                          </Tooltip>
                         )}
                       </div>
                     )}
