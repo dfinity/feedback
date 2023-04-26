@@ -39,6 +39,14 @@ if (import.meta.env.PROD) {
   (agent as any)._host = 'https://icp0.io/';
 }
 
+// TODO: refactor
+if (
+  window.location.hostname.endsWith('.icp0.io') ||
+  window.location.hostname.endsWith('.ic0.app')
+) {
+  window.location.hostname = 'dx.internetcomputer.org';
+}
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
