@@ -35,7 +35,9 @@ export default function LoginArea({ label }: LoginAreaProps) {
 
   return (
     <div tw="flex gap-1 items-center">
-      <span tw="mr-3 font-semibold opacity-70 select-none">Sign in:</span>
+      <span tw="mr-3 font-semibold opacity-70 text-lg cursor-default">
+        Sign in:
+      </span>
       <Tooltip content="Internet Identity">
         <LoginAreaButton
           onClick={() => wrapLogin(loginII())}

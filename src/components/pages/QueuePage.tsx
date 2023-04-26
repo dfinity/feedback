@@ -26,9 +26,9 @@ export default function QueuePage() {
     }
   }, [getModQueue, user]);
 
-  const changeStatus = (topic: Topic, modStatus: ModStatus) => {
+  const changeModStatus = (topic: Topic, modStatus: ModStatus) => {
     setModStatus(topic, modStatus).catch((err) => {
-      handleError(err, 'Error while approving topic!');
+      handleError(err, 'Error while changing topic status!');
     });
     if (topics) {
       setTopics(topics.filter((t) => t !== topic));
@@ -60,12 +60,12 @@ export default function QueuePage() {
             <div tw="flex">
               <div tw="flex gap-2 mt-2 mx-auto">
                 <ModeratorButton
-                  onClick={() => changeStatus(topic, 'approved')}
+                  onClick={() => changeModStatus(topic, 'approved')}
                 >
                   <FaCheck tw="text-green-600" />
                 </ModeratorButton>
                 <ModeratorButton
-                  onClick={() => changeStatus(topic, 'rejected')}
+                  onClick={() => changeModStatus(topic, 'rejected')}
                 >
                   <FaTimes tw="text-orange-600" />
                 </ModeratorButton>

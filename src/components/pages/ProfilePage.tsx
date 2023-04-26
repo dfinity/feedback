@@ -1,10 +1,9 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { FaSignOutAlt } from 'react-icons/fa';
+import 'twin.macro';
+import useIdentity from '../../hooks/useIdentity';
 import { useIdentityStore, User } from '../../stores/identityStore';
 import LoginArea, { LoginAreaButton } from '../LoginArea';
 import Tooltip from '../Tooltip';
-import useIdentity from '../../hooks/useIdentity';
-import 'twin.macro';
 
 const userTypeLookup: Record<User['type'], string> = {
   ic: 'Internet Identity',
@@ -14,7 +13,7 @@ const userTypeLookup: Record<User['type'], string> = {
 export default function ProfilePage() {
   const user = useIdentity();
   const logoutII = useIdentityStore((state) => state.logout);
-  const { logout } = useAuth0();
+  // const { logout } = useAuth0();
 
   const onLogoutError = (err: any) => {
     // TODO: handle errors
@@ -58,7 +57,9 @@ export default function ProfilePage() {
                 <LoginAreaButton
                   tw="flex gap-1 items-center"
                   onClick={() =>
-                    Promise.all([logout(), logoutII()]).catch(onLogoutError)
+                    Promise.all([/* logout(), */ logoutII()]).catch(
+                      onLogoutError,
+                    )
                   }
                 >
                   <FaSignOutAlt />

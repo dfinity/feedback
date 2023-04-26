@@ -8,6 +8,7 @@ import {
 import { create } from 'zustand';
 import { backend } from '../declarations/backend';
 import { handleError } from '../utils/handlers';
+import { unwrap } from '../utils/unwrap';
 import { useTopicStore } from './topicStore';
 
 export interface UserDetail {
@@ -31,36 +32,31 @@ export type User = (
 // TODO: refactor
 const applicationName = 'IC Feedback';
 
+// TODO: refactor
+const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
+  .agent as HttpAgent;
+if (import.meta.env.PROD) {
+  (agent as any)._host = 'https://icp0.io/';
+}
+
+// TODO: refactor
+if (
+  window.location.hostname.endsWith('.icp0.io') ||
+  window.location.hostname.endsWith('.ic0.app')
+) {
+  window.location.hostname = 'dx.internetcomputer.org';
+}
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
-  user: User | null;
+  user: User | null | undefined;
   loginInternetIdentity(): Promise<AuthClient | undefined>;
   loginNFID(): Promise<AuthClient | undefined>;
   logout(): Promise<void>;
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
-  if (window.indexedDB) {
-    AuthClient.create().then(async (client) => {
-      try {
-        if (await client.isAuthenticated()) {
-          await finishLoginIC(client);
-        }
-      } catch (err) {
-        handleError(err, 'Error while fetching user info!');
-        window.indexedDB.deleteDatabase('auth-client-db'); // Clear login cache
-        return;
-      }
-
-      // Fetch topics after authenticating
-      useTopicStore
-        .getState()
-        .search()
-        .catch((err) => handleError(err, 'Error while fetching topics!'));
-    });
-  }
-
   const loginIC = async (
     options?: Omit<Omit<AuthClientLoginOptions, 'onSuccess'>, 'onError'>,
   ) => {
@@ -104,10 +100,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     await useTopicStore.getState().search(); // TODO: refactor
   };
 
-  const getUserDetail = async () => {
+  const getUserDetail = async (): Promise<UserDetail> => {
     let [view] = await backend.fastLogin();
     if (view === undefined) {
-      view = await backend.login();
+      view = unwrap(await backend.login());
     }
     return {
       ...view,
@@ -115,8 +111,32 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     };
   };
 
+  if (window.indexedDB) {
+    (async () => {
+      try {
+        const client = await AuthClient.create();
+        if (await client.isAuthenticated()) {
+          await finishLoginIC(client);
+        }
+      } catch (err) {
+        handleError(err, 'Error while fetching user info!');
+        window.indexedDB.deleteDatabase('auth-client-db'); // Clear login cache
+        set({ user: null });
+        return;
+      }
+
+      // Fetch topics after authenticating
+      useTopicStore
+        .getState()
+        .search()
+        .catch((err) => handleError(err, 'Error while fetching topics!'));
+    })();
+  } else {
+    set({ user: null });
+  }
+
   return {
-    user: null,
+    user: undefined,
     async loginInternetIdentity() {
       return loginIC({
         identityProvider: import.meta.env.PROD

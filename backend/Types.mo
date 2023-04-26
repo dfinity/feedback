@@ -36,8 +36,9 @@ module {
 
     public type ImportId = { #jira : Text };
 
-    // milliseconds since Unix epoch
-    public type Internal = {
+    // nanosec since Unix epoch.
+    // (raw IC times here).
+    public type Stamp = {
       createTime : Int;
       editTime : Int; // initially = createTime
       voteTime : ?Int; // initially null
@@ -48,22 +49,24 @@ module {
     public type State = {
       edit : Edit;
       importId : ?ImportId;
-      internal : Internal;
+      stamp : Stamp;
       status : Status;
       modStatus : ModStatus;
     };
 
+    // all times are msec, for frontend.
     public type View = Edit and {
       id : RawId;
       importId : ?ImportId;
       isOwner : Bool;
+      isEditable : Bool;
       // submitterName: Text;
       // ownerName: Text;
-      createTime : Int; // milliseconds since Unix epoch
-      editTime : Int; // milliseconds since Unix epoch
-      voteTime : ?Int; // milliseconds since Unix epoch
-      modTime : ?Int; // initially null
-      statusTime : Int; // initially = createTime
+      createTime : Int; // msec since Unix epoch
+      editTime : Int; // msec
+      voteTime : ?Int; // msec
+      modTime : ?Int; // msec, initially null
+      statusTime : Int; // msec, initially = createTime
       upVoters : Nat;
       downVoters : Nat;
       yourVote : UserVote;
@@ -86,13 +89,13 @@ module {
       bioBlurb : Text; // one-liner, like on Twitter
     };
 
-    public type Internal = {
+    public type Stamp = {
       createTime : Int; // milliseconds since Unix epoch
     };
 
     public type State = {
       edit : Edit;
-      internal : Internal;
+      stamp : Stamp;
     };
 
     public type View = {
@@ -115,13 +118,13 @@ module {
       description : Text; // one-liner? may be more than one line?
     };
 
-    public type Internal = {
+    public type Stamp = {
       createTime : Int; // milliseconds since Unix epoch
     };
 
     public type State = {
       edit : Edit;
-      internal : Internal;
+      stamp : Stamp;
     };
   };
 
