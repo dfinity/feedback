@@ -211,6 +211,9 @@ export default function TopicView({
                   {topic.tags.map((tag, i) => (
                     <Tag key={i}>{tag}</Tag>
                   ))}
+                  {user?.detail.isModerator && (
+                    <Tag color="#9195e621">{`#${topic.id}`}</Tag>
+                  )}
                 </div>
               )}
               {!hideModerationInfo && topic.modStatus !== 'approved' && (
