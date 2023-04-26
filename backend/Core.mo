@@ -522,5 +522,53 @@ module {
       };
     };
 
+    func replayRequest(log : ReqLog, caller : Principal, request : History.Request) : ?() {
+      // to do -- finish cases below.
+      do ? {
+        switch request {
+          case (#clearTopics) {};
+          case (#createTopic { edit }) {};
+          case (#editTopic { topic; edit }) {};
+          case (#importTopics { edits }) {};
+          case (#login) {};
+          case (#moderatorQuery) {};
+          case (#setTopicModStatus { modStatus; topic }) {};
+          case (#setTopicStatus { status; topic }) {};
+          case (#setUserIsModerator { isMod; user }) {};
+          case (#voteTopic { topic; userVote }) {};
+          case (#replayRequests) { /* implicitly enter "body". */ };
+        };
+      };
+    };
+
+    public func replayRequests(caller : Principal, history : Iter.Iter<History.Event>) : ?() {
+      // to do -- use indirection for Time.now()
+      let log = logger.Begin(caller, #replayRequests);
+      var start_end : ?{ start : History.RequestId; end : History.RequestId } = null;
+      let res = do ? {
+        assertCallerIsModerator(log, caller)!;
+        for (event in history) {
+          switch event {
+            case (#request r) {
+              // extend end of the requestId interval.
+              switch start_end {
+                case null {
+                  start_end := ?{ start = r.requestId; end = r.requestId };
+                };
+                case (?{ start; end }) {
+                  start_end := ?{ start; end = r.requestId };
+                };
+              };
+              // to do -- reset Time to the recorded time.
+
+              // replay the request at current time.
+              replayRequest(log, r.caller, r.request)!;
+            };
+            case _ ();
+          };
+        };
+      };
+      log.okReplay(start_end);
+    };
   };
 };
