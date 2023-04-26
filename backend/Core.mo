@@ -85,7 +85,7 @@ module {
       };
     };
 
-    func assertTopicIsEditable(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
+    func assertCallerCanEdit(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
       do ? {
         if (caller == installer) { return ?() };
         let user = assertCallerIsUser(log, caller)!;
@@ -401,7 +401,7 @@ module {
     public func editTopic(caller : Principal, id : Types.Topic.RawId, edit : Types.Topic.Edit) : ?() {
       do ? {
         let log = logger.Begin(caller, #editTopic { topic = #topic id; edit });
-        assertTopicIsEditable(log, caller, #topic id)!;
+        assertCallerCanEdit(log, caller, #topic id)!;
         state.topics.update(
           #topic id,
           func(topic : Types.Topic.State) : Types.Topic.State {
@@ -449,7 +449,7 @@ module {
     public func setTopicStatus(caller : Principal, id : Types.Topic.RawId, status : Types.Topic.Status) : ?() {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
-        assertCallerOwnsTopic(log, caller, #topic id)!;
+        assertCallerCanEdit(log, caller, #topic id)!;
         state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
         log.ok()!;
       };
