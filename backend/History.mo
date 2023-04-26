@@ -46,6 +46,7 @@ module {
 
   public type Invariant = {
     #userExists : UserId;
+    #topicExists : TopicId;
   };
 
   public type Internal = {
