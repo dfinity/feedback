@@ -30,7 +30,6 @@ module {
     };
 
     public func edit(e : Types.Topic.Edit) : Bool {
-
       // prettier-ignore
       isTitle(e.title) and isDescription(e.description) and
         arrayAll(e.links, isLink) and arrayAll(e.tags, isTag)
