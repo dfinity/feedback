@@ -4,13 +4,7 @@
 
 ---
 
-## 
-
 This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
-
-## Context
-
-This application demonstrates a realistic full-stack dapp with a Motoko backend. 
 
 ## Local Development
 
