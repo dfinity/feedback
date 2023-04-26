@@ -28,6 +28,7 @@ export interface Topic extends TopicInfo {
   status: TopicStatus;
   modStatus: ModStatus;
   isOwner: boolean;
+  isEditable: boolean;
   yourVote: VoteStatus;
   importId?: { type: string; id: string } | undefined;
 }
@@ -119,6 +120,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         status: 'open',
         modStatus: 'pending',
         isOwner: true,
+        isEditable: true,
         yourVote: 0,
       };
       set((state) => ({
