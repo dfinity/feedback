@@ -1,8 +1,12 @@
-# DX Feedback Board (name TBD)
+# DX Feedback Board
 
 > #### An IC developer feedback dapp powered by Motoko.
 
 ---
+
+## 
+
+This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
 
 ## Context
 
