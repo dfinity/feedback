@@ -72,7 +72,9 @@ export default function Navbar() {
                 {modQueueLength !== undefined ? (
                   <div tw="flex gap-2 items-center">
                     Queue
-                    <Tag color="#2ae00633">{modQueueLength}</Tag>
+                    <Tag color={modQueueLength > 0 ? '#33ec0e4f' : '#0001'}>
+                      {modQueueLength}
+                    </Tag>
                   </div>
                 ) : (
                   <>Queue</>
