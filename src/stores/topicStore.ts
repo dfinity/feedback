@@ -133,7 +133,6 @@ export const useTopicStore = create<TopicState>((set, get) => {
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().search();
     },
     async importAll(infoArray: ImportTopic[]) {
       unwrap(
