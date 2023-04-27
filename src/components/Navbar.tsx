@@ -8,6 +8,8 @@ import { useBreakpoint } from '../hooks/useBreakpoint';
 import useIdentity from '../hooks/useIdentity';
 import LoginArea, { LoginAreaButton } from './LoginArea';
 import Tooltip from './Tooltip';
+import { useTopicStore } from '../stores/topicStore';
+import Tag from './Tag';
 
 interface NavItemProps {
   to: string;
@@ -32,6 +34,8 @@ function NavItem({ to, children }: NavItemProps) {
 export default function Navbar() {
   const user = useIdentity();
   const breakpoint = useBreakpoint();
+
+  const modQueueLength = useTopicStore((state) => state.modQueue?.length);
 
   const isMobile = breakpoint === 'xs';
 
@@ -63,7 +67,20 @@ export default function Navbar() {
           <div tw="flex-1 flex items-center">
             <NavItem to="/">Browse</NavItem>
             <NavItem to="/submit">Submit</NavItem>
-            {!!user?.detail.isModerator && <NavItem to="/queue">Queue</NavItem>}
+            {!!user?.detail.isModerator && (
+              <NavItem to="/queue">
+                {modQueueLength !== undefined ? (
+                  <div tw="flex gap-2 items-center">
+                    Queue
+                    <Tag color={modQueueLength > 0 ? '#33ec0e4f' : '#0001'}>
+                      {modQueueLength}
+                    </Tag>
+                  </div>
+                ) : (
+                  <>Queue</>
+                )}
+              </NavItem>
+            )}
           </div>
           {isMobile || user ? (
             <Tooltip content="Profile">

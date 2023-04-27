@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import tw from 'twin.macro';
 import useIdentity from '../../hooks/useIdentity';
@@ -10,16 +10,17 @@ import TopicView from '../TopicView';
 const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-xl rounded-full cursor-pointer border-2 bg-[#fffd] border-gray-300 hover:scale-105`;
 
 export default function QueuePage() {
-  const [topics, setTopics] = useState<Topic[] | undefined>();
+  // const [topics, setTopics] = useState<Topic[] | undefined>();
 
   const user = useIdentity();
-  const getModQueue = useTopicStore((state) => state.getModQueue);
+  const topics = useTopicStore((state) => state.modQueue);
+  const getModQueue = useTopicStore((state) => state.fetchModQueue);
   const setModStatus = useTopicStore((state) => state.setModStatus);
 
   useEffect(() => {
     if (user) {
       getModQueue()
-        .then((topics) => setTopics(topics))
+        // .then((topics) => setTopics(topics))
         .catch((err) =>
           handleError(err, 'Error while fetching moderator queue!'),
         );
@@ -30,9 +31,9 @@ export default function QueuePage() {
     setModStatus(topic, modStatus).catch((err) => {
       handleError(err, 'Error while changing topic status!');
     });
-    if (topics) {
-      setTopics(topics.filter((t) => t !== topic));
-    }
+    // if (topics) {
+    //   setTopics(topics.filter((t) => t !== topic));
+    // }
   };
 
   if (!topics) {

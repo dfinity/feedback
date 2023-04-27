@@ -114,22 +114,23 @@ export default function BrowsePage() {
           <div tw="sm:flex items-center pb-4">
             <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg md:text-xl font-semibold sm:gap-4 text-white">
               {filterStatuses.map((status) => (
-                <div key={status}>
-                  <label tw="select-none cursor-pointer">
-                    <input
-                      tw="mr-2"
-                      type="checkbox"
-                      checked={filterStates[status]}
-                      onChange={() =>
-                        setFilterStates({
-                          ...filterStates,
-                          [status]: !filterStates[status],
-                        })
-                      }
-                    />
-                    {capitalize(status)}
-                  </label>
-                </div>
+                <label
+                  key={status}
+                  tw="select-none cursor-pointer whitespace-nowrap"
+                >
+                  <input
+                    tw="mr-2"
+                    type="checkbox"
+                    checked={filterStates[status]}
+                    onChange={() =>
+                      setFilterStates({
+                        ...filterStates,
+                        [status]: !filterStates[status],
+                      })
+                    }
+                  />
+                  {capitalize(status)}
+                </label>
               ))}
             </div>
             {!inlineSort && sortDropdown}

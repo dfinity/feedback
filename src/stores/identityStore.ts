@@ -97,7 +97,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         detail,
       },
     });
-    await useTopicStore.getState().search(); // TODO: refactor
+
+    // TODO: refactor
+    const topicState = useTopicStore.getState();
+    await Promise.all([topicState.search(), topicState.fetchModQueue()]);
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {

@@ -1,18 +1,21 @@
 import { ReactNode } from 'react';
-import 'twin.macro';
+import styled from 'styled-components/macro';
+import tw from 'twin.macro';
 
-export interface TagProps {
+const TagDiv = styled.div<TagProps>((p) => [
+  tw`px-2 py-0.5 rounded-full font-bold text-sm whitespace-nowrap lowercase`,
+  { background: p.color || '#e1dceb' },
+]);
+
+export interface TagProps extends React.HTMLAttributes<HTMLDivElement> {
   color?: string;
   children: ReactNode;
 }
 
-export default function Tag({ color, children }: TagProps) {
+export default function Tag({ color, children, ...rest }: TagProps) {
   return (
-    <div
-      tw="px-2 py-0.5 rounded-full font-bold text-sm whitespace-nowrap lowercase"
-      css={{ background: color || '#e1dceb' }}
-    >
+    <TagDiv color={color} {...rest}>
       {children}
-    </div>
+    </TagDiv>
   );
 }
