@@ -123,17 +123,16 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
-        votes: 0,
+        votes: 1,
+        yourVote: 1,
         status: 'open',
         modStatus: 'pending',
         isOwner: true,
         isEditable: true,
-        yourVote: 0,
       };
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().search();
     },
     async importAll(infoArray: ImportTopic[]) {
       unwrap(
