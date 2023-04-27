@@ -47,6 +47,14 @@ if (
   window.location.hostname = 'dx.internetcomputer.org';
 }
 
+// TODO: refactor
+window.addEventListener('focus', () => {
+  const user = useIdentityStore.getState().user;
+  if (user?.detail.isModerator) {
+    useTopicStore.getState().fetchModQueue();
+  }
+});
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
@@ -100,7 +108,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
 
     // TODO: refactor
     const topicState = useTopicStore.getState();
-    await Promise.all([topicState.search(), topicState.fetchModQueue()]);
+    await Promise.all([
+      topicState.search(),
+      detail.isModerator && topicState.fetchModQueue(),
+    ]);
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {
