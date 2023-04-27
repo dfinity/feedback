@@ -42,6 +42,7 @@ export interface ImportTopic extends TopicInfo {
 
 export interface TopicState {
   topics: Topic[];
+  modQueue: Topic[] | undefined;
   sort: SearchSort;
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
@@ -50,7 +51,7 @@ export interface TopicState {
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
-  getModQueue(): Promise<Topic[]>;
+  fetchModQueue(): Promise<Topic[]>;
   setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
 }
 
@@ -60,6 +61,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
       topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
+      modQueue: state.modQueue
+        ?.map((other) => (topic.id === other.id ? topic : other))
+        .filter(
+          (other) => topic.id !== other.id || other.modStatus !== 'approved',
+        ),
     }));
 
   const statusMap: Record<TopicStatus, Status> = {
@@ -94,6 +100,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
 
   return {
     topics: [],
+    modQueue: undefined,
     sort: 'activity',
     async search() {
       const topics = (
@@ -116,17 +123,16 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
-        votes: 0,
+        votes: 1,
+        yourVote: 1,
         status: 'open',
         modStatus: 'pending',
         isOwner: true,
         isEditable: true,
-        yourVote: 0,
       };
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().search();
     },
     async importAll(infoArray: ImportTopic[]) {
       unwrap(
@@ -177,9 +183,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }
       unwrap(await backend.setTopicStatus(BigInt(id), statusMap[status]));
     },
-    async getModQueue() {
+    async fetchModQueue() {
       const topics = unwrap(await backend.getModeratorTopics()).map(mapTopic);
       console.log('Queue:', topics);
+      set({ modQueue: topics });
       return topics;
     },
     async setModStatus(topic: Topic, modStatus: ModStatus) {

@@ -182,7 +182,7 @@ export default function TopicView({
           ) : (
             <Join separator={() => <hr tw="my-3" />}>
               {!!topic.description && (
-                <div>
+                <div tw="overflow-x-hidden">
                   <Markdown>{topic.description}</Markdown>
                 </div>
               )}
