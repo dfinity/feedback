@@ -61,9 +61,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
       topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
-      modQueue: state.modQueue?.map((other) =>
-        topic.id === other.id ? topic : other,
-      ),
+      modQueue: state.modQueue
+        ?.map((other) => (topic.id === other.id ? topic : other))
+        .filter(
+          (other) => topic.id !== other.id || other.modStatus !== 'approved',
+        ),
     }));
 
   const statusMap: Record<TopicStatus, Status> = {
