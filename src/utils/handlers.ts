@@ -33,6 +33,6 @@ export function handleInfo(message: string) {
   toast(message, {
     type: 'info',
     autoClose: 5000,
-    position: 'top-left',
+    position: 'bottom-left',
   });
 }
