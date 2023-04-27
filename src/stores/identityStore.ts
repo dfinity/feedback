@@ -100,7 +100,10 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
 
     // TODO: refactor
     const topicState = useTopicStore.getState();
-    await Promise.all([topicState.search(), topicState.fetchModQueue()]);
+    await Promise.all([
+      topicState.search(),
+      detail.isModerator && topicState.fetchModQueue(),
+    ]);
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {
