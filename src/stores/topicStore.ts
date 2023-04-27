@@ -123,7 +123,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
-        votes: 0,
+        votes: 1,
         status: 'open',
         modStatus: 'pending',
         isOwner: true,
