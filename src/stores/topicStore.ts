@@ -42,6 +42,7 @@ export interface ImportTopic extends TopicInfo {
 
 export interface TopicState {
   topics: Topic[];
+  modQueue: Topic[] | undefined;
   sort: SearchSort;
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
@@ -50,7 +51,7 @@ export interface TopicState {
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
-  getModQueue(): Promise<Topic[]>;
+  fetchModQueue(): Promise<Topic[]>;
   setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
 }
 
@@ -58,6 +59,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
   const updateTopic = (topic: Topic) =>
     set((state) => ({
       topics: state.topics.map((other) =>
+        topic.id === other.id ? topic : other,
+      ),
+      modQueue: state.modQueue?.map((other) =>
         topic.id === other.id ? topic : other,
       ),
     }));
@@ -94,6 +98,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
 
   return {
     topics: [],
+    modQueue: undefined,
     sort: 'activity',
     async search() {
       const topics = (
@@ -177,9 +182,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }
       unwrap(await backend.setTopicStatus(BigInt(id), statusMap[status]));
     },
-    async getModQueue() {
+    async fetchModQueue() {
       const topics = unwrap(await backend.getModeratorTopics()).map(mapTopic);
       console.log('Queue:', topics);
+      set({ modQueue: topics });
       return topics;
     },
     async setModStatus(topic: Topic, modStatus: ModStatus) {
