@@ -124,11 +124,11 @@ export const useTopicStore = create<TopicState>((set, get) => {
         id,
         createTime: Date.now(),
         votes: 1,
+        yourVote: 1,
         status: 'open',
         modStatus: 'pending',
         isOwner: true,
         isEditable: true,
-        yourVote: 0,
       };
       set((state) => ({
         topics: [topic, ...state.topics],
