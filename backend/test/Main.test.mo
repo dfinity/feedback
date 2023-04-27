@@ -8,8 +8,11 @@ import History "../History";
 func expect<T>(name : Text, response : ?T) : T {
   switch (response) {
     case (?r) r;
-    case null {
-      print(">> " # name);
+    case _ {
+      for (event in core.logger.getEvents(0, core.logger.getSize()).vals()) {
+        print(debug_show event);
+      };
+      print("\n>> " # name);
       assert false;
       loop {};
     };
@@ -20,6 +23,8 @@ let installer = Principal.fromText("rkp4c-7iaaa-aaaaa-aaaca-cai");
 let caller = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
 
 let core = Core.Core(installer, State.init(installer), History.init(installer));
+
+let user = expect("login", core.login(caller));
 
 let id = expect(
   "createTopic",

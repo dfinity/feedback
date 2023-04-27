@@ -28,8 +28,8 @@ module {
 
   public class Core(installer : Principal, stableState : State.State, history_v0 : History.History) {
 
-    let state : State.OOState = State.OO(stableState);
-    let logger = History.Logger(history_v0);
+    public let state : State.OOState = State.OO(stableState);
+    public let logger = History.Logger(history_v0);
 
     let topicRateLimit = RateLimit.New(5, 5); // 5 per 5 seconds.
 
