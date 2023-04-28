@@ -63,7 +63,8 @@ export default function TopicView({
   const user = useIdentity();
   const vote = useTopicStore((state) => state.vote);
 
-  const maxPreviewTags = breakpoint === 'xs' || expanded ? 0 : 2;
+  const isMobile = breakpoint === 'xs';
+  const maxPreviewTags = isMobile || expanded ? 0 : 2;
 
   useEffect(() => {
     if (!expanded) {
@@ -150,7 +151,7 @@ export default function TopicView({
               onChangeExpanded && tw`select-none`,
             ]}
           >
-            {topic.importId?.type === 'jira' && breakpoint !== 'xs' && (
+            {topic.importId?.type === 'jira' && !isMobile && (
               <div>
                 <Tooltip content={topic.importId.id}>
                   <div>
