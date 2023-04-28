@@ -132,6 +132,8 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         const client = await AuthClient.create();
         if (await client.isAuthenticated()) {
           await finishLoginIC(client);
+        } else {
+          set({ user: null });
         }
       } catch (err) {
         handleError(err, 'Error while fetching user info!');
