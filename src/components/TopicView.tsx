@@ -29,8 +29,8 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
+import TopicTag from './TopicTag';
 import { Join } from './utils/Join';
-import { Link } from 'react-router-dom';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -164,11 +164,9 @@ export default function TopicView({
           <div tw="flex gap-1 items-center">
             <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
             {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
-              <Link key={i} to={`/?tag=${tag}`}>
-                <Tag>{tag}</Tag>
-              </Link>
+              <TopicTag key={i}>{tag}</TopicTag>
             ))}
-            {topic.tags.length > maxPreviewTags && (
+            {!expanded && topic.tags.length > maxPreviewTags && (
               <Tag>
                 <span tw="opacity-50">
                   +{topic.tags.length - maxPreviewTags}
@@ -215,9 +213,7 @@ export default function TopicView({
                 <div tw="flex flex-wrap gap-2 items-center">
                   <span tw="font-bold opacity-70">Tags:</span>
                   {topic.tags.map((tag, i) => (
-                    <Link key={i} to={`/?tag=${tag}`}>
-                      <Tag>{tag}</Tag>
-                    </Link>
+                    <TopicTag key={i}>{tag}</TopicTag>
                   ))}
                   {user?.detail.isModerator && (
                     <Tag color="#9195e621">{`#${topic.id}`}</Tag>
