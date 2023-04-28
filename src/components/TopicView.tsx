@@ -150,7 +150,7 @@ export default function TopicView({
               onChangeExpanded && tw`select-none`,
             ]}
           >
-            {topic.importId?.type === 'jira' && (
+            {topic.importId?.type === 'jira' && breakpoint !== 'xs' && (
               <div>
                 <Tooltip content={topic.importId.id}>
                   <div>
