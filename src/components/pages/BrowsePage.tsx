@@ -31,13 +31,18 @@ export default function BrowsePage() {
 
   const topics = useTopicStore((state) => state.topics);
   const sort = useTopicStore((state) => state.sort);
+  // const tags = useTopicStore((state) => state.tags);
   const navigate = useNavigate();
+
+  const tag = searchParams.get('tag');
 
   const visibleTopics = topics.filter((topic: Topic) => {
     if (filterText) {
-      // TODO: per-word filter
-      const text = topic.title.toLowerCase();
-      return text.includes(filterText.toLowerCase());
+      // Show all topics matching the query regardless of other search params
+      return topic.title.toLowerCase().includes(filterText.toLowerCase());
+    }
+    if (tag && !topic.tags.includes(tag)) {
+      return false;
     }
     return !!filterStates[topic.status];
   });
@@ -109,6 +114,7 @@ export default function BrowsePage() {
               onChange={(e) => setFilterText(e.target.value)}
               placeholder="Search..."
             />
+            {/* <Select isMulti options={tags.map((tag) => tag.name)} /> */}
             {inlineSort && <div tw="shrink-0">{sortDropdown}</div>}
           </div>
           <div tw="sm:flex items-center pb-4">

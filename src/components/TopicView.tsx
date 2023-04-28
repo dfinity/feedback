@@ -29,6 +29,7 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
+import TopicTag from './TopicTag';
 import { Join } from './utils/Join';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
@@ -165,7 +166,7 @@ export default function TopicView({
             {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
               <Tag key={i}>{tag}</Tag>
             ))}
-            {topic.tags.length > maxPreviewTags && (
+            {!expanded && topic.tags.length > maxPreviewTags && (
               <Tag>
                 <span tw="opacity-50">
                   +{topic.tags.length - maxPreviewTags}
@@ -212,7 +213,7 @@ export default function TopicView({
                 <div tw="flex flex-wrap gap-2 items-center">
                   <span tw="font-bold opacity-70">Tags:</span>
                   {topic.tags.map((tag, i) => (
-                    <Tag key={i}>{tag}</Tag>
+                    <TopicTag key={i}>{tag}</TopicTag>
                   ))}
                   {user?.detail.isModerator && (
                     <Tag color="#9195e621">{`#${topic.id}`}</Tag>
