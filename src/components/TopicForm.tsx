@@ -20,42 +20,6 @@ const Form = styled.form`
   }
 `;
 
-// const ArrayEditorButton = tw.div`cursor-pointer inline-block p-2 text-sm rounded-full border-2 hover:bg-[rgba(0,0,0,.05)]`;
-
-// interface ArrayEditorProps<T> {
-//   array: T[];
-//   onChange(newArray: T[]): void;
-//   onCreate(): T;
-//   children(item: T, i: number): ReactNode;
-//   newTooltip?: ReactNode;
-// }
-
-// function ArrayEditor<T>({
-//   array: value,
-//   onChange,
-//   onCreate: createItem,
-//   children,
-//   newTooltip,
-// }: ArrayEditorProps<T>) {
-//   return (
-//     <div>
-//       {value.map((item, i) => (
-//         <div tw="flex">
-//           <ArrayEditorButton>
-//             <FaMinus />
-//           </ArrayEditorButton>
-//           <div tw="flex-1">{children(item, i)}</div>
-//         </div>
-//       ))}
-//       <Tooltip content={newTooltip}>
-//         <ArrayEditorButton onClick={() => onChange([...value, createItem()])}>
-//           <FaPlus />
-//         </ArrayEditorButton>
-//       </Tooltip>
-//     </div>
-//   );
-// }
-
 export interface TopicFormProps {
   initial?: TopicInfo;
   onSubmit?(info: TopicInfo): void | Promise<void>;
@@ -85,7 +49,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   const patch = (partialInfo: Partial<TopicInfo>) =>
     setInfo({ ...info, ...partialInfo });
 
-  // TODO: add form validation
+  // TODO: add client-side form validation
 
   return (
     <Form
@@ -110,13 +74,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       </label>
       <label>
         Brief description
-        {/* <Slate
-          editor={editor}
-          value={info.description}
-          onChange={(description) => patch({ description })}
-        >
-          <Editable />
-        </Slate> */}
         <textarea
           tw="mb-0"
           rows={5}
@@ -131,19 +88,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       )} */}
       <label>
         Links
-        {/* <ArrayEditor
-          array={details.links}
-          onChange={(links) => patch({ links })}
-          onCreate={() => ''}
-        >
-          {(value, i) => (
-            <input
-              type="text"
-              value={details.title}
-              onChange={(e) => patch({ title: e.target.value })}
-            />
-          )}
-        </ArrayEditor> */}
         <div tw="flex flex-col gap-2">
           {[...info.links, ''].map((link, i) => (
             <div key={i}>
