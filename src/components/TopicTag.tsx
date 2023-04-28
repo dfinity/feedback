@@ -21,7 +21,7 @@ export default function TopicTag({ children: tag, ...rest }: TopicTagProps) {
 
   return (
     <Tag
-      tw="select-none cursor-pointer"
+      tw="select-none cursor-pointer hover:scale-105"
       css={[searchParams.get('tag') === tag && tw`bg-blue-200`]}
       {...rest}
       onClick={onClick}

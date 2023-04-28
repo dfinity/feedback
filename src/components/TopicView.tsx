@@ -164,7 +164,7 @@ export default function TopicView({
           <div tw="flex gap-1 items-center">
             <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
             {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
-              <TopicTag key={i}>{tag}</TopicTag>
+              <Tag key={i}>{tag}</Tag>
             ))}
             {!expanded && topic.tags.length > maxPreviewTags && (
               <Tag>
