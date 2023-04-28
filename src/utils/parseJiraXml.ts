@@ -40,7 +40,7 @@ export default function parseJiraXml(xml: string): ImportTopic[] {
     let description = htmlToMarkdown(htmlDecode(getField(item, 'description')));
 
     const links = getFields(item, 'link');
-    const match = /^\[([^\]]+)\]\n?\(([^) ]+ ?[^)]*)\)$/.exec(description)?.[2];
+    const match = /^\[([^\]]+)\]\n?\(([^) ]+) ?[^)]*\)$/.exec(description)?.[2];
     if (match) {
       description = '';
       links.unshift(match);
