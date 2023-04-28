@@ -31,6 +31,7 @@ export default function BrowsePage() {
 
   const topics = useTopicStore((state) => state.topics);
   const sort = useTopicStore((state) => state.sort);
+  // const tags = useTopicStore((state) => state.tags);
   const navigate = useNavigate();
 
   const visibleTopics = topics.filter((topic: Topic) => {
