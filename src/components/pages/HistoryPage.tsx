@@ -13,7 +13,20 @@ interface EventItemProps {
 }
 
 function EventItem({ event }: EventItemProps) {
-  if ('request' in event) {
+  if ('install' in event) {
+    const { install } = event;
+    return (
+      <EventCard>
+        <label tw="text-lg text-blue-500">Install</label>
+        <div>
+          <label>Installer:</label> {install.installer.toString()}
+        </div>
+        <div>
+          <label>Time:</label> {new Date(Number(install.time) / 1e6).toString()}
+        </div>
+      </EventCard>
+    );
+  } else if ('request' in event) {
     const { request } = event;
     return (
       <EventCard>
@@ -26,6 +39,26 @@ function EventItem({ event }: EventItemProps) {
         </div>
         <div>
           <label>Time:</label> {new Date(Number(request.time) / 1e6).toString()}
+        </div>
+      </EventCard>
+    );
+  } else if ('internal' in event) {
+    const { internal } = event;
+    return (
+      <EventCard>
+        <label tw="text-lg text-blue-500">Internal</label>
+        <div>
+          <label>ID:</label> {internal.requestId.toString()}
+        </div>
+      </EventCard>
+    );
+  } else if ('response' in event) {
+    const { response } = event;
+    return (
+      <EventCard>
+        <label tw="text-lg text-blue-500">Response</label>
+        <div>
+          <label>ID:</label> {response.requestId.toString()}
         </div>
       </EventCard>
     );
