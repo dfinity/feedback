@@ -12,11 +12,15 @@ interface EventItemProps {
   event: Event;
 }
 
+BigInt.prototype.toJSON = function (): number {
+  return this.toString();
+};
+
 function EventItem({ event }: EventItemProps) {
   if ('install' in event) {
     const { install } = event;
     return (
-      <EventCard>
+      <InstallEventCard>
         <label tw="text-lg text-blue-500">Install</label>
         <div>
           <label>Installer:</label> {install.installer.toString()}
@@ -24,13 +28,18 @@ function EventItem({ event }: EventItemProps) {
         <div>
           <label>Time:</label> {new Date(Number(install.time) / 1e6).toString()}
         </div>
-      </EventCard>
+      </InstallEventCard>
     );
   } else if ('request' in event) {
     const { request } = event;
     return (
-      <EventCard>
-        <label tw="text-lg text-blue-500">Request</label>
+      <RequestEventCard>
+        <label tw="text-lg text-blue-900">
+          Request {JSON.stringify(request.request)}{' '}
+        </label>
+        <div>
+          <label>Caller:</label> {request.request.toString()}
+        </div>
         <div>
           <label>ID:</label> {request.requestId.toString()}
         </div>
@@ -40,39 +49,83 @@ function EventItem({ event }: EventItemProps) {
         <div>
           <label>Time:</label> {new Date(Number(request.time) / 1e6).toString()}
         </div>
-      </EventCard>
+      </RequestEventCard>
     );
   } else if ('internal' in event) {
     const { internal } = event;
     return (
-      <EventCard>
-        <label tw="text-lg text-blue-500">Internal</label>
+      <InternalEventCard>
+        <label tw="text-lg text-blue-500">
+          Internal {JSON.stringify(internal.internal)}{' '}
+        </label>
         <div>
           <label>ID:</label> {internal.requestId.toString()}
         </div>
-      </EventCard>
+      </InternalEventCard>
     );
   } else if ('response' in event) {
     const { response } = event;
     return (
-      <EventCard>
-        <label tw="text-lg text-blue-500">Response</label>
+      <ResponseEventCard>
+        <label tw="text-lg text-blue-500">
+          Response {JSON.stringify(response.response)}{' '}
+        </label>
         <div>
           <label>ID:</label> {response.requestId.toString()}
         </div>
-      </EventCard>
+      </ResponseEventCard>
     );
   }
 
   // Default
-  return <EventCard tw="opacity-60">Unknown event type</EventCard>;
+  return (
+    <UnknownEventCard tw="opacity-60">Unknown event type</UnknownEventCard>
+  );
 }
 
-const EventCard = styled.div`
+const UnknownEventCard = styled.div`
   ${tw`bg-gray-100 px-5 py-3 rounded-xl`}
 
   // TODO: custom CSS styling
   label {
+    font-weight: bold;
+  }
+`;
+
+const InstallEventCard = styled.div`
+  ${tw`bg-blue-100 px-5 py-3 rounded-xl`}
+
+  // TODO: custom CSS styling
+  label {
+    font-weight: bold;
+  }
+`;
+
+const RequestEventCard = styled.div`
+  ${tw`bg-purple-200 px-5 py-3 rounded-xl`}
+
+  // TODO: custom CSS styling
+  label {
+    font-weight: bold;
+  }
+`;
+
+const InternalEventCard = styled.div`
+  ${tw`bg-white px-5 py-3`}
+
+  // TODO: custom CSS styling
+  label {
+    color: black;
+    font-weight: normal;
+  }
+`;
+
+const ResponseEventCard = styled.div`
+  ${tw`bg-green-200 px-5 py-3 rounded-xl`}
+
+  // TODO: custom CSS styling
+  label {
+    color: green;
     font-weight: bold;
   }
 `;
@@ -95,7 +148,7 @@ export default function HistoryPage() {
               eventCount,
             ),
           );
-          events.reverse(); // Most recent events first
+          // events.reverse(); // Most recent events first
           console.log('Events:', events);
           setEvents(events);
         } catch (err) {
