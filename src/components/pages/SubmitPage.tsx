@@ -26,9 +26,8 @@ export default function SubmitPage() {
   return user ? (
     <>
       <div tw="bg-gray-100 flex flex-col items-center px-10 py-8 rounded-xl">
-        <div tw="w-full text-2xl sm:text-xl">
-          Let us know how we can improve your experience <br tw="sm:hidden" />
-          as an IC developer:
+        <div tw="w-full text-xl opacity-60">
+          Let us know how we can improve your experience as an IC developer:
           <hr tw="my-4" />
         </div>
         <TopicForm initial={recentInfo} onSubmit={onSubmit} />
