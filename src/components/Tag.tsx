@@ -4,8 +4,10 @@ import tw from 'twin.macro';
 
 const TagDiv = styled.div<TagProps>((p) => [
   tw`px-2 py-0.5 rounded-full font-bold text-sm whitespace-nowrap lowercase`,
-  { background: p.color || '#e1dceb' },
+  { background: p.color || defaultTagColor },
 ]);
+
+export const defaultTagColor = '#e1dceb';
 
 export interface TagProps extends React.HTMLAttributes<HTMLDivElement> {
   color?: string;
