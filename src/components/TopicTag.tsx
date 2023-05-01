@@ -1,13 +1,16 @@
 import { useSearchParams } from 'react-router-dom';
 import 'twin.macro';
-import tw from 'twin.macro';
 import Tag, { TagProps } from './Tag';
 
 export interface TopicTagProps extends TagProps {
   children: string;
 }
 
-export default function TopicTag({ children: tag, ...rest }: TopicTagProps) {
+export default function TopicTag({
+  children: tag,
+  color,
+  ...rest
+}: TopicTagProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const onClick = () => {
@@ -19,10 +22,12 @@ export default function TopicTag({ children: tag, ...rest }: TopicTagProps) {
     }
   };
 
+  const isSelected = searchParams.get('tag') === tag;
+
   return (
     <Tag
       tw="select-none cursor-pointer hover:scale-105"
-      css={[searchParams.get('tag') === tag && tw`bg-blue-200`]}
+      color={isSelected ? 'rgb(191,219,254)' : color}
       {...rest}
       onClick={onClick}
     >
