@@ -95,6 +95,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     ...result,
     id: String(result.id),
     createTime: Number(result.createTime),
+    tags: result.tags.map(normalizeTag),
     votes: Number(result.upVoters - result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
@@ -103,6 +104,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
       ? mapImportId(result.importId[0])
       : undefined,
   });
+
+  const normalizeTag = (tag: string) => tag.toLowerCase();
 
   return {
     topics: [],
@@ -139,6 +142,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
+        tags: info.tags.map(normalizeTag),
         votes: 1,
         yourVote: 1,
         status: 'open',
