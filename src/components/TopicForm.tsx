@@ -3,6 +3,7 @@ import CreatableSelect from 'react-select/creatable';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { TopicInfo, useTopicStore } from '../stores/topicStore';
+import { defaultTagColor } from './Tag';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -120,12 +121,18 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
           <CreatableSelect
             tw="w-full"
             styles={{
-              // multiValue: (styles) => ({
-              //   ...styles,
-              // }),
-              container: (styles) => ({
+              multiValue: (styles) => ({
                 ...styles,
-                borderRadius: '100%',
+                ...tw`rounded-2xl px-1`,
+                background: defaultTagColor,
+              }),
+              multiValueRemove: (styles) => ({
+                ...styles,
+                ...tw`rounded-xl hover:bg-[#0001]`,
+              }),
+              control: (styles) => ({
+                ...styles,
+                ...tw`rounded-lg border-2 border-[rgba(0,0,0,.1)]`,
               }),
               placeholder: (styles) => ({
                 ...styles,
@@ -134,6 +141,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
             }}
             value={info.tags.map((tag) => ({ label: tag, value: tag }))}
             isMulti={true}
+            isClearable={false}
             options={tags.map((tag) => ({
               label: tag.name,
               value: tag.name,
