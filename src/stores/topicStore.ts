@@ -40,10 +40,16 @@ export interface ImportTopic extends TopicInfo {
   editTime: number;
 }
 
+export interface TagInfo {
+  name: string;
+  count: number;
+}
+
 export interface TopicState {
   topics: Topic[];
   modQueue: Topic[] | undefined;
   sort: SearchSort;
+  tags: TagInfo[];
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
@@ -102,11 +108,21 @@ export const useTopicStore = create<TopicState>((set, get) => {
     topics: [],
     modQueue: undefined,
     sort: 'activity',
+    tags: [],
     async search() {
       const topics = (
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
-      set({ topics });
+      const tagCounts: Record<string, number> = {};
+      topics.forEach((topic) => {
+        topic.tags.forEach((tag) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+      const tags = Object.entries(tagCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      set({ topics, tags });
       // console.log('Topics:', get().topics);
       return topics;
     },
