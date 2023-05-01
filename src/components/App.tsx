@@ -13,10 +13,10 @@ export default function App() {
   const user = useIdentity();
 
   const app = (
-    <div tw="w-screen overflow-x-hidden">
-      <Router>
+    <Router>
+      <div tw="w-screen min-h-screen overflow-x-hidden">
         <Navbar />
-        <div tw="max-w-[800px] min-h-[400px] mx-auto p-4 mt-1">
+        <div tw="max-w-[800px] h-full mx-auto p-4 mt-1">
           <Routes>
             <Route path="/" element={<BrowsePage />} />
             <Route path="/topic/:id" element={<TopicPage />} />
@@ -25,8 +25,8 @@ export default function App() {
             <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </div>
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 
   return user?.detail.isModerator ? <FileDropZone>{app}</FileDropZone> : app;
