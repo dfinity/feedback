@@ -46,6 +46,7 @@ export interface TagInfo {
 }
 
 export interface TopicState {
+  topicLookup: Record<string, Topic>;
   topics: Topic[];
   modQueue: Topic[] | undefined;
   sort: SearchSort;
@@ -64,6 +65,7 @@ export interface TopicState {
 export const useTopicStore = create<TopicState>((set, get) => {
   const updateTopic = (topic: Topic) =>
     set((state) => ({
+      topicLookup: { ...state.topicLookup, [topic.id]: topic },
       topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
@@ -108,6 +110,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
   const normalizeTag = (tag: string) => tag.toLowerCase();
 
   return {
+    topicLookup: {},
     topics: [],
     modQueue: undefined,
     sort: 'activity',
@@ -116,8 +119,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
       const topics = (
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
+      const topicLookup = { ...get().topicLookup };
       const tagCounts: Record<string, number> = {};
       topics.forEach((topic) => {
+        topicLookup[topic.id] = topic;
         topic.tags.forEach((tag) => {
           tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         });
@@ -125,7 +130,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
       const tags = Object.entries(tagCounts)
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
-      set({ topics, tags });
+      set({ topicLookup, topics, tags });
       // console.log('Topics:', get().topics);
       return topics;
     },
