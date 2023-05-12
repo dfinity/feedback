@@ -35,3 +35,9 @@ When ready, run `dfx deploy` to build and deploy the application.
 - [Motoko](https://github.com/dfinity/motoko#readme): a safe and simple programming language for the Internet Computer
 - [mo-dev](https://github.com/dfinity/motoko-dev-server#readme): a live reload development server for Motoko
 - [MOPS](https://j4mwm-bqaaa-aaaam-qajbq-cai.ic0.app/): an on-chain community package manager for Motoko
+
+---
+
+`mo-dev` is early in development. Please feel free to report a bug, ask a question, or request a feature on the project's [GitHub issues](https://github.com/dfinity/motoko-dev-server/issues) page.
+
+Contributions are welcome! Please check out the [contributor guidelines](https://github.com/dfinity/motoko-dev-server/blob/main/.github/CONTRIBUTING.md) for more information.
