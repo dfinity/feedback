@@ -38,6 +38,6 @@ When ready, run `dfx deploy` to build and deploy the application.
 
 ---
 
-`mo-dev` is early in development. Please feel free to report a bug, ask a question, or request a feature on the project's [GitHub issues](https://github.com/dfinity/motoko-dev-server/issues) page.
+This project is early in development. Please feel free to report a bug, ask a question, or request a feature on the project's [GitHub issues](https://github.com/dfinity/feedback/issues) page.
 
-Contributions are welcome! Please check out the [contributor guidelines](https://github.com/dfinity/motoko-dev-server/blob/main/.github/CONTRIBUTING.md) for more information.
+Contributions are welcome! Please check out the [contributor guidelines](https://github.com/dfinity/feedback/blob/main/.github/CONTRIBUTING.md) for more information.
