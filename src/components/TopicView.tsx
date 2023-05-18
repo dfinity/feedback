@@ -146,7 +146,20 @@ export default function TopicView({
                 onClick={() => onVote(topic.yourVote === -1 ? 0 : -1)}
               />
             </div>
-            <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
+            <Tooltip
+              content={
+                <div tw="flex gap-1">
+                  <FaCaretUp />
+                  {topic.upvotes}
+                  <FaCaretDown />
+                  {topic.downvotes}
+                </div>
+              }
+            >
+              <span tw="opacity-60 text-lg font-bold">
+                {topic.upvotes - topic.downvotes}
+              </span>
+            </Tooltip>
           </div>
           <div
             tw="flex-1 flex gap-2 items-center overflow-hidden"

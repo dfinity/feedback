@@ -24,7 +24,8 @@ export interface Topic extends TopicInfo {
   id: string;
   // owner: Principal;
   createTime: number;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
   status: TopicStatus;
   modStatus: ModStatus;
   isOwner: boolean;
@@ -98,7 +99,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
     id: String(result.id),
     createTime: Number(result.createTime),
     tags: result.tags.map(normalizeTag),
-    votes: Number(result.upVoters - result.downVoters),
+    upvotes: Number(result.upVoters),
+    downvotes: Number(result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
@@ -148,7 +150,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
         id,
         createTime: Date.now(),
         tags: info.tags.map(normalizeTag),
-        votes: 1,
+        upvotes: 1,
+        downvotes: 0,
         yourVote: 1,
         status: 'open',
         modStatus: 'pending',
@@ -187,7 +190,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({
         ...topic,
-        votes: topic.votes + vote - topic.yourVote,
+        upvotes:
+          topic.upvotes + Math.max(0, vote) - Math.max(0, topic.yourVote),
+        downvotes:
+          topic.downvotes - Math.min(0, vote) + Math.min(0, topic.yourVote),
         yourVote: vote,
       });
       unwrap(
