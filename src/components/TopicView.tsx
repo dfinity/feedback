@@ -147,13 +147,18 @@ export default function TopicView({
               />
             </div>
             <Tooltip
+              delay={500}
               content={
-                <div tw="flex gap-1">
-                  <FaCaretUp />
-                  {topic.upvotes}
-                  <FaCaretDown tw="ml-3" />
-                  {topic.downvotes}
-                </div>
+                <>
+                  <div tw="flex gap-1 items-center">
+                    <FaCaretUp tw="translate-y-[-1px]" />
+                    {topic.upvotes}
+                  </div>
+                  <div tw="flex gap-1 items-center">
+                    <FaCaretDown />
+                    {topic.downvotes}
+                  </div>
+                </>
               }
             >
               <span tw="opacity-60 text-lg font-bold">
