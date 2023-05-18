@@ -151,7 +151,7 @@ export default function TopicView({
                 <div tw="flex gap-1">
                   <FaCaretUp />
                   {topic.upvotes}
-                  <FaCaretDown />
+                  <FaCaretDown tw="ml-3" />
                   {topic.downvotes}
                 </div>
               }
