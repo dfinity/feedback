@@ -28,6 +28,7 @@ export interface Topic extends TopicInfo {
   downvotes: number;
   status: TopicStatus;
   modStatus: ModStatus;
+  modMessage: string;
   isOwner: boolean;
   isEditable: boolean;
   yourVote: VoteStatus;
@@ -103,6 +104,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
     downvotes: Number(result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
+    modMessage: result.modStatus.rejected?.[0] || '',
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
     importId: result.importId.length
       ? mapImportId(result.importId[0])
