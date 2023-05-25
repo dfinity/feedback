@@ -81,14 +81,14 @@ module {
   public type Event = {
     #install : {
       time : Int; // nano seconds
-      cycles_balance : Int;
+      cycles_balance : Nat;
       installer : Principal;
     };
     #request : {
       requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
-      cycles_balance : Int;
+      cycles_balance : Nat;
       request : Request;
     };
     #internal : {
