@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
-import 'twin.macro';
+import tw from 'twin.macro';
 import Tag, { TagProps } from './Tag';
 
 export interface TopicTagProps extends TagProps {
@@ -27,7 +27,10 @@ export default function TopicTag({
   return (
     <Tag
       tw="select-none cursor-pointer hover:scale-105"
-      color={isSelected ? 'rgb(191,219,254)' : color}
+      css={[
+        isSelected &&
+          tw`scale-110 [box-shadow: 0 0 8px 2px rgba(83, 51, 152, .8)] z-10`,
+      ]}
       {...rest}
       onClick={onClick}
     >
