@@ -33,6 +33,7 @@ import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
 import TopicTag from './TopicTag';
 import { Join } from './utils/Join';
+import { promptModMessage } from '../utils/promptModMessage';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
 
@@ -304,7 +305,13 @@ export default function TopicView({
                           <Tooltip content="Hide">
                             <ToolbarButton
                               // css={{ background: statusColors.next }}
-                              onClick={() => setModStatus(topic, 'rejected')}
+                              onClick={() =>
+                                handlePromise(
+                                  promptModMessage(topic, 'rejected'),
+                                  undefined,
+                                  'Error while updating topic status!',
+                                )
+                              }
                             >
                               {' '}
                               <FaFlag tw="text-red-600" />

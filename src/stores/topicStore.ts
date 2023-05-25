@@ -61,7 +61,11 @@ export interface TopicState {
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
   fetchModQueue(): Promise<Topic[]>;
-  setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
+  setModStatus(
+    topic: Topic,
+    modStatus: ModStatus,
+    modMessage?: string,
+  ): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
@@ -236,7 +240,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
       });
       unwrap(
         await backend.setTopicModStatus(BigInt(topic.id), {
-          [modStatus]: modMessage || null,
+          [modStatus]:
+            modStatus === 'rejected' ? (modMessage ? [modMessage] : []) : null,
         } as any),
       );
     },
