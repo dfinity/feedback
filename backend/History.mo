@@ -81,14 +81,14 @@ module {
   public type Event = {
     #install : {
       time : Int; // nano seconds
-      cycles_balance : ?Nat;
+      cyclesBalance : ?Nat;
       installer : Principal;
     };
     #request : {
       requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
-      cycles_balance : ?Nat;
+      cyclesBalance : ?Nat;
       request : Request;
     };
     #internal : {
@@ -112,10 +112,10 @@ module {
   };
 
   public func init(installer : Principal) : History {
-    let cycles_balance = ?Cycles.balance();
+    let cyclesBalance = ?Cycles.balance();
     {
       var nextRequestId = 1;
-      var events = Seq.make(#install { time = Time.now(); installer; cycles_balance });
+      var events = Seq.make(#install { time = Time.now(); installer; cyclesBalance });
     };
   };
 
@@ -178,8 +178,8 @@ module {
       let requestId = history.nextRequestId;
       do {
         history.nextRequestId += 1;
-        let cycles_balance = ?Cycles.balance();
-        add(#request { time = Time.now(); caller; request; requestId; cycles_balance });
+        let cyclesBalance = ?Cycles.balance();
+        add(#request { time = Time.now(); caller; request; requestId; cyclesBalance });
       };
 
       func addResponse(response : Response) {
