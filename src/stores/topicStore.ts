@@ -104,7 +104,8 @@ export const useTopicStore = create<TopicState>((set, get) => {
     downvotes: Number(result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
-    modMessage: result.modStatus.rejected?.[0] || '',
+    modMessage:
+      ('rejected' in result.modStatus && result.modStatus.rejected?.[0]) || '',
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
     importId: result.importId.length
       ? mapImportId(result.importId[0])
@@ -157,6 +158,7 @@ export const useTopicStore = create<TopicState>((set, get) => {
         yourVote: 1,
         status: 'open',
         modStatus: 'pending',
+        modMessage: '',
         isOwner: true,
         isEditable: true,
       };
@@ -222,14 +224,19 @@ export const useTopicStore = create<TopicState>((set, get) => {
       set({ modQueue: topics });
       return topics;
     },
-    async setModStatus(topic: Topic, modStatus: ModStatus) {
+    async setModStatus(
+      topic: Topic,
+      modStatus: ModStatus,
+      modMessage?: string,
+    ) {
       updateTopic({
         ...topic,
         modStatus,
+        modMessage: modMessage || '',
       });
       unwrap(
         await backend.setTopicModStatus(BigInt(topic.id), {
-          [modStatus]: null,
+          [modStatus]: modMessage || null,
         } as any),
       );
     },
