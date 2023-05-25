@@ -435,7 +435,7 @@ module {
               };
               // TODO: moderation for approved topic edits
               modStatus = switch (topic.modStatus) {
-                case (#rejected) #pending;
+                case (#rejected _) #pending;
                 case (s) s;
               };
             };
