@@ -6,10 +6,11 @@ export async function promptModMessage(
   modStatus: ModStatus,
 ): Promise<string | undefined> {
   const result = await Swal.fire({
-    title: 'Message (optional):',
+    title: 'Moderator note:',
     showCancelButton: true,
     confirmButtonColor: '#7450c3', // TODO: refactor
     input: 'text',
+    inputPlaceholder: '(Leave blank for default)',
   });
   if (!result.isConfirmed) {
     return;
