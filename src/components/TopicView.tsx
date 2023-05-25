@@ -280,7 +280,16 @@ export default function TopicView({
                     )}
                   </div>
                 )}
-              {(!!topic.isEditable || !!user?.detail.isModerator) &&
+              {!!(topic.isEditable && topic.modMessage) && (
+                <div tw="">
+                  <div tw="flex gap-2">
+                    <FaTimes tw="text-red-600 translate-y-[3px]" />
+                    <div tw="font-bold">Moderator note:</div>
+                    <div tw="opacity-75">{topic.modMessage}</div>
+                  </div>
+                </div>
+              )}
+              {!!(topic.isEditable || user?.detail.isModerator) &&
                 !hideModerationInfo && (
                   <div tw="flex gap-2 mt-4">
                     <div tw="flex flex-1">
