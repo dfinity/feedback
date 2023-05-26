@@ -39,13 +39,13 @@ if (import.meta.env.PROD) {
   (agent as any)._host = 'https://icp0.io/';
 }
 
-// TODO: refactor
-if (
-  window.location.hostname.endsWith('.icp0.io') ||
-  window.location.hostname.endsWith('.ic0.app')
-) {
-  window.location.hostname = 'dx.internetcomputer.org';
-}
+// // TODO: refactor
+// if (
+//   window.location.hostname.endsWith('.icp0.io') ||
+//   window.location.hostname.endsWith('.ic0.app')
+// ) {
+//   window.location.hostname = 'dx.internetcomputer.org';
+// }
 
 // TODO: refactor
 window.addEventListener('focus', () => {
