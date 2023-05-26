@@ -1,11 +1,12 @@
 {
   "backend": {
-    "ic": "qwmau-siaaa-aaaap-aa5cq-cai"
+    "ic": "jrkiy-xyaaa-aaaap-abccq-cai"
   },
   "frontend": {
-    "ic": "q7pli-eaaaa-aaaap-aa5da-cai"
+    "ic": "jyjde-bqaaa-aaaap-abcda-cai"
   },
   "internet_identity": {
+    "ic": "jwlom-2aaaa-aaaap-abcca-cai",
     "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
   }
 }
