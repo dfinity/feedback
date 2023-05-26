@@ -12,10 +12,6 @@ interface EventItemProps {
   event: Event;
 }
 
-BigInt.prototype.toJSON = function (): number {
-  return this.toString();
-};
-
 function EventItem({ event }: EventItemProps) {
   if ('install' in event) {
     const { install } = event;
@@ -34,15 +30,10 @@ function EventItem({ event }: EventItemProps) {
     const { request } = event;
     return (
       <RequestEventCard>
+        <div tw="float-right">{request.requestId.toString()}</div>
         <label tw="text-lg text-blue-900">
-          Request {JSON.stringify(request.request)}{' '}
+          {JSON.stringify(request.request)}{' '}
         </label>
-        <div>
-          <label>Caller:</label> {request.request.toString()}
-        </div>
-        <div>
-          <label>ID:</label> {request.requestId.toString()}
-        </div>
         <div>
           <label>Caller:</label> {request.caller.toString()}
         </div>
@@ -56,7 +47,7 @@ function EventItem({ event }: EventItemProps) {
     return (
       <InternalEventCard>
         <label tw="text-lg text-blue-500">
-          Internal {JSON.stringify(internal.internal)}{' '}
+          {JSON.stringify(internal.internal)}{' '}
         </label>
         <div>
           <label>ID:</label> {internal.requestId.toString()}
@@ -68,7 +59,7 @@ function EventItem({ event }: EventItemProps) {
     return (
       <ResponseEventCard>
         <label tw="text-lg text-blue-500">
-          Response {JSON.stringify(response.response)}{' '}
+          {JSON.stringify(response.response)}{' '}
         </label>
         <div>
           <label>ID:</label> {response.requestId.toString()}
@@ -84,27 +75,24 @@ function EventItem({ event }: EventItemProps) {
 }
 
 const UnknownEventCard = styled.div`
-  ${tw`bg-gray-100 px-5 py-3 rounded-xl`}
+  ${tw`bg-gray-100 px-5 py-3 rounded-xl my-2`}
 
-  // TODO: custom CSS styling
   label {
     font-weight: bold;
   }
 `;
 
 const InstallEventCard = styled.div`
-  ${tw`bg-blue-100 px-5 py-3 rounded-xl`}
+  ${tw`bg-blue-100 px-5 py-3 rounded-xl my-2`}
 
-  // TODO: custom CSS styling
   label {
     font-weight: bold;
   }
 `;
 
 const RequestEventCard = styled.div`
-  ${tw`bg-purple-200 px-5 py-3 rounded-xl`}
+  ${tw`bg-purple-200 px-5 py-3 rounded-t-xl mt-2`}
 
-  // TODO: custom CSS styling
   label {
     font-weight: bold;
   }
@@ -113,17 +101,14 @@ const RequestEventCard = styled.div`
 const InternalEventCard = styled.div`
   ${tw`bg-white px-5 py-3`}
 
-  // TODO: custom CSS styling
   label {
     color: black;
-    font-weight: normal;
   }
 `;
 
 const ResponseEventCard = styled.div`
-  ${tw`bg-green-200 px-5 py-3 rounded-xl`}
+  ${tw`bg-green-200 px-5 py-3 rounded-b-xl mb-2`}
 
-  // TODO: custom CSS styling
   label {
     color: green;
     font-weight: bold;
@@ -169,7 +154,7 @@ export default function HistoryPage() {
           History is empty!
         </div>
       )}
-      <div tw="flex flex-col gap-4 mx-auto">
+      <div tw="flex flex-col mx-auto">
         {events.map((event, i) => (
           <EventItem key={i} event={event} />
         ))}
