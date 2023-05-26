@@ -27,7 +27,7 @@ export default function SubmitPage() {
     <>
       <div tw="bg-gray-100 flex flex-col items-center px-10 py-8 rounded-xl">
         <div tw="w-full text-xl opacity-60">
-          Let us know how we can improve your experience as an IC developer:
+          Let us know your suggestions for future DFINITY Global R&D meetings:
           <hr tw="my-4" />
         </div>
         <TopicForm initial={recentInfo} onSubmit={onSubmit} />
