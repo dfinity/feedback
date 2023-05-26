@@ -46,24 +46,20 @@ function EventItem({ event }: EventItemProps) {
     const { internal } = event;
     return (
       <InternalEventCard>
+        <div tw="float-right">{internal.requestId.toString()}</div>
         <label tw="text-lg text-blue-500">
           {JSON.stringify(internal.internal)}{' '}
         </label>
-        <div>
-          <label>ID:</label> {internal.requestId.toString()}
-        </div>
       </InternalEventCard>
     );
   } else if ('response' in event) {
     const { response } = event;
     return (
       <ResponseEventCard>
+        <div tw="float-right">{response.requestId.toString()}</div>
         <label tw="text-lg text-blue-500">
           {JSON.stringify(response.response)}{' '}
         </label>
-        <div>
-          <label>ID:</label> {response.requestId.toString()}
-        </div>
       </ResponseEventCard>
     );
   }
