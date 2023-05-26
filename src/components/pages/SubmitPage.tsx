@@ -35,7 +35,7 @@ export default function SubmitPage() {
     </>
   ) : (
     <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
-      Please sign in to submit feedback.
+      Please sign in to submit a suggestion.
     </div>
   );
 }
