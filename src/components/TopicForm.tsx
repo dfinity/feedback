@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import CreatableSelect from 'react-select/creatable';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
-import { TopicInfo } from '../stores/topicStore';
-import Tag from './Tag';
+import { TopicInfo, useTopicStore } from '../stores/topicStore';
+import { defaultTagColor } from './Tag';
 
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
@@ -19,42 +20,6 @@ const Form = styled.form`
     ${tw`w-full border-2 p-2 rounded-lg`}
   }
 `;
-
-// const ArrayEditorButton = tw.div`cursor-pointer inline-block p-2 text-sm rounded-full border-2 hover:bg-[rgba(0,0,0,.05)]`;
-
-// interface ArrayEditorProps<T> {
-//   array: T[];
-//   onChange(newArray: T[]): void;
-//   onCreate(): T;
-//   children(item: T, i: number): ReactNode;
-//   newTooltip?: ReactNode;
-// }
-
-// function ArrayEditor<T>({
-//   array: value,
-//   onChange,
-//   onCreate: createItem,
-//   children,
-//   newTooltip,
-// }: ArrayEditorProps<T>) {
-//   return (
-//     <div>
-//       {value.map((item, i) => (
-//         <div tw="flex">
-//           <ArrayEditorButton>
-//             <FaMinus />
-//           </ArrayEditorButton>
-//           <div tw="flex-1">{children(item, i)}</div>
-//         </div>
-//       ))}
-//       <Tooltip content={newTooltip}>
-//         <ArrayEditorButton onClick={() => onChange([...value, createItem()])}>
-//           <FaPlus />
-//         </ArrayEditorButton>
-//       </Tooltip>
-//     </div>
-//   );
-// }
 
 export interface TopicFormProps {
   initial?: TopicInfo;
@@ -78,6 +43,8 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   //   formState: { errors },
   // } = useForm();
 
+  const tags = useTopicStore((state) => state.tags);
+
   const isValid = () => {
     return info.title.length > 1;
   };
@@ -85,7 +52,7 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
   const patch = (partialInfo: Partial<TopicInfo>) =>
     setInfo({ ...info, ...partialInfo });
 
-  // TODO: add form validation
+  // TODO: add client-side form validation
 
   return (
     <Form
@@ -110,13 +77,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       </label>
       <label>
         Brief description
-        {/* <Slate
-          editor={editor}
-          value={info.description}
-          onChange={(description) => patch({ description })}
-        >
-          <Editable />
-        </Slate> */}
         <textarea
           tw="mb-0"
           rows={5}
@@ -131,19 +91,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       )} */}
       <label>
         Links
-        {/* <ArrayEditor
-          array={details.links}
-          onChange={(links) => patch({ links })}
-          onCreate={() => ''}
-        >
-          {(value, i) => (
-            <input
-              type="text"
-              value={details.title}
-              onChange={(e) => patch({ title: e.target.value })}
-            />
-          )}
-        </ArrayEditor> */}
         <div tw="flex flex-col gap-2">
           {[...info.links, ''].map((link, i) => (
             <div key={i}>
@@ -171,34 +118,40 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       <label>
         Tags
         <div tw="flex flex-col gap-2">
-          {[...info.tags, ''].map((tag, i) => (
-            <div key={i} tw="flex items-center gap-3">
-              <div tw="max-w-[200px]">
-                <input
-                  type="text"
-                  // placeholder=""
-                  value={tag}
-                  onChange={(e) => {
-                    const newTag = e.target.value;
-                    const newTags = [...info.tags];
-                    if (newTag) {
-                      newTags[i] = newTag;
-                    } else {
-                      newTags.splice(i, 1);
-                    }
-                    patch({
-                      tags: newTags,
-                    });
-                  }}
-                />
-              </div>
-              {!!tag && (
-                <div>
-                  <Tag>{tag}</Tag>
-                </div>
-              )}
-            </div>
-          ))}
+          <CreatableSelect
+            tw="w-full"
+            styles={{
+              multiValue: (styles) => ({
+                ...styles,
+                ...tw`rounded-2xl px-1`,
+                background: defaultTagColor,
+              }),
+              multiValueRemove: (styles) => ({
+                ...styles,
+                ...tw`rounded-xl hover:bg-[#0001]`,
+              }),
+              control: (styles) => ({
+                ...styles,
+                ...tw`rounded-lg border-2 border-[rgba(0,0,0,.1)]`,
+              }),
+              placeholder: (styles) => ({
+                ...styles,
+                color: '#0005',
+              }),
+            }}
+            value={info.tags.map((tag) => ({ label: tag, value: tag }))}
+            isMulti={true}
+            isClearable={false}
+            options={tags.map((tag) => ({
+              label: tag.name,
+              value: tag.name,
+            }))}
+            onChange={(newTags) => {
+              patch({
+                tags: newTags.map((tag) => tag.value),
+              });
+            }}
+          />
         </div>
       </label>
       <button

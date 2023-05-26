@@ -3,6 +3,7 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Error "mo:base/Error";
+import Cycles "mo:base/ExperimentalCycles";
 
 import Seq "mo:sequence/Sequence";
 import Stream "mo:sequence/Stream";
@@ -80,12 +81,14 @@ module {
   public type Event = {
     #install : {
       time : Int; // nano seconds
+      cyclesBalance : ?Nat;
       installer : Principal;
     };
     #request : {
       requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
+      cyclesBalance : ?Nat;
       request : Request;
     };
     #internal : {
@@ -109,9 +112,10 @@ module {
   };
 
   public func init(installer : Principal) : History {
+    let cyclesBalance = ?Cycles.balance();
     {
       var nextRequestId = 1;
-      var events = Seq.make(#install { time = Time.now(); installer });
+      var events = Seq.make(#install { time = Time.now(); installer; cyclesBalance });
     };
   };
 
@@ -174,7 +178,8 @@ module {
       let requestId = history.nextRequestId;
       do {
         history.nextRequestId += 1;
-        add(#request { time = Time.now(); caller; request; requestId });
+        let cyclesBalance = ?Cycles.balance();
+        add(#request { time = Time.now(); caller; request; requestId; cyclesBalance });
       };
 
       func addResponse(response : Response) {

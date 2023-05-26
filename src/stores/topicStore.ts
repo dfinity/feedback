@@ -24,7 +24,8 @@ export interface Topic extends TopicInfo {
   id: string;
   // owner: Principal;
   createTime: number;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
   status: TopicStatus;
   modStatus: ModStatus;
   isOwner: boolean;
@@ -40,10 +41,17 @@ export interface ImportTopic extends TopicInfo {
   editTime: number;
 }
 
+export interface TagInfo {
+  name: string;
+  count: number;
+}
+
 export interface TopicState {
+  topicLookup: Record<string, Topic>;
   topics: Topic[];
   modQueue: Topic[] | undefined;
   sort: SearchSort;
+  tags: TagInfo[];
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
@@ -58,6 +66,7 @@ export interface TopicState {
 export const useTopicStore = create<TopicState>((set, get) => {
   const updateTopic = (topic: Topic) =>
     set((state) => ({
+      topicLookup: { ...state.topicLookup, [topic.id]: topic },
       topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
@@ -89,7 +98,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
     ...result,
     id: String(result.id),
     createTime: Number(result.createTime),
-    votes: Number(result.upVoters - result.downVoters),
+    tags: result.tags.map(normalizeTag),
+    upvotes: Number(result.upVoters),
+    downvotes: Number(result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
@@ -98,15 +109,30 @@ export const useTopicStore = create<TopicState>((set, get) => {
       : undefined,
   });
 
+  const normalizeTag = (tag: string) => tag.toLowerCase();
+
   return {
+    topicLookup: {},
     topics: [],
     modQueue: undefined,
     sort: 'activity',
+    tags: [],
     async search() {
       const topics = (
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
-      set({ topics });
+      const topicLookup = { ...get().topicLookup };
+      const tagCounts: Record<string, number> = {};
+      topics.forEach((topic) => {
+        topicLookup[topic.id] = topic;
+        topic.tags.forEach((tag) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+      const tags = Object.entries(tagCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      set({ topicLookup, topics, tags });
       // console.log('Topics:', get().topics);
       return topics;
     },
@@ -123,7 +149,9 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
-        votes: 1,
+        tags: info.tags.map(normalizeTag),
+        upvotes: 1,
+        downvotes: 0,
         yourVote: 1,
         status: 'open',
         modStatus: 'pending',
@@ -162,7 +190,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({
         ...topic,
-        votes: topic.votes + vote - topic.yourVote,
+        upvotes:
+          topic.upvotes + Math.max(0, vote) - Math.max(0, topic.yourVote),
+        downvotes:
+          topic.downvotes - Math.min(0, vote) + Math.min(0, topic.yourVote),
         yourVote: vote,
       });
       unwrap(

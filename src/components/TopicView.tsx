@@ -12,8 +12,10 @@ import {
   FaRegDotCircle,
   FaRegPlayCircle,
   FaRegTimesCircle,
+  FaShare,
   FaTimes,
 } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
 import tw from 'twin.macro';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import useIdentity from '../hooks/useIdentity';
@@ -29,6 +31,7 @@ import Markdown from './Markdown';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
+import TopicTag from './TopicTag';
 import { Join } from './utils/Join';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
@@ -58,11 +61,14 @@ export default function TopicView({
   const setStatus = useTopicStore((state) => state.setStatus);
   const setModStatus = useTopicStore((state) => state.setModStatus);
   const breakpoint = useBreakpoint();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const user = useIdentity();
   const vote = useTopicStore((state) => state.vote);
 
-  const maxPreviewTags = breakpoint === 'xs' || expanded ? 0 : 2;
+  const isMobile = breakpoint === 'xs';
+  const maxPreviewTags = isMobile || expanded ? 0 : 2;
 
   useEffect(() => {
     if (!expanded) {
@@ -140,7 +146,25 @@ export default function TopicView({
                 onClick={() => onVote(topic.yourVote === -1 ? 0 : -1)}
               />
             </div>
-            <span tw="opacity-60 text-lg font-bold">{topic.votes}</span>
+            <Tooltip
+              delay={500}
+              content={
+                <>
+                  <div tw="flex gap-1 items-center">
+                    <FaCaretUp tw="translate-y-[-1px]" />
+                    {topic.upvotes}
+                  </div>
+                  <div tw="flex gap-1 items-center">
+                    <FaCaretDown />
+                    {topic.downvotes}
+                  </div>
+                </>
+              }
+            >
+              <span tw="opacity-60 text-lg font-bold">
+                {topic.upvotes - topic.downvotes}
+              </span>
+            </Tooltip>
           </div>
           <div
             tw="flex-1 flex gap-2 items-center overflow-hidden"
@@ -149,7 +173,7 @@ export default function TopicView({
               onChangeExpanded && tw`select-none`,
             ]}
           >
-            {topic.importId?.type === 'jira' && (
+            {topic.importId?.type === 'jira' && !isMobile && (
               <div>
                 <Tooltip content={topic.importId.id}>
                   <div>
@@ -161,16 +185,29 @@ export default function TopicView({
             {topic.title}
           </div>
           <div tw="flex gap-1 items-center">
-            <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
-            {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
-              <Tag key={i}>{tag}</Tag>
-            ))}
-            {topic.tags.length > maxPreviewTags && (
-              <Tag>
-                <span tw="opacity-50">
-                  +{topic.tags.length - maxPreviewTags}
-                </span>
-              </Tag>
+            {!expanded ? (
+              <>
+                <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
+                {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
+                  <Tag key={i}>{tag}</Tag>
+                ))}
+                {topic.tags.length > maxPreviewTags && (
+                  <Tag>
+                    <span tw="opacity-50">
+                      +{topic.tags.length - maxPreviewTags}
+                    </span>
+                  </Tag>
+                )}
+              </>
+            ) : (
+              !location.pathname.startsWith('/topic/') && (
+                <div
+                  tw="text-xs rounded-full p-2 cursor-pointer select-none bg-[rgba(0,0,0,.1)] hover:bg-[rgba(0,0,0,.15)]"
+                  onClick={() => navigate(`/topic/${topic.id}`)}
+                >
+                  <FaShare />
+                </div>
+              )
             )}
           </div>
         </>
@@ -208,17 +245,21 @@ export default function TopicView({
                   ))}
                 </div>
               )}
-              {topic.tags.length > 0 && (
-                <div tw="flex flex-wrap gap-2 items-center">
-                  <span tw="font-bold opacity-70">Tags:</span>
+              {
+                /* topic.tags.length > 0 && */
+                <div tw="flex flex-wrap gap-1 sm:gap-2 items-center">
+                  <span tw="font-bold opacity-70 hidden sm:block">Tags:</span>
+                  <Tag tw="select-none" color={statusColors[topic.status]}>
+                    {topic.status}
+                  </Tag>
                   {topic.tags.map((tag, i) => (
-                    <Tag key={i}>{tag}</Tag>
+                    <TopicTag key={i}>{tag}</TopicTag>
                   ))}
                   {user?.detail.isModerator && (
                     <Tag color="#9195e621">{`#${topic.id}`}</Tag>
                   )}
                 </div>
-              )}
+              }
               {!hideModerationInfo &&
                 !user?.detail.isModerator &&
                 topic.modStatus !== 'approved' && (
