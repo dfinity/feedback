@@ -12,6 +12,22 @@ interface EventItemProps {
   event: Event;
 }
 
+// Convert agent-js response value to JSON
+const show = (value: any): string => {
+  const cache: any[] = [];
+  return JSON.stringify(value, (k, v) => {
+    if (typeof v === 'object' && v !== null) {
+      if (cache.includes(v)) return;
+      cache.push(v);
+    }
+    if (v === undefined || v === null) return null;
+    if (typeof v === 'bigint') return v.toString();
+    if (ArrayBuffer.isView(v) || v instanceof ArrayBuffer)
+      return [...(v as any)];
+    return v;
+  });
+};
+
 function EventItem({ event }: EventItemProps) {
   if ('install' in event) {
     const { install } = event;
@@ -31,9 +47,7 @@ function EventItem({ event }: EventItemProps) {
     return (
       <RequestEventCard>
         <div tw="float-right">{request.requestId.toString()}</div>
-        <label tw="text-lg text-blue-900">
-          {JSON.stringify(request.request)}{' '}
-        </label>
+        <label tw="text-lg text-blue-900">{show(request.request)} </label>
         <div>
           <label>Caller:</label> {request.caller.toString()}
         </div>
@@ -47,9 +61,7 @@ function EventItem({ event }: EventItemProps) {
     return (
       <InternalEventCard>
         <div tw="float-right">{internal.requestId.toString()}</div>
-        <label tw="text-lg text-blue-500">
-          {JSON.stringify(internal.internal)}{' '}
-        </label>
+        <label tw="text-lg text-blue-500">{show(internal.internal)} </label>
       </InternalEventCard>
     );
   } else if ('response' in event) {
@@ -57,9 +69,7 @@ function EventItem({ event }: EventItemProps) {
     return (
       <ResponseEventCard>
         <div tw="float-right">{response.requestId.toString()}</div>
-        <label tw="text-lg text-blue-500">
-          {JSON.stringify(response.response)}{' '}
-        </label>
+        <label tw="text-lg text-blue-500">{show(response.response)} </label>
       </ResponseEventCard>
     );
   }
