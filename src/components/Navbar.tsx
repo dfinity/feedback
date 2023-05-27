@@ -68,18 +68,21 @@ export default function Navbar() {
             <NavItem to="/">Browse</NavItem>
             <NavItem to="/submit">Submit</NavItem>
             {!!user?.detail.isModerator && (
-              <NavItem to="/queue">
-                {modQueueLength !== undefined ? (
-                  <div tw="flex gap-2 items-center">
-                    Queue
-                    <Tag color={modQueueLength > 0 ? '#33ec0e4f' : '#0001'}>
-                      {modQueueLength}
-                    </Tag>
-                  </div>
-                ) : (
-                  <>Queue</>
-                )}
-              </NavItem>
+              <>
+                <NavItem to="/queue">
+                  {modQueueLength !== undefined ? (
+                    <div tw="flex gap-2 items-center">
+                      Queue
+                      <Tag color={modQueueLength > 0 ? '#33ec0e4f' : '#0001'}>
+                        {modQueueLength}
+                      </Tag>
+                    </div>
+                  ) : (
+                    <>Queue</>
+                  )}
+                </NavItem>
+                {!isMobile && <NavItem to="/history">History</NavItem>}
+              </>
             )}
           </div>
           {isMobile || user ? (

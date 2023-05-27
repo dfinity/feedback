@@ -1,13 +1,14 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import 'twin.macro';
+import useIdentity from '../hooks/useIdentity';
 import { FileDropZone } from './FileDropZone';
 import Navbar from './Navbar';
+import BrowsePage from './pages/BrowsePage';
+import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import QueuePage from './pages/QueuePage';
 import SubmitPage from './pages/SubmitPage';
 import TopicPage from './pages/TopicPage';
-import BrowsePage from './pages/BrowsePage';
-import useIdentity from '../hooks/useIdentity';
 
 export default function App() {
   const user = useIdentity();
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/submit" element={<SubmitPage />} />
             <Route path="/queue" element={<QueuePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </div>
       </div>

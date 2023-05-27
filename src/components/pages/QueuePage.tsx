@@ -6,6 +6,7 @@ import { ModStatus, Topic, useTopicStore } from '../../stores/topicStore';
 import { handleError } from '../../utils/handlers';
 import Loading from '../Loading';
 import TopicView from '../TopicView';
+import { promptModMessage } from '../../utils/promptModMessage';
 
 const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-xl rounded-full cursor-pointer border-2 bg-[#fffd] border-gray-300 hover:scale-105`;
 
@@ -28,7 +29,12 @@ export default function QueuePage() {
   }, [getModQueue, user]);
 
   const changeModStatus = (topic: Topic, modStatus: ModStatus) => {
-    setModStatus(topic, modStatus).catch((err) => {
+    const promise =
+      modStatus === 'rejected'
+        ? promptModMessage(topic, modStatus)
+        : setModStatus(topic, modStatus);
+
+    promise.catch((err) => {
       handleError(err, 'Error while changing topic status!');
     });
     // if (topics) {
