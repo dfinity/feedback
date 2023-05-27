@@ -4,7 +4,7 @@
 
 ---
 
-This project is hosted on-chain and is available at [jyjde-bqaaa-aaaap-abcda-cai.icp0.io/](https://jyjde-bqaaa-aaaap-abcda-cai.icp0.io/).
+This project is hosted on-chain and is available at [jyjde-bqaaa-aaaap-abcda-cai.icp0.io/](https://jyjde-bqaaa-aaaap-abcda-cai.icp0.io).
 
 ## Local Development
 
