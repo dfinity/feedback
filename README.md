@@ -1,10 +1,10 @@
-# DX Feedback Board
+# Global R&D Suggestion Board
 
-> #### An IC developer feedback dapp powered by Motoko.
+> #### Vote on suggestions for DFINITY Global R&D.
 
 ---
 
-This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
+This project is hosted on-chain and is available at [jyjde-bqaaa-aaaap-abcda-cai.icp0.io/](https://jyjde-bqaaa-aaaap-abcda-cai.icp0.io/).
 
 ## Local Development
 
