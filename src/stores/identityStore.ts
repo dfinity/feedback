@@ -65,29 +65,32 @@ export interface IdentityState {
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
-  const clientPromise = AuthClient.create();
+  const clientPromise = window.indexedDB
+    ? AuthClient.create()
+    : Promise.resolve(undefined);
 
   const loginIC = async (
     options?: Omit<Omit<AuthClientLoginOptions, 'onSuccess'>, 'onError'>,
   ) => {
     const client = await clientPromise;
-    try {
-      await new Promise((onSuccess: any, onError) =>
-        client.login({
-          maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1e9),
-          ...(options || {}),
-          onSuccess,
-          onError,
-        }),
-      );
-    } catch (err) {
-      if (err === ERROR_USER_INTERRUPT) {
-        return;
+    if (client) {
+      try {
+        await new Promise((onSuccess: any, onError) =>
+          client.login({
+            maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1e9),
+            ...(options || {}),
+            onSuccess,
+            onError,
+          }),
+        );
+      } catch (err) {
+        if (err === ERROR_USER_INTERRUPT) {
+          return;
+        }
+        throw err;
       }
-      throw err;
+      await finishLoginIC(client);
     }
-
-    await finishLoginIC(client);
     return client;
   };
 
@@ -130,7 +133,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     (async () => {
       try {
         const client = await clientPromise;
-        if (await client.isAuthenticated()) {
+        if (client && (await client.isAuthenticated())) {
           await finishLoginIC(client);
         } else {
           set({ user: null });
