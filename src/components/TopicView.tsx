@@ -329,45 +329,48 @@ export default function TopicView({
                         )}
                       </div>
                     )}
-                    <div tw="flex gap-2">
-                      {topic.status === 'open' && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.next }}
-                          onClick={() => onChangeStatus(topic, 'next')}
-                        >
-                          <FaRegPlayCircle />
-                          Start
-                        </ToolbarButton>
-                      )}
-                      {topic.status === 'next' && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.completed }}
-                          onClick={() => onChangeStatus(topic, 'completed')}
-                        >
-                          <FaRegCheckCircle />
-                          Complete
-                        </ToolbarButton>
-                      )}
-                      {(topic.status === 'open' || topic.status === 'next') && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.closed }}
-                          onClick={() => onChangeStatus(topic, 'closed')}
-                        >
-                          <FaRegTimesCircle />
-                          Close
-                        </ToolbarButton>
-                      )}
-                      {(topic.status === 'completed' ||
-                        topic.status === 'closed') && (
-                        <ToolbarButton
-                          // css={{ background: statusColors.open }}
-                          onClick={() => onChangeStatus(topic, 'open')}
-                        >
-                          <FaRegDotCircle />
-                          Reopen
-                        </ToolbarButton>
-                      )}
-                    </div>
+                    {!!user?.detail.isModerator && (
+                      <div tw="flex gap-2">
+                        {topic.status === 'open' && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.next }}
+                            onClick={() => onChangeStatus(topic, 'next')}
+                          >
+                            <FaRegPlayCircle />
+                            Start
+                          </ToolbarButton>
+                        )}
+                        {topic.status === 'next' && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.completed }}
+                            onClick={() => onChangeStatus(topic, 'completed')}
+                          >
+                            <FaRegCheckCircle />
+                            Complete
+                          </ToolbarButton>
+                        )}
+                        {(topic.status === 'open' ||
+                          topic.status === 'next') && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.closed }}
+                            onClick={() => onChangeStatus(topic, 'closed')}
+                          >
+                            <FaRegTimesCircle />
+                            Close
+                          </ToolbarButton>
+                        )}
+                        {(topic.status === 'completed' ||
+                          topic.status === 'closed') && (
+                          <ToolbarButton
+                            // css={{ background: statusColors.open }}
+                            onClick={() => onChangeStatus(topic, 'open')}
+                          >
+                            <FaRegDotCircle />
+                            Reopen
+                          </ToolbarButton>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
             </Join>
