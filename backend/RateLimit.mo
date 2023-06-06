@@ -1,9 +1,11 @@
 import Array "mo:base/Array";
 import Time "mo:base/Time";
 
+import System "System";
+
 module {
 
-  public class New(limit_count : Nat, limit_seconds : Nat) {
+  public class New(sys : System.System, limit_count : Nat, limit_seconds : Nat) {
 
     public func doCount() : Nat {
       let t0 = start();
@@ -28,7 +30,7 @@ module {
     // returns #wait when it has.
     public func tick() : { #wait; #ok } {
       if (check() == #wait) { #wait } else {
-        add(Time.now());
+        add(sys.time());
         #ok;
       };
     };
@@ -45,7 +47,7 @@ module {
 
     // The start of the current time window.
     func start() : Int {
-      Time.now() - limit_seconds * 1_000_000_000;
+      sys.time() - limit_seconds * 1_000_000_000;
     };
 
     // all initial time entries are far enough in the
