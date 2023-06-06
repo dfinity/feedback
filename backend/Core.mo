@@ -474,7 +474,7 @@ module {
     public func setTopicStatus(caller : Principal, id : Types.Topic.RawId, status : Types.Topic.Status) : ?() {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
-        assertCallerCanEdit(log, caller, #topic id)!;
+        assertCallerIsModerator(log, caller)!;
         state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
         log.ok()!;
       };

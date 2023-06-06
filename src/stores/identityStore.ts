@@ -65,11 +65,15 @@ export interface IdentityState {
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
+  const clientPromise = window.indexedDB
+    ? AuthClient.create()
+    : Promise.resolve(undefined);
+
   const loginIC = async (
     options?: Omit<Omit<AuthClientLoginOptions, 'onSuccess'>, 'onError'>,
   ) => {
-    const client = await AuthClient.create();
-    if (!(await client.isAuthenticated())) {
+    const client = await clientPromise;
+    if (client) {
       try {
         await new Promise((onSuccess: any, onError) =>
           client.login({
@@ -85,7 +89,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         }
         throw err;
       }
-
       await finishLoginIC(client);
     }
     return client;
@@ -129,8 +132,8 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   if (window.indexedDB) {
     (async () => {
       try {
-        const client = await AuthClient.create();
-        if (await client.isAuthenticated()) {
+        const client = await clientPromise;
+        if (client && (await client.isAuthenticated())) {
           await finishLoginIC(client);
         } else {
           set({ user: null });
