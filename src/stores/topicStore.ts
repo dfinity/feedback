@@ -24,10 +24,13 @@ export interface Topic extends TopicInfo {
   id: string;
   // owner: Principal;
   createTime: number;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
   status: TopicStatus;
   modStatus: ModStatus;
+  modMessage: string;
   isOwner: boolean;
+  isEditable: boolean;
   yourVote: VoteStatus;
   importId?: { type: string; id: string } | undefined;
 }
@@ -39,9 +42,17 @@ export interface ImportTopic extends TopicInfo {
   editTime: number;
 }
 
+export interface TagInfo {
+  name: string;
+  count: number;
+}
+
 export interface TopicState {
+  topicLookup: Record<string, Topic>;
   topics: Topic[];
+  modQueue: Topic[] | undefined;
   sort: SearchSort;
+  tags: TagInfo[];
   search(): Promise<Topic[]>;
   find(id: string): Promise<Topic | undefined>;
   create(info: TopicInfo): Promise<void>;
@@ -49,16 +60,26 @@ export interface TopicState {
   edit(id: string, info: TopicInfo): Promise<void>;
   vote(topic: Topic, vote: VoteStatus): Promise<void>;
   setStatus(id: string, status: TopicStatus): Promise<void>;
-  getModQueue(): Promise<Topic[]>;
-  setModStatus(topic: Topic, modStatus: ModStatus): Promise<void>;
+  fetchModQueue(): Promise<Topic[]>;
+  setModStatus(
+    topic: Topic,
+    modStatus: ModStatus,
+    modMessage?: string,
+  ): Promise<void>;
 }
 
 export const useTopicStore = create<TopicState>((set, get) => {
   const updateTopic = (topic: Topic) =>
     set((state) => ({
+      topicLookup: { ...state.topicLookup, [topic.id]: topic },
       topics: state.topics.map((other) =>
         topic.id === other.id ? topic : other,
       ),
+      modQueue: state.modQueue
+        ?.map((other) => (topic.id === other.id ? topic : other))
+        .filter(
+          (other) => topic.id !== other.id || other.modStatus !== 'approved',
+        ),
     }));
 
   const statusMap: Record<TopicStatus, Status> = {
@@ -82,23 +103,43 @@ export const useTopicStore = create<TopicState>((set, get) => {
     ...result,
     id: String(result.id),
     createTime: Number(result.createTime),
-    votes: Number(result.upVoters - result.downVoters),
+    tags: result.tags.map(normalizeTag),
+    upvotes: Number(result.upVoters),
+    downvotes: Number(result.downVoters),
     status: Object.keys(result.status)[0] as TopicStatus,
     modStatus: Object.keys(result.modStatus)[0] as ModStatus,
+    modMessage:
+      ('rejected' in result.modStatus && result.modStatus.rejected?.[0]) || '',
     yourVote: 'up' in result.yourVote ? 1 : 'down' in result.yourVote ? -1 : 0,
     importId: result.importId.length
       ? mapImportId(result.importId[0])
       : undefined,
   });
 
+  const normalizeTag = (tag: string) => tag.toLowerCase();
+
   return {
+    topicLookup: {},
     topics: [],
+    modQueue: undefined,
     sort: 'activity',
+    tags: [],
     async search() {
       const topics = (
         await backend.searchTopics({ [get().sort]: null } as any)
       ).map(mapTopic);
-      set({ topics });
+      const topicLookup = { ...get().topicLookup };
+      const tagCounts: Record<string, number> = {};
+      topics.forEach((topic) => {
+        topicLookup[topic.id] = topic;
+        topic.tags.forEach((tag) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+      const tags = Object.entries(tagCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      set({ topicLookup, topics, tags });
       // console.log('Topics:', get().topics);
       return topics;
     },
@@ -115,16 +156,19 @@ export const useTopicStore = create<TopicState>((set, get) => {
         ...info,
         id,
         createTime: Date.now(),
-        votes: 0,
+        tags: info.tags.map(normalizeTag),
+        upvotes: 1,
+        downvotes: 0,
+        yourVote: 1,
         status: 'open',
         modStatus: 'pending',
+        modMessage: '',
         isOwner: true,
-        yourVote: 0,
+        isEditable: true,
       };
       set((state) => ({
         topics: [topic, ...state.topics],
       }));
-      // await get().search();
     },
     async importAll(infoArray: ImportTopic[]) {
       unwrap(
@@ -154,7 +198,10 @@ export const useTopicStore = create<TopicState>((set, get) => {
     async vote(topic: Topic, vote: VoteStatus) {
       updateTopic({
         ...topic,
-        votes: topic.votes + vote - topic.yourVote,
+        upvotes:
+          topic.upvotes + Math.max(0, vote) - Math.max(0, topic.yourVote),
+        downvotes:
+          topic.downvotes - Math.min(0, vote) + Math.min(0, topic.yourVote),
         yourVote: vote,
       });
       unwrap(
@@ -175,19 +222,26 @@ export const useTopicStore = create<TopicState>((set, get) => {
       }
       unwrap(await backend.setTopicStatus(BigInt(id), statusMap[status]));
     },
-    async getModQueue() {
+    async fetchModQueue() {
       const topics = unwrap(await backend.getModeratorTopics()).map(mapTopic);
       console.log('Queue:', topics);
+      set({ modQueue: topics });
       return topics;
     },
-    async setModStatus(topic: Topic, modStatus: ModStatus) {
+    async setModStatus(
+      topic: Topic,
+      modStatus: ModStatus,
+      modMessage?: string,
+    ) {
       updateTopic({
         ...topic,
         modStatus,
+        modMessage: modMessage || '',
       });
       unwrap(
         await backend.setTopicModStatus(BigInt(topic.id), {
-          [modStatus]: null,
+          [modStatus]:
+            modStatus === 'rejected' ? (modMessage ? [modMessage] : []) : null,
         } as any),
       );
     },

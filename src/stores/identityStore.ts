@@ -47,6 +47,14 @@ if (
   window.location.hostname = 'dx.internetcomputer.org';
 }
 
+// TODO: refactor
+window.addEventListener('focus', () => {
+  const user = useIdentityStore.getState().user;
+  if (user?.detail.isModerator) {
+    useTopicStore.getState().fetchModQueue();
+  }
+});
+
 const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
 
 export interface IdentityState {
@@ -57,11 +65,15 @@ export interface IdentityState {
 }
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
+  const clientPromise = window.indexedDB
+    ? AuthClient.create()
+    : Promise.resolve(undefined);
+
   const loginIC = async (
     options?: Omit<Omit<AuthClientLoginOptions, 'onSuccess'>, 'onError'>,
   ) => {
-    const client = await AuthClient.create();
-    if (!(await client.isAuthenticated())) {
+    const client = await clientPromise;
+    if (client) {
       try {
         await new Promise((onSuccess: any, onError) =>
           client.login({
@@ -77,7 +89,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         }
         throw err;
       }
-
       await finishLoginIC(client);
     }
     return client;
@@ -97,13 +108,20 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         detail,
       },
     });
-    await useTopicStore.getState().search(); // TODO: refactor
+
+    // TODO: refactor
+    const topicState = useTopicStore.getState();
+    await Promise.all([
+      topicState.search(),
+      detail.isModerator && topicState.fetchModQueue(),
+    ]);
   };
 
   const getUserDetail = async (): Promise<UserDetail> => {
+    const loginPromise = backend.login();
     let [view] = await backend.fastLogin();
     if (view === undefined) {
-      view = unwrap(await backend.login());
+      view = unwrap(await loginPromise);
     }
     return {
       ...view,
@@ -114,9 +132,11 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
   if (window.indexedDB) {
     (async () => {
       try {
-        const client = await AuthClient.create();
-        if (await client.isAuthenticated()) {
+        const client = await clientPromise;
+        if (client && (await client.isAuthenticated())) {
           await finishLoginIC(client);
+        } else {
+          set({ user: null });
         }
       } catch (err) {
         handleError(err, 'Error while fetching user info!');

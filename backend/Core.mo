@@ -4,7 +4,6 @@ import Int "mo:base/Int";
 import List "mo:base/List";
 import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
-import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
@@ -20,18 +19,19 @@ import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
 import RateLimit "RateLimit";
+import System "System";
 
 module {
   type ReqLog = History.ReqLog;
   type TopicView = Types.Topic.View;
   type UserView = Types.User.View;
 
-  public class Core(installer : Principal, stableState : State.State, history_v0 : History.History) {
+  public class Core(installer : Principal, sys : System.System, stableState : State.State, history_v0 : History.History) {
 
-    let state : State.OOState = State.OO(stableState);
-    let logger = History.Logger(history_v0);
+    public let state : State.OOState = State.OO(stableState);
+    public let logger = History.Logger(sys, history_v0);
 
-    let topicRateLimit = RateLimit.New(5, 5); // 5 per 5 seconds.
+    let topicRateLimit = RateLimit.New(sys, 5, 5); // 5 per 5 seconds.
 
     func findUser(caller : Principal) : ?Types.User.Id {
       if (Principal.isAnonymous(caller)) {
@@ -45,6 +45,16 @@ module {
       caller == installer or state.userIsModerator.has(user);
     };
 
+    func userCanEditTopic_(caller : Principal, user : Types.User.Id, topic : Types.Topic.Id) : Bool {
+      switch (state.topics.get(topic)) {
+        case null false;
+        case (?topicState) {
+          caller == installer or state.userIsModerator.has(user) or (topicState.modStatus != #approved and state.userOwnsTopic.has(user, topic));
+        };
+      };
+
+    };
+
     func assertUserExists(log : ReqLog, user : Types.User.Id) : ?() {
       switch (state.users.get(user)) {
         case null {
@@ -53,6 +63,18 @@ module {
         case (?_) {
           log.internal(#okCheck(#userExists(user)));
           ?();
+        };
+      };
+    };
+
+    func assertTopicStateExists(log : ReqLog, topic : Types.Topic.Id) : ?Types.Topic.State {
+      switch (state.topics.get(topic)) {
+        case null {
+          log.errCheck(#topicExists(topic));
+        };
+        case (?s) {
+          log.internal(#okCheck(#topicExists(topic)));
+          ?s;
         };
       };
     };
@@ -74,6 +96,22 @@ module {
         let user = assertCallerIsUser(log, caller)!;
         let a = #callerOwnsTopic { user; topic };
         if (state.userOwnsTopic.has(user, topic)) {
+          log.internal(#okAccess a);
+        } else {
+          log.errAccess(a)!;
+        };
+      };
+    };
+
+    func assertCallerCanEdit(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
+      do ? {
+        if (caller == installer) { return ?() };
+        let user = assertCallerIsUser(log, caller)!;
+        let topicState = assertTopicStateExists(log, topic)!;
+        let a = #callerCanEditTopic { user; topic };
+        if (
+          state.userOwnsTopic.has(user, topic) and topicState.modStatus != #approved or userIsModerator_(caller, user)
+        ) {
           log.internal(#okAccess a);
         } else {
           log.errAccess(a)!;
@@ -106,17 +144,17 @@ module {
 
     // returns some topic view when user owns the topic, or when the topic is approved.
     // returns null when a topic is unapproved and not owned by the optional user argument.
-    func viewTopic(user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?TopicView {
+    func viewTopic(caller : Principal, user : ?Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?TopicView {
       if (not maybeUserIsOwner(user, id) and state.modStatus != #approved) {
         return null;
       } else {
-        ?viewTopic_(user, id, state);
+        ?viewTopic_(caller, user, id, state);
       };
     };
 
     // No access control here for user, only customization.
     // Each use of this helper has its own access control logic.
-    func viewTopic_(user : ?Types.User.Id, id : Types.Topic.Id, topic : Types.Topic.State) : TopicView {
+    func viewTopic_(caller : Principal, user : ?Types.User.Id, id : Types.Topic.Id, topic : Types.Topic.State) : TopicView {
       var upVoters : Nat = 0;
       var downVoters : Nat = 0;
       for ((_, vote) in state.userTopicVotes.getRelatedRight(id)) {
@@ -129,12 +167,14 @@ module {
       let userFields = switch user {
         case null {
           {
+            isEditable = false;
             isOwner = false;
             yourVote = #none;
           };
         };
         case (?user) {
           {
+            isEditable = userCanEditTopic_(caller, user, id);
             isOwner = maybeUserIsOwner(?user, id);
             yourVote = switch (state.userTopicVotes.get(user, id)) {
               case null #none;
@@ -168,9 +208,9 @@ module {
 
     // returns some topic view when topic is #pending.
     // returns null otherwise.
-    func viewTopicAsModerator(user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
+    func viewTopicAsModerator(caller : Principal, user : Types.User.Id, id : Types.Topic.Id, state : Types.Topic.State) : ?Types.Topic.View {
       if (state.modStatus == #pending) {
-        ?viewTopic_(?user, id, state);
+        ?viewTopic_(caller, ?user, id, state);
       } else null;
     };
 
@@ -209,7 +249,7 @@ module {
     public func searchTopics(caller : Principal, searchSort : SearchSort) : [Types.Topic.View] {
       let maybeUser = findUser(caller);
       func viewAsCaller((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
-        viewTopic(maybeUser, topic, state);
+        viewTopic(caller, maybeUser, topic, state);
       };
       let unsorted = Iter.toArray(
         // If Iter had filterMap this could be more efficient.
@@ -265,7 +305,7 @@ module {
         assertCallerIsModerator(log, caller)!;
         let user = assertCallerIsUser(log, caller)!;
         func view((topic : Types.Topic.Id, state : Types.Topic.State)) : ?Types.Topic.View {
-          viewTopicAsModerator(user, topic, state);
+          viewTopicAsModerator(caller, user, topic, state);
         };
         let unsorted = Iter.toArray(
           // If Iter had filterMap this could be more efficient.
@@ -301,13 +341,13 @@ module {
     public func getTopic(caller : Principal, id : Types.Topic.RawId) : ?Types.Topic.View {
       let maybeUser = findUser(caller);
       do ? {
-        viewTopic(maybeUser, #topic id, state.topics.get(#topic id)!)!;
+        viewTopic(caller, maybeUser, #topic id, state.topics.get(#topic id)!)!;
       };
     };
 
     func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
       let topic = state.nextTopicId();
-      let timeNow = Time.now();
+      let timeNow = sys.time();
       let stamp = {
         createTime = timeNow;
         modTime = null : ?Int;
@@ -346,6 +386,7 @@ module {
         };
         if (userIsModerator_(caller, user) or Validate.Topic.edit(edit)) {
           let id = createTopic_(user, null, edit);
+          voteTopic_(user, id, #up);
           log.okWithTopicId(id);
         } else {
           log.errInvalidTopicEdit()!;
@@ -382,7 +423,7 @@ module {
     public func editTopic(caller : Principal, id : Types.Topic.RawId, edit : Types.Topic.Edit) : ?() {
       do ? {
         let log = logger.Begin(caller, #editTopic { topic = #topic id; edit });
-        assertCallerOwnsTopic(log, caller, #topic id)!;
+        assertCallerCanEdit(log, caller, #topic id)!;
         state.topics.update(
           #topic id,
           func(topic : Types.Topic.State) : Types.Topic.State {
@@ -390,11 +431,11 @@ module {
               topic with
               edit;
               stamp = {
-                topic.stamp with editTime = Time.now()
+                topic.stamp with editTime = sys.time()
               };
               // TODO: moderation for approved topic edits
               modStatus = switch (topic.modStatus) {
-                case (#rejected) #pending;
+                case (#rejected _) #pending;
                 case (s) s;
               };
             };
@@ -404,24 +445,27 @@ module {
       };
     };
 
+    public func voteTopic_(user : Types.User.Id, id : Types.Topic.RawId, userVote : Types.Topic.UserVote) {
+      state.userTopicVotes.put(user, #topic id, userVote);
+      state.topics.update(
+        #topic id,
+        func(topic : Types.Topic.State) : Types.Topic.State {
+          {
+            topic with stamp = {
+              topic.stamp with voteTime = ?(sys.time())
+            };
+          };
+        },
+      );
+    };
+
     public func voteTopic(caller : Principal, id : Types.Topic.RawId, userVote : Types.Topic.UserVote) : ?() {
       do ? {
         let log = logger.Begin(caller, #voteTopic { topic = #topic id; userVote });
         let success = do ? {
-          // validates arguments before updating relation.
-          ignore state.topics.get(#topic id)!;
+          ignore assertTopicStateExists(log, #topic id)!;
           let user = assertCallerIsUser(log, caller)!;
-          state.userTopicVotes.put(user, #topic id, userVote);
-          state.topics.update(
-            #topic id,
-            func(topic : Types.Topic.State) : Types.Topic.State {
-              {
-                topic with stamp = {
-                  topic.stamp with voteTime = ?(Time.now())
-                };
-              };
-            },
-          );
+          voteTopic_(user, id, userVote);
         };
         log.okIf(success == ?())!;
       };
@@ -430,8 +474,8 @@ module {
     public func setTopicStatus(caller : Principal, id : Types.Topic.RawId, status : Types.Topic.Status) : ?() {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
-        assertCallerOwnsTopic(log, caller, #topic id)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
+        assertCallerIsModerator(log, caller)!;
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = sys.time() } } });
         log.ok()!;
       };
     };
@@ -440,7 +484,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
         assertCallerIsModerator(log, caller)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?sys.time() } } });
         log.ok()!;
       };
     };
@@ -456,7 +500,7 @@ module {
             state.principals.put(caller, #user user);
             let initUserState : Types.User.State = {
               stamp = {
-                createTime = Time.now();
+                createTime = sys.time();
               };
               edit = {
                 name = "";
@@ -464,6 +508,7 @@ module {
               };
             };
             state.users.put(#user user, initUserState);
+            log.internal(#createUser(#user user));
             user;
           };
           case (?(#user u)) u;

@@ -1,11 +1,12 @@
-import Types "Types";
-import Time "mo:base/Time";
+import Error "mo:base/Error";
+import Cycles "mo:base/ExperimentalCycles";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
-import Error "mo:base/Error";
-
 import Seq "mo:sequence/Sequence";
 import Stream "mo:sequence/Stream";
+
+import System "System";
+import Types "Types";
 
 module {
 
@@ -47,11 +48,13 @@ module {
 
   public type Invariant = {
     #userExists : UserId;
+    #topicExists : TopicId;
   };
 
   public type Internal = {
     #callerIsInstaller; // Implies all access checks will pass.
     #callerIsUser : UserId; // like AccessPredicate, but always successful, and carries UserId.
+    #createUser : UserId; // when a login request creates a user (the first time).
     #okAccess : AccessPredicate; // record successsful access check.
     #okCheck : Invariant;
   };
@@ -71,6 +74,7 @@ module {
   public type AccessPredicate = {
     #callerIsUser; // caller ID comes from outer Event type.
     #callerIsModerator;
+    #callerCanEditTopic : { user : UserId; topic : TopicId };
     #callerOwnsTopic : { user : UserId; topic : TopicId };
   };
 
@@ -79,12 +83,14 @@ module {
   public type Event = {
     #install : {
       time : Int; // nano seconds
+      cyclesBalance : ?Nat;
       installer : Principal;
     };
     #request : {
       requestId : RequestId;
       time : Int; // nano seconds
       caller : Principal;
+      cyclesBalance : ?Nat;
       request : Request;
     };
     #internal : {
@@ -107,10 +113,11 @@ module {
     var events : Seq.Sequence<Event>;
   };
 
-  public func init(installer : Principal) : History {
+  public func init(sys : System.System, installer : Principal) : History {
+    let cyclesBalance = ?sys.cyclesBalance();
     {
       var nextRequestId = 1;
-      var events = Seq.make(#install { time = Time.now(); installer });
+      var events = Seq.make(#install { time = sys.time(); installer; cyclesBalance });
     };
   };
 
@@ -130,9 +137,9 @@ module {
   /// OO interface for `Main` canister to log all of its state-affecting update behavior.
   /// Of particular interest are access control checks, and their outcomes.
   ///
-  public class Logger(history : History) {
+  public class Logger(sys : System.System, history : History) {
 
-    let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(Int.abs(Time.now()));
+    let levels : Stream.Stream<Nat32> = Stream.Bernoulli.seedFrom(Int.abs(sys.time()));
 
     public func getEvents(start : Nat, size : Nat) : [Event] {
       let (_, slice, _) = Seq.slice(history.events, start, size);
@@ -173,7 +180,8 @@ module {
       let requestId = history.nextRequestId;
       do {
         history.nextRequestId += 1;
-        add(#request { time = Time.now(); caller; request; requestId });
+        let cyclesBalance = ?sys.cyclesBalance();
+        add(#request { time = sys.time(); caller; request; requestId; cyclesBalance });
       };
 
       func addResponse(response : Response) {

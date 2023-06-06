@@ -15,7 +15,7 @@ module {
 
     public type Status = { #open; #next; #completed; #closed };
 
-    public type ModStatus = { #pending; #approved; #rejected };
+    public type ModStatus = { #pending; #approved; #rejected : ?Text };
 
     public type UserVote = { #up; #down; #none };
 
@@ -59,6 +59,7 @@ module {
       id : RawId;
       importId : ?ImportId;
       isOwner : Bool;
+      isEditable : Bool;
       // submitterName: Text;
       // ownerName: Text;
       createTime : Int; // msec since Unix epoch

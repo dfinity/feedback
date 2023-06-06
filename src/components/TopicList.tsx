@@ -1,14 +1,14 @@
-// import { useState } from 'react';
-// import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { Topic } from '../stores/topicStore';
 import TopicView from './TopicView';
 
 export interface TopicListProps {
   topics: Topic[];
+  compact?: boolean;
 }
 
-export default function TopicList({ topics }: TopicListProps) {
-  // const [expandedId, setExpandedId] = useState<string | undefined>();
+export default function TopicList({ topics, compact }: TopicListProps) {
+  const [expandedId, setExpandedId] = useState<string | undefined>();
   // const [searchParams, setSearchParams] = useSearchParams();
 
   return (
@@ -17,17 +17,20 @@ export default function TopicList({ topics }: TopicListProps) {
         <TopicView
           key={topic.id}
           topic={topic}
-          // expanded={topic.id === expandedId}
-          expanded={true}
-          // onChangeExpanded={(expanded) => {
-          //   setExpandedId(expanded ? topic.id : undefined);
-          //   if (expanded) {
-          //     setSearchParams({ topic: topic.id });
-          //   } else {
-          //     searchParams.delete('topic');
-          //     setSearchParams(searchParams);
-          //   }
-          // }}
+          expanded={!compact || topic.id === expandedId}
+          onChangeExpanded={
+            !compact || topic.id === expandedId
+              ? undefined
+              : (expanded) => {
+                  setExpandedId(expanded ? topic.id : undefined);
+                  // if (expanded) {
+                  //   setSearchParams({ topic: topic.id });
+                  // } else {
+                  //   searchParams.delete('topic');
+                  //   setSearchParams(searchParams);
+                  // }
+                }
+          }
         />
       ))}
     </div>

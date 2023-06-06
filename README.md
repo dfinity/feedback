@@ -1,12 +1,10 @@
-# DX Feedback Board (name TBD)
+# DX Feedback Board
 
 > #### An IC developer feedback dapp powered by Motoko.
 
 ---
 
-## Context
-
-This application demonstrates a realistic full-stack dapp with a Motoko backend. 
+This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
 
 ## Local Development
 
@@ -37,3 +35,9 @@ When ready, run `dfx deploy` to build and deploy the application.
 - [Motoko](https://github.com/dfinity/motoko#readme): a safe and simple programming language for the Internet Computer
 - [mo-dev](https://github.com/dfinity/motoko-dev-server#readme): a live reload development server for Motoko
 - [MOPS](https://j4mwm-bqaaa-aaaam-qajbq-cai.ic0.app/): an on-chain community package manager for Motoko
+
+---
+
+This project is early in development. Please feel free to report a bug, ask a question, or request a feature on the project's [GitHub issues](https://github.com/dfinity/feedback/issues) page.
+
+Contributions are welcome! Please check out the [contributor guidelines](https://github.com/dfinity/feedback/blob/main/.github/CONTRIBUTING.md) for more information.
