@@ -2,6 +2,7 @@ import Principal "mo:base/Principal";
 import { print } "mo:base/Debug";
 
 import Core "../Core";
+import System "../System";
 import State "../State";
 import History "../History";
 
@@ -21,10 +22,19 @@ func expect<T>(name : Text, response : ?T) : T {
 
 let installer = Principal.fromText("rkp4c-7iaaa-aaaaa-aaaca-cai");
 let caller = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
+let moderator = Principal.fromText("rno2w-sqaaa-aaaaa-aaacq-cai");
 
-let core = Core.Core(installer, State.init(installer), History.init(installer));
+let sys = System.UnitTest(5);
+let core = Core.Core(installer, sys, State.init(installer), History.init(sys, installer));
 
-let user = expect("login", core.login(caller));
+let user = expect("login user", core.login(caller));
+var moderatorUser = expect("login moderator", core.login(moderator));
+
+expect("setUserIsModerator", core.setUserIsModerator(installer, moderatorUser.id, true));
+
+moderatorUser := expect("login moderator with isModerator == true", core.login(moderator));
+
+assert moderatorUser.isModerator;
 
 let id = expect(
   "createTopic",
@@ -66,7 +76,7 @@ expect(
 );
 expect(
   "setTopicStatus",
-  core.setTopicStatus(caller, id, #completed),
+  core.setTopicStatus(moderator, id, #completed),
 );
 do {
   // Assert topic view

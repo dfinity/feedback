@@ -19,7 +19,7 @@ import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
 import RateLimit "RateLimit";
-import Time "Time";
+import System "System";
 
 import Core "Core";
 
@@ -28,12 +28,14 @@ shared ({ caller = installer }) actor class Main() {
   type TopicView = Types.Topic.View;
   type UserView = Types.User.View;
 
+  let sys = System.IC();
+
   /// Stable canister state, version 0.
   /// Rather than use this directly, we use instead use the OO wrappers defined from its projections (see uses in Core module).
   stable var state_v0 : State.State = State.init(installer);
-  stable var history_v0 : History.History = History.init(installer);
+  stable var history_v0 : History.History = History.init(sys, installer);
 
-  let core : Core.Core = Core.Core(installer, Time.ICSystem(), state_v0, history_v0);
+  let core : Core.Core = Core.Core(installer, sys, state_v0, history_v0);
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) : async ?() {
     core.setUserIsModerator(caller, id, isMod);
