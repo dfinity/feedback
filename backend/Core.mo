@@ -4,7 +4,6 @@ import Int "mo:base/Int";
 import List "mo:base/List";
 import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
-import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
@@ -20,13 +19,14 @@ import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
 import RateLimit "RateLimit";
+import Time "Time";
 
 module {
   type ReqLog = History.ReqLog;
   type TopicView = Types.Topic.View;
   type UserView = Types.User.View;
 
-  public class Core(installer : Principal, stableState : State.State, history_v0 : History.History) {
+  public class Core(installer : Principal, time : Time.Time, stableState : State.State, history_v0 : History.History) {
 
     public let state : State.OOState = State.OO(stableState);
     public let logger = History.Logger(history_v0);
@@ -347,7 +347,7 @@ module {
 
     func createTopic_(user : Types.User.Id, importId : ?Types.Topic.ImportId, edit : Types.Topic.Edit) : Types.Topic.RawId {
       let topic = state.nextTopicId();
-      let timeNow = Time.now();
+      let timeNow = time.now();
       let stamp = {
         createTime = timeNow;
         modTime = null : ?Int;
@@ -431,7 +431,7 @@ module {
               topic with
               edit;
               stamp = {
-                topic.stamp with editTime = Time.now()
+                topic.stamp with editTime = time.now()
               };
               // TODO: moderation for approved topic edits
               modStatus = switch (topic.modStatus) {
@@ -452,7 +452,7 @@ module {
         func(topic : Types.Topic.State) : Types.Topic.State {
           {
             topic with stamp = {
-              topic.stamp with voteTime = ?(Time.now())
+              topic.stamp with voteTime = ?(time.now())
             };
           };
         },
@@ -475,7 +475,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicStatus { topic = #topic id; status });
         assertCallerIsModerator(log, caller)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with status; stamp = { topic.stamp with statusTime = time.now() } } });
         log.ok()!;
       };
     };
@@ -484,7 +484,7 @@ module {
       do ? {
         let log = logger.Begin(caller, #setTopicModStatus({ topic = #topic id; modStatus }));
         assertCallerIsModerator(log, caller)!;
-        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?Time.now() } } });
+        state.topics.update(#topic id, func(topic : Types.Topic.State) : Types.Topic.State { { topic with modStatus; stamp = { topic.stamp with modTime = ?time.now() } } });
         log.ok()!;
       };
     };
@@ -500,7 +500,7 @@ module {
             state.principals.put(caller, #user user);
             let initUserState : Types.User.State = {
               stamp = {
-                createTime = Time.now();
+                createTime = time.now();
               };
               edit = {
                 name = "";

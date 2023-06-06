@@ -4,7 +4,6 @@ import Int "mo:base/Int";
 import List "mo:base/List";
 import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
-import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
@@ -20,6 +19,7 @@ import Snapshot "Snapshot";
 import Relate "Relate";
 import Validate "Validate";
 import RateLimit "RateLimit";
+import Time "Time";
 
 import Core "Core";
 
@@ -33,7 +33,7 @@ shared ({ caller = installer }) actor class Main() {
   stable var state_v0 : State.State = State.init(installer);
   stable var history_v0 : History.History = History.init(installer);
 
-  let core : Core.Core = Core.Core(installer, state_v0, history_v0);
+  let core : Core.Core = Core.Core(installer, Time.ICSystem(), state_v0, history_v0);
 
   public shared ({ caller }) func setUserIsModerator(id : Types.User.RawId, isMod : Bool) : async ?() {
     core.setUserIsModerator(caller, id, isMod);
