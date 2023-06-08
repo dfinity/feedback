@@ -16,12 +16,13 @@ module {
     };
   };
 
-  public class UnitTest(amount : Nat) {
+  public class UnitTest(deltaTime : Nat) {
     public var _time : Int = 0;
     public var _cyclesBalance = 0;
+
     public func time() : Int {
       let t0 = _time;
-      _time += amount;
+      _time += deltaTime;
       t0;
     };
     public func cyclesBalance() : Nat {
