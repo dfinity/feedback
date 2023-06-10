@@ -50,7 +50,6 @@ export default defineConfig({
     imagetools(),
   ],
   define: {
-    global: 'globalThis', // Patch CBOR library used in agent-js
     'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     // Expose canister IDs provided by `dfx deploy`
     ...Object.fromEntries(
@@ -59,6 +58,14 @@ export default defineConfig({
         JSON.stringify(ids[network] || ids[localNetwork]),
       ]),
     ),
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        // Patch CBOR library used in agent-js
+        global: 'globalThis',
+      },
+    },
   },
   server: {
     // Local IC replica proxy
