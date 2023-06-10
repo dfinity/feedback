@@ -36,14 +36,7 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [
-          'babel-plugin-twin',
-          'babel-plugin-macros',
-          // [
-          //   'babel-plugin-styled-components',
-          //   { displayName: true, fileName: false },
-          // ],
-        ],
+        plugins: ['babel-plugin-twin', 'babel-plugin-macros'],
         ignore: ['\x00commonjsHelpers.js'], // Fix build error (ben-rogerson/babel-plugin-twin#9)
       },
     }),
