@@ -36,21 +36,13 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [
-          'babel-plugin-twin',
-          'babel-plugin-macros',
-          // [
-          //   'babel-plugin-styled-components',
-          //   { displayName: true, fileName: false },
-          // ],
-        ],
+        plugins: ['babel-plugin-twin', 'babel-plugin-macros'],
         ignore: ['\x00commonjsHelpers.js'], // Fix build error (ben-rogerson/babel-plugin-twin#9)
       },
     }),
     imagetools(),
   ],
   define: {
-    global: 'globalThis', // Patch CBOR library used in agent-js
     'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     // Expose canister IDs provided by `dfx deploy`
     ...Object.fromEntries(
@@ -59,6 +51,14 @@ export default defineConfig({
         JSON.stringify(ids[network] || ids[localNetwork]),
       ]),
     ),
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        // Patch CBOR library used in agent-js
+        global: 'globalThis',
+      },
+    },
   },
   server: {
     // Local IC replica proxy
