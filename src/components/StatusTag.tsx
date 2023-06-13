@@ -23,7 +23,7 @@ export interface StatusTagProps {
 
 export default function StatusTag({ status }: StatusTagProps) {
   return (
-    <Tooltip content={statusTooltips[status]} delay={100}>
+    <Tooltip content={statusTooltips[status]}>
       <div tw="inline-block">
         <Tag tw="cursor-default" color={statusColors[status]}>
           {status}
