@@ -103,8 +103,14 @@ export const useTopicStore = create<TopicState>((set, get) => {
   // Converts nanoseconds and microseconds to milliseconds
   const resolveTime = (time: bigint): number => {
     const threshold = BigInt(100_000_000_000_000);
+    const oneThousand = BigInt(1000);
+    // ns -> us -> ms
     while (time > threshold) {
-      time /= BigInt(1000);
+      time /= oneThousand;
+    }
+    // s -> ms
+    if (time < threshold / oneThousand) {
+      time *= oneThousand;
     }
     return Number(time);
   };
