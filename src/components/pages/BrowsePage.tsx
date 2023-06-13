@@ -13,7 +13,6 @@ import {
 import { capitalize } from '../../utils/capitalize';
 import { handleError } from '../../utils/handlers';
 import TopicList from '../TopicList';
-import Tooltip from '../Tooltip';
 
 const filterStatuses: TopicStatus[] = ['open', 'next', 'completed', 'closed'];
 
@@ -22,13 +21,6 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
   next: true,
   completed: false,
   closed: false,
-};
-
-const statusTooltips: Record<TopicStatus, string> = {
-  open: 'Currently in discussion',
-  next: 'Under development',
-  completed: 'Already completed',
-  closed: 'No longer under consideration',
 };
 
 export default function BrowsePage() {
@@ -128,25 +120,23 @@ export default function BrowsePage() {
           <div tw="sm:flex items-center pb-4">
             <div tw="flex-1 flex justify-around sm:justify-start sm:px-3 sm:text-lg font-semibold sm:gap-4 text-white">
               {filterStatuses.map((status) => (
-                <Tooltip content={statusTooltips[status]} delay={500}>
-                  <label
-                    key={status}
-                    tw="select-none cursor-pointer whitespace-nowrap"
-                  >
-                    <input
-                      tw="mr-2"
-                      type="checkbox"
-                      checked={filterStates[status]}
-                      onChange={() =>
-                        setFilterStates({
-                          ...filterStates,
-                          [status]: !filterStates[status],
-                        })
-                      }
-                    />
-                    {capitalize(status)}
-                  </label>
-                </Tooltip>
+                <label
+                  key={status}
+                  tw="select-none cursor-pointer whitespace-nowrap"
+                >
+                  <input
+                    tw="mr-2"
+                    type="checkbox"
+                    checked={filterStates[status]}
+                    onChange={() =>
+                      setFilterStates({
+                        ...filterStates,
+                        [status]: !filterStates[status],
+                      })
+                    }
+                  />
+                  {capitalize(status)}
+                </label>
               ))}
             </div>
             {!inlineSort && sortDropdown}
