@@ -24,6 +24,7 @@ export interface Topic extends TopicInfo {
   id: string;
   // owner: Principal;
   createTime: number;
+  editTime: number;
   upvotes: number;
   downvotes: number;
   status: TopicStatus;
@@ -99,10 +100,20 @@ export const useTopicStore = create<TopicState>((set, get) => {
     );
   };
 
+  // Converts nanoseconds and microseconds to milliseconds
+  const resolveTime = (time: bigint): number => {
+    const threshold = BigInt(100_000_000_000_000);
+    while (time > threshold) {
+      time /= BigInt(1000);
+    }
+    return Number(time);
+  };
+
   const mapTopic = (result: View): Topic => ({
     ...result,
     id: String(result.id),
-    createTime: Number(result.createTime),
+    createTime: resolveTime(result.createTime),
+    editTime: resolveTime(result.editTime),
     tags: result.tags.map(normalizeTag),
     upvotes: Number(result.upVoters),
     downvotes: Number(result.downVoters),
@@ -152,10 +163,12 @@ export const useTopicStore = create<TopicState>((set, get) => {
     },
     async create(info: TopicInfo) {
       const id = String(unwrap(await backend.createTopic(info)));
+      const now = Date.now();
       const topic: Topic = {
         ...info,
         id,
-        createTime: Date.now(),
+        createTime: now,
+        editTime: now,
         tags: info.tags.map(normalizeTag),
         upvotes: 1,
         downvotes: 0,
