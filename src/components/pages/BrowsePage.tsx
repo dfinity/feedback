@@ -25,10 +25,10 @@ const defaultFilterStates: Record<TopicStatus, boolean> = {
 };
 
 const statusTooltips: Record<TopicStatus, string> = {
-  open: 'Thing thing',
-  next: 'Thing thing',
-  completed: 'Thing thing',
-  closed: 'Thing thing',
+  open: 'Currently in discussion',
+  next: 'Under development',
+  completed: 'Already completed',
+  closed: 'No longer under consideration',
 };
 
 export default function BrowsePage() {
