@@ -240,19 +240,37 @@ export default function TopicView({
                   ))}
                 </div>
               )}
-              {
-                /* topic.tags.length > 0 && */
-                <div tw="flex flex-wrap gap-1 sm:gap-2 items-center">
-                  <span tw="font-bold opacity-70 hidden sm:block">Tags:</span>
-                  <StatusTag status={topic.status} />
-                  {topic.tags.map((tag, i) => (
-                    <TopicTag key={i}>{tag}</TopicTag>
-                  ))}
-                  {user?.detail.isModerator && (
+              <div tw="flex flex-wrap gap-1 sm:gap-2 items-center">
+                <span tw="font-bold opacity-70 hidden sm:block">Tags:</span>
+                <StatusTag status={topic.status} />
+                {topic.tags.map((tag, i) => (
+                  <TopicTag key={i}>{tag}</TopicTag>
+                ))}
+                {user?.detail.isModerator && (
+                  <>
                     <Tag color="#9195e621">{`#${topic.id}`}</Tag>
-                  )}
-                </div>
-              }
+                    {!isMobile && (
+                      <div tw="flex-1 flex items-center justify-end opacity-60">
+                        <div>
+                          <Tooltip
+                            content={
+                              <span tw="whitespace-pre">
+                                Last modified:
+                                <br />
+                                {new Date(topic.editTime).toLocaleString()}
+                              </span>
+                            }
+                          >
+                            <span tw="font-semibold">
+                              {new Date(topic.createTime).toLocaleDateString()}
+                            </span>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
               {!hideModerationInfo &&
                 !user?.detail.isModerator &&
                 topic.modStatus !== 'approved' && (
