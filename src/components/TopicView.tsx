@@ -27,22 +27,16 @@ import {
   useTopicStore,
 } from '../stores/topicStore';
 import { handleInfo, handlePromise } from '../utils/handlers';
+import { promptModMessage } from '../utils/promptModMessage';
 import Markdown from './Markdown';
+import StatusTag from './StatusTag';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 import TopicForm from './TopicForm';
 import TopicTag from './TopicTag';
 import { Join } from './utils/Join';
-import { promptModMessage } from '../utils/promptModMessage';
 
 const ToolbarButton = tw.div`flex items-center gap-2 font-bold px-4 py-2 text-sm rounded-full cursor-pointer border-2 bg-[#fff8] border-gray-300 hover:bg-[rgba(0,0,0,.05)]`;
-
-const statusColors: Record<TopicStatus, string> = {
-  open: '#e8caf1',
-  next: '#bcdbef',
-  completed: '#c8ebd7',
-  closed: '#e9ddd3',
-};
 
 export interface TopicViewProps {
   topic: Topic;
@@ -188,7 +182,7 @@ export default function TopicView({
           <div tw="flex gap-1 items-center">
             {!expanded ? (
               <>
-                <Tag color={statusColors[topic.status]}>{topic.status}</Tag>
+                <StatusTag status={topic.status} />
                 {topic.tags.slice(0, maxPreviewTags).map((tag, i) => (
                   <Tag key={i}>{tag}</Tag>
                 ))}
@@ -246,21 +240,37 @@ export default function TopicView({
                   ))}
                 </div>
               )}
-              {
-                /* topic.tags.length > 0 && */
-                <div tw="flex flex-wrap gap-1 sm:gap-2 items-center">
-                  <span tw="font-bold opacity-70 hidden sm:block">Tags:</span>
-                  <Tag tw="select-none" color={statusColors[topic.status]}>
-                    {topic.status}
-                  </Tag>
-                  {topic.tags.map((tag, i) => (
-                    <TopicTag key={i}>{tag}</TopicTag>
-                  ))}
-                  {user?.detail.isModerator && (
+              <div tw="flex flex-wrap gap-1 sm:gap-2 items-center">
+                <span tw="font-bold opacity-70 hidden sm:block">Tags:</span>
+                <StatusTag status={topic.status} />
+                {topic.tags.map((tag, i) => (
+                  <TopicTag key={i}>{tag}</TopicTag>
+                ))}
+                {user?.detail.isModerator && (
+                  <>
                     <Tag color="#9195e621">{`#${topic.id}`}</Tag>
-                  )}
-                </div>
-              }
+                    {!isMobile && (
+                      <div tw="flex-1 flex items-center justify-end opacity-60">
+                        <div>
+                          <Tooltip
+                            content={
+                              <span tw="whitespace-pre">
+                                Last modified:
+                                <br />
+                                {new Date(topic.editTime).toLocaleString()}
+                              </span>
+                            }
+                          >
+                            <span tw="font-semibold">
+                              {new Date(topic.createTime).toLocaleDateString()}
+                            </span>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
               {!hideModerationInfo &&
                 !user?.detail.isModerator &&
                 topic.modStatus !== 'approved' && (

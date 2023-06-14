@@ -21,7 +21,7 @@ jobs:
       matrix:
         node-version: [18.x]
     env:
-      DFX_VERSION: 0.13.1
+      DFX_VERSION: 0.14.1
 
     steps:
     - uses: actions/checkout@v3
