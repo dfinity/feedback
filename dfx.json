@@ -1,5 +1,5 @@
 {
-  "dfx": "0.14.0",
+  "dfx": "0.14.1",
   "defaults": {
     "build": {
       "packtool": "npm run --silent sources"

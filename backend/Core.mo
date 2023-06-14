@@ -26,8 +26,9 @@ module {
   type TopicView = Types.Topic.View;
   type UserView = Types.User.View;
 
-  public class Core(installer : Principal, sys : System.System, stableState : State.State, history_v0 : History.History) {
+  public class Core(installer : Principal, sys_ : System.System, stableState : State.State, history_v0 : History.History) {
 
+    public var sys : System.System = sys_;
     public let state : State.OOState = State.OO(stableState);
     public let logger = History.Logger(sys, history_v0);
 
