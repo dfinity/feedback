@@ -569,26 +569,36 @@ module {
     };
 
     func replayRequest(log : ReqLog, caller : Principal, request : History.Request) : ?() {
-      // to do -- finish cases below.
       do ? {
         switch request {
-          case (#clearTopics) {};
-          case (#createTopic { edit }) {};
-          case (#editTopic { topic = #topic id; edit }) { editTopic(caller, id, edit)! };
+          case (#createTopic { edit }) { ignore createTopic(caller, edit)! };
+          case (#editTopic { topic = #topic id; edit }) {
+            editTopic(caller, id, edit)!;
+          };
           case (#importTopics { edits }) { importTopics(caller, edits)! };
           case (#login) { ignore login(caller) };
-          case (#moderatorQuery) { };
-          case (#setTopicModStatus { topic = #topic id; modStatus }) { setTopicModStatus(caller, id, modStatus)! };
-          case (#setTopicStatus { topic = #topic id; status }) { setTopicStatus(caller, id, status)! };
-          case (#setUserIsModerator { user = #user id; isMod }) { setUserIsModerator(caller, id, isMod)! };
-          case (#voteTopic { topic = #topic id; userVote }) { voteTopic(caller, id, userVote)! };
-          case (#replayRequests) { /* implicitly enter "body". */ };
+          case (#moderatorQuery) {};
+          case (#setTopicModStatus { topic = #topic id; modStatus }) {
+            setTopicModStatus(caller, id, modStatus)!;
+          };
+          case (#setTopicStatus { topic = #topic id; status }) {
+            setTopicStatus(caller, id, status)!;
+          };
+          case (#setUserIsModerator { user = #user id; isMod }) {
+            setUserIsModerator(caller, id, isMod)!;
+          };
+          case (#voteTopic { topic = #topic id; userVote }) {
+            voteTopic(caller, id, userVote)!;
+          };
+          case (#replayRequests) {
+            return null /* to do -- nested case. Not essential in MVP. */;
+          };
         };
       };
     };
 
     public func replayRequests(caller : Principal, history : Iter.Iter<History.Event>) : ?() {
-      // to do -- use indirection for Time.now()
+      let sys0 = sys; // save system variable, to restore after the replay.
       let log = logger.Begin(caller, #replayRequests);
       var start_end : ?{ start : History.RequestId; end : History.RequestId } = null;
       let res = do ? {
@@ -605,7 +615,13 @@ module {
                   start_end := ?{ start; end = r.requestId };
                 };
               };
-              // to do -- reset Time to the recorded time.
+              sys := System.Constant({
+                time = r.time;
+                cyclesBalance = switch (r.cyclesBalance) {
+                  case null 0; // zero means we didn't have a known cyclesBalance at the time.
+                  case (?b) b;
+                };
+              });
 
               // replay the request at current time.
               replayRequest(log, r.caller, r.request)!;
@@ -614,7 +630,8 @@ module {
           };
         };
       };
-      log.okReplay(start_end);
+      sys := sys0; // restore original system var.
+      log.replayResult(if (res == null) null else start_end);
     };
   };
 };

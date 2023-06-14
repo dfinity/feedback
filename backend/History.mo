@@ -63,7 +63,7 @@ module {
     #ok;
     #okWithTopic : { topic : TopicId };
     #okWithUser : { user : UserId };
-    #okReplay : ?{ start : RequestId; end : RequestId }; // [start, end] specifies event interval that is nested in this replay request.
+    #replay : ?{ start : RequestId; end : RequestId }; // [start, end] specifies event interval that is nested in this replay request.
     #err; // e.g., the user gives an invalid topic ID.
     #errAccess : AccessPredicate;
     #errCheck : Invariant;
@@ -220,10 +220,10 @@ module {
       };
 
       // ?(start, end) specifies a non-empty event interval that is nested in this replay request.
-      // null specifies the empty event interval.
-      public func okReplay(interval : ?{ start : RequestId; end : RequestId }) : ?() {
-        addResponse(#okReplay(interval));
-        ?();
+      // null specifies that something went wrong.
+      public func replayResult(interval : ?{ start : RequestId; end : RequestId }) : ?() {
+        addResponse(#replay(interval));
+        if (interval == null) null else ?();
       };
 
       public func errAccess(a : AccessPredicate) : ?None {
