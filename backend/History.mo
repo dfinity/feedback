@@ -2,6 +2,8 @@ import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
+import Buffer "mo:base/Buffer";
+
 import Seq "mo:sequence/Sequence";
 import Stream "mo:sequence/Stream";
 
@@ -143,6 +145,40 @@ module {
       let (_, slice, _) = Seq.slice(history.events, start, size);
       let i : Iter.Iter<Event> = Seq.iter(slice, #fwd);
       Iter.toArray(i);
+    };
+
+    // Go through the last `size` events.
+    // Delimit groups of events so that each group begins with a request.
+    // The first group is the most recent.
+    public func getHistory(size : Nat) : [[Event]] {
+      let fullSize = Seq.size(history.events);
+      let sub = if (fullSize == 0) Seq.empty() else if (fullSize < size) history.events else Seq.slice(
+        history.events,
+        fullSize - 1 - size : Nat,
+        size,
+      ).1;
+      let i : Iter.Iter<Event> = Seq.iter(sub, #bwd);
+      let buff : Buffer.Buffer<[Event]> = Buffer.Buffer(0);
+      let reqBuff : Buffer.Buffer<Event> = Buffer.Buffer(0);
+      label L loop {
+        let next = i.next();
+        switch next {
+          case null { break L };
+          case (?((#request r))) {
+            reqBuff.add(#request r);
+            Buffer.reverse(reqBuff);
+            buff.add(Buffer.toArray(reqBuff));
+            reqBuff.clear();
+          };
+          case (?ev) {
+            reqBuff.add(ev);
+          };
+        };
+      };
+      if (reqBuff.size() != 0) {
+        buff.add(Buffer.toArray(reqBuff));
+      };
+      buff.toArray();
     };
 
     public func getSize() : Nat {

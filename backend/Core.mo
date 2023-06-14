@@ -540,6 +540,15 @@ module {
       };
     };
 
+    public func getHistory(caller : Principal, size : Nat) : ?[[History.Event]] {
+      do ? {
+        let log = logger.Begin(caller, #moderatorQuery);
+        assertCallerIsModerator(log, caller)!;
+        log.ok()!; // want this response to be included in the result in next line.
+        logger.getHistory(size);
+      };
+    };
+
     public func getLogEvents(caller : Principal, start : Nat, size : Nat) : ?[History.Event] {
       do ? {
         let log = logger.Begin(caller, #moderatorQuery);
