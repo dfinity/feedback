@@ -30,4 +30,9 @@ module {
     };
   };
 
+  public class Constant({ time_ : Int, cyclesBalance_ : Nat }) {
+      public time() : Int = time_;
+      public cyclesBalance() : Nat = cyclesBalance_;
+  };
+
 };
