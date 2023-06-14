@@ -6,6 +6,16 @@
 
 This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
 
+## As an example project and workflow
+
+In addition to running as a useful service, this project gives an example "full stack Dapp" with a "live development" workflow.
+
+Related projects:
+
+1. [Motoko Dev Server](https://github.com/dfinity/motoko-dev-server) provides the live workflow.
+2. [Vite + React + Motoko: a minimal starter example](https://github.com/rvanasa/vite-react-motoko) gives an essential distillation of using this workflow in a new project.
+
+
 ## Local Development
 
 Make sure that [Node.js](https://nodejs.org/en/) `>= 16.x` and the latest version of [`dfx`](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) are installed on your system.
