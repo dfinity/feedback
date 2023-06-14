@@ -13,7 +13,7 @@ In addition to running as a real-world service, this project is designed to be a
 **Related projects:**
 
 1. [`mo-dev`](https://github.com/dfinity/motoko-dev-server) provides live reloading for Motoko canisters.
-2. [Vite + React + Motoko](https://github.com/rvanasa/vite-react-motoko) is a beginner-friendly starter project based on this repository.
+2. [Vite + React + Motoko](https://github.com/rvanasa/vite-react-motoko) is a beginner-friendly starter project that was originally used for this repository.
 
 
 ## Local Development
