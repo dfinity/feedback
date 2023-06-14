@@ -8,12 +8,12 @@ This project is hosted on-chain and is available at [dx.internetcomputer.org](ht
 
 ## As an example project and workflow
 
-In addition to running as a useful service, this project gives an example "full stack Dapp" with a "live development" workflow.
+In addition to running as a real-world service, this project is designed to be an ideal starting point for building a full-stack Motoko dapp with a [live reload](https://blog.logrocket.com/complete-guide-full-stack-live-reload/) workflow.
 
-Related projects:
+**Related projects:**
 
-1. [Motoko Dev Server](https://github.com/dfinity/motoko-dev-server) provides the live workflow.
-2. [Vite + React + Motoko: a minimal starter example](https://github.com/rvanasa/vite-react-motoko) gives an essential distillation of using this workflow in a new project.
+1. [`mo-dev`](https://github.com/dfinity/motoko-dev-server) provides live reloading for Motoko canisters.
+2. [Vite + React + Motoko](https://github.com/rvanasa/vite-react-motoko) is a beginner-friendly starter project based on this repository.
 
 
 ## Local Development
