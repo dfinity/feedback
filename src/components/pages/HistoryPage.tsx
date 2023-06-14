@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
@@ -121,33 +121,81 @@ const ResponseEventCard = styled.div`
   }
 `;
 
+const eventsPerPage = 1000;
+
 export default function HistoryPage() {
-  const [events, setEvents] = useState<Event[] | undefined>();
-  const [maxEventCount] = useState(1000); // TODO: adjustable?
+  const [pageCount] = useState(1);
+  const [fetchedPageCount, setFetchedPageCount] = useState(0);
+  const [, setMaxPages] = useState(0);
+  const [eventGroups, setEventGroups] = useState<Event[][]>([]);
 
   const user = useIdentity();
 
-  useEffect(() => {
-    if (user) {
-      (async () => {
-        try {
-          const eventCount = unwrap(await backend.getLogEventCount());
-          const minEventNumber = eventCount - BigInt(maxEventCount);
-          const events = unwrap(
-            await backend.getLogEvents(
-              minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
-              eventCount,
-            ),
-          );
-          // events.reverse(); // Most recent events first
-          console.log('Events:', events);
-          setEvents(events);
-        } catch (err) {
-          handleError(err, 'Error while fetching history!');
+  // Cache initial event count
+  const eventCountPromise = useMemo(
+    async () => Number(unwrap(await backend.getLogEventCount())),
+    [],
+  );
+
+  const getRequestId = useCallback((event: Event): bigint | undefined => {
+    const part = (event as any)[Object.keys(event)[0]];
+    return part.requestId;
+  }, []);
+
+  const fetchPage = useCallback(async () => {
+    try {
+      const eventCount = await eventCountPromise;
+      setFetchedPageCount(pageCount);
+      setMaxPages(Math.ceil(eventCount / eventsPerPage));
+
+      const minEventNumber =
+        BigInt(eventCount) - BigInt(fetchedPageCount * eventsPerPage);
+      const events = unwrap(
+        await backend.getLogEvents(
+          minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
+          BigInt((pageCount - fetchedPageCount) * eventsPerPage),
+        ),
+      ).reverse();
+
+      const groups: Event[][] = [...eventGroups];
+      events.forEach((event) => {
+        const requestId = getRequestId(event);
+        if (groups.length && requestId) {
+          const previousGroup = groups[groups.length - 1];
+          const previousRequestId = getRequestId(previousGroup[0]);
+          if (requestId === previousRequestId) {
+            // Add to most recent group
+            previousGroup.push(event);
+            return;
+          }
         }
-      })();
+        // Create a new group by default
+        groups.push([event]);
+      });
+      console.log('Event groups:', events);
+      setEventGroups(groups);
+    } catch (err) {
+      handleError(err, 'Error while fetching history!');
     }
-  }, [maxEventCount, user]);
+  }, [
+    eventCountPromise,
+    eventGroups,
+    fetchedPageCount,
+    getRequestId,
+    pageCount,
+  ]);
+
+  useEffect(() => {
+    if (user && fetchedPageCount < pageCount) {
+      fetchPage();
+    }
+  }, [eventGroups, fetchPage, fetchedPageCount, pageCount, user]);
+
+  const events = useMemo(() => {
+    const events: Event[] = [];
+    eventGroups.forEach((group) => events.push(...group));
+    return events;
+  }, [eventGroups]);
 
   if (!events) {
     return <Loading />;
