@@ -163,7 +163,7 @@ module {
       for (ev in iter) {
         switch ev {
           case (#request r) {
-            reqBuff.add(#request r);
+            reqBuff.add(ev);
             Buffer.reverse(reqBuff);
             buff.add(Buffer.toArray(reqBuff));
             reqBuff.clear();
