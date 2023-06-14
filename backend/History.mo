@@ -157,20 +157,18 @@ module {
         fullSize - 1 - size : Nat,
         size,
       ).1;
-      let i : Iter.Iter<Event> = Seq.iter(sub, #bwd);
+      let iter : Iter.Iter<Event> = Seq.iter(sub, #bwd);
       let buff : Buffer.Buffer<[Event]> = Buffer.Buffer(0);
       let reqBuff : Buffer.Buffer<Event> = Buffer.Buffer(0);
-      label L loop {
-        let next = i.next();
-        switch next {
-          case null { break L };
-          case (?((#request r))) {
+      for (ev in iter) {
+        switch ev {
+          case (#request r) {
             reqBuff.add(#request r);
             Buffer.reverse(reqBuff);
             buff.add(Buffer.toArray(reqBuff));
             reqBuff.clear();
           };
-          case (?ev) {
+          case ev {
             reqBuff.add(ev);
           };
         };
