@@ -6,6 +6,16 @@
 
 This project is hosted on-chain and is available at [dx.internetcomputer.org](https://dx.internetcomputer.org).
 
+## As an example project and workflow
+
+In addition to running as a real-world service, this project is designed to be an ideal starting point for building a full-stack Motoko dapp with a [live reload](https://blog.logrocket.com/complete-guide-full-stack-live-reload/) workflow.
+
+**Related projects:**
+
+1. [`mo-dev`](https://github.com/dfinity/motoko-dev-server) provides live reloading for Motoko canisters.
+2. [Vite + React + Motoko](https://github.com/rvanasa/vite-react-motoko) is a beginner-friendly starter project that was originally used for this repository.
+
+
 ## Local Development
 
 Make sure that [Node.js](https://nodejs.org/en/) `>= 16.x` and the latest version of [`dfx`](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) are installed on your system.
