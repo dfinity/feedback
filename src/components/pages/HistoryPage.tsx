@@ -121,9 +121,10 @@ const ResponseEventCard = styled.div`
   }
 `;
 
+const maxEventCount = 1000; // TODO: pagination
+
 export default function HistoryPage() {
   const [events, setEvents] = useState<Event[] | undefined>();
-  const [maxEventCount] = useState(1000); // TODO: adjustable?
 
   const user = useIdentity();
 
@@ -131,15 +132,9 @@ export default function HistoryPage() {
     if (user) {
       (async () => {
         try {
-          const eventCount = unwrap(await backend.getLogEventCount());
-          const minEventNumber = eventCount - BigInt(maxEventCount);
           const events = unwrap(
-            await backend.getLogEvents(
-              minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
-              eventCount,
-            ),
+            await backend.getLogEvents(BigInt(0), BigInt(maxEventCount)),
           );
-          // events.reverse(); // Most recent events first
           console.log('Events:', events);
           setEvents(events);
         } catch (err) {
@@ -147,7 +142,7 @@ export default function HistoryPage() {
         }
       })();
     }
-  }, [maxEventCount, user]);
+  }, [user]);
 
   if (!events) {
     return <Loading />;
