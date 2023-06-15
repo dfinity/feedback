@@ -194,9 +194,11 @@ export default function HistoryPage() {
   const events = useMemo(() => {
     const events: Event[] = [];
     // Hide earliest (possibly incomplete) group
-    eventGroups.slice(0, -1).forEach((group) => events.push(...group));
+    (pageCount === maxPages ? eventGroups : eventGroups.slice(0, -1)).forEach(
+      (group) => events.push(...group),
+    );
     return events;
-  }, [eventGroups]);
+  }, [eventGroups, maxPages, pageCount]);
 
   if (!events) {
     return <Loading />;
