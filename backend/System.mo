@@ -30,4 +30,9 @@ module {
     };
   };
 
+  public class Constant(args : { time : Int; cyclesBalance : Nat }) {
+    public func time() : Int = args.time;
+    public func cyclesBalance() : Nat = args.cyclesBalance;
+  };
+
 };

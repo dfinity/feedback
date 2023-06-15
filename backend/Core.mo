@@ -26,8 +26,9 @@ module {
   type TopicView = Types.Topic.View;
   type UserView = Types.User.View;
 
-  public class Core(installer : Principal, sys : System.System, stableState : State.State, history_v0 : History.History) {
+  public class Core(installer : Principal, sys_ : System.System, stableState : State.State, history_v0 : History.History) {
 
+    public var sys : System.System = sys_;
     public let state : State.OOState = State.OO(stableState);
     public let logger = History.Logger(sys, history_v0);
 
@@ -567,5 +568,70 @@ module {
       };
     };
 
+    func replayRequest(log : ReqLog, caller : Principal, request : History.Request) : ?() {
+      do ? {
+        switch request {
+          case (#createTopic { edit }) { ignore createTopic(caller, edit)! };
+          case (#editTopic { topic = #topic id; edit }) {
+            editTopic(caller, id, edit)!;
+          };
+          case (#importTopics { edits }) { importTopics(caller, edits)! };
+          case (#login) { ignore login(caller) };
+          case (#moderatorQuery) {};
+          case (#setTopicModStatus { topic = #topic id; modStatus }) {
+            setTopicModStatus(caller, id, modStatus)!;
+          };
+          case (#setTopicStatus { topic = #topic id; status }) {
+            setTopicStatus(caller, id, status)!;
+          };
+          case (#setUserIsModerator { user = #user id; isMod }) {
+            setUserIsModerator(caller, id, isMod)!;
+          };
+          case (#voteTopic { topic = #topic id; userVote }) {
+            voteTopic(caller, id, userVote)!;
+          };
+          case (#replayRequests) {
+            return null /* to do -- nested case. Not essential in MVP. */;
+          };
+        };
+      };
+    };
+
+    public func replayRequests(caller : Principal, history : Iter.Iter<History.Event>) : ?() {
+      let sys0 = sys; // save system variable, to restore after the replay.
+      let log = logger.Begin(caller, #replayRequests);
+      var start_end : ?{ start : History.RequestId; end : History.RequestId } = null;
+      let res = do ? {
+        assertCallerIsModerator(log, caller)!;
+        for (event in history) {
+          switch event {
+            case (#request r) {
+              // extend end of the requestId interval.
+              switch start_end {
+                case null {
+                  start_end := ?{ start = r.requestId; end = r.requestId };
+                };
+                case (?{ start; end }) {
+                  start_end := ?{ start; end = r.requestId };
+                };
+              };
+              sys := System.Constant({
+                time = r.time;
+                cyclesBalance = switch (r.cyclesBalance) {
+                  case null 0; // zero means we didn't have a known cyclesBalance at the time.
+                  case (?b) b;
+                };
+              });
+
+              // replay the request at current time.
+              replayRequest(log, r.caller, r.request)!;
+            };
+            case _ ();
+          };
+        };
+      };
+      sys := sys0; // restore original system var.
+      log.replayResult(if (res == null) null else start_end);
+    };
   };
 };
