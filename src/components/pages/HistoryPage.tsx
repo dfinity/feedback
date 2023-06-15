@@ -149,7 +149,8 @@ export default function HistoryPage() {
       setMaxPages(Math.ceil(eventCount / eventsPerPage));
 
       const minEventNumber =
-        BigInt(eventCount) - BigInt(fetchedPageCount * eventsPerPage);
+        BigInt(eventCount) - BigInt(pageCount * eventsPerPage);
+      console.log(minEventNumber, pageCount); /////
       const events = unwrap(
         await backend.getLogEvents(
           minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
@@ -165,7 +166,7 @@ export default function HistoryPage() {
           const previousRequestId = getRequestId(previousGroup[0]);
           if (requestId === previousRequestId) {
             // Add to most recent group
-            previousGroup.push(event);
+            previousGroup.unshift(event);
             return;
           }
         }
