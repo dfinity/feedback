@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
@@ -121,33 +121,84 @@ const ResponseEventCard = styled.div`
   }
 `;
 
+const eventsPerPage = 1000;
+
 export default function HistoryPage() {
-  const [events, setEvents] = useState<Event[] | undefined>();
-  const [maxEventCount] = useState(1000); // TODO: adjustable?
+  const [pageCount, setPageCount] = useState(1);
+  const [fetchedPageCount, setFetchedPageCount] = useState(0);
+  const [maxPages, setMaxPages] = useState(0);
+  const [eventGroups, setEventGroups] = useState<Event[][]>([]);
 
   const user = useIdentity();
 
+  // Cache initial event count
+  const eventCountPromise = useMemo(
+    async () => Number(unwrap(await backend.getLogEventCount())),
+    [],
+  );
+
+  const getRequestId = useCallback((event: Event): string | undefined => {
+    const part = (event as any)[Object.keys(event)[0]];
+    return part.requestId ? String(part.requestId) : undefined;
+  }, []);
+
   useEffect(() => {
-    if (user) {
-      (async () => {
-        try {
-          const eventCount = unwrap(await backend.getLogEventCount());
-          const minEventNumber = eventCount - BigInt(maxEventCount);
-          const events = unwrap(
-            await backend.getLogEvents(
-              minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
-              eventCount,
-            ),
-          );
-          // events.reverse(); // Most recent events first
-          console.log('Events:', events);
-          setEvents(events);
-        } catch (err) {
-          handleError(err, 'Error while fetching history!');
-        }
-      })();
+    if (!user || fetchedPageCount >= pageCount) {
+      return;
     }
-  }, [maxEventCount, user]);
+    (async () => {
+      try {
+        const eventCount = await eventCountPromise;
+        setFetchedPageCount(pageCount);
+        setMaxPages(Math.ceil(eventCount / eventsPerPage));
+
+        const minEventNumber =
+          BigInt(eventCount) - BigInt(pageCount * eventsPerPage);
+        const events = unwrap(
+          await backend.getLogEvents(
+            minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
+            BigInt((pageCount - fetchedPageCount) * eventsPerPage),
+          ),
+        ).reverse();
+
+        const groups: Event[][] = [...eventGroups];
+        console.log('Events:', events);
+        events.forEach((event) => {
+          const requestId = getRequestId(event);
+          if (groups.length && requestId) {
+            const previousGroup = groups[groups.length - 1];
+            const previousRequestId = getRequestId(previousGroup[0]);
+            if (requestId === previousRequestId) {
+              // Add to most recent group
+              previousGroup.unshift(event);
+              return;
+            }
+          }
+          // Create a new group by default
+          groups.push([event]);
+        });
+        setEventGroups(groups);
+      } catch (err) {
+        handleError(err, 'Error while fetching history!');
+      }
+    })();
+  }, [
+    eventCountPromise,
+    eventGroups,
+    fetchedPageCount,
+    getRequestId,
+    pageCount,
+    user,
+  ]);
+
+  const events = useMemo(() => {
+    const events: Event[] = [];
+    // Hide earliest (possibly incomplete) group
+    (pageCount === maxPages ? eventGroups : eventGroups.slice(0, -1)).forEach(
+      (group) => events.push(...group),
+    );
+    return events;
+  }, [eventGroups, maxPages, pageCount]);
 
   if (!events) {
     return <Loading />;
@@ -164,6 +215,14 @@ export default function HistoryPage() {
         {events.map((event, i) => (
           <EventItem key={i} event={event} />
         ))}
+        {pageCount < maxPages && (
+          <div
+            tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+            onClick={() => setPageCount(pageCount + 1)}
+          >
+            Load More
+          </div>
+        )}
       </div>
     </>
   );
