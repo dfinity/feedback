@@ -124,9 +124,9 @@ const ResponseEventCard = styled.div`
 const eventsPerPage = 1000;
 
 export default function HistoryPage() {
-  const [pageCount] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
   const [fetchedPageCount, setFetchedPageCount] = useState(0);
-  const [, setMaxPages] = useState(0);
+  const [maxPages, setMaxPages] = useState(0);
   const [eventGroups, setEventGroups] = useState<Event[][]>([]);
 
   const user = useIdentity();
@@ -137,64 +137,64 @@ export default function HistoryPage() {
     [],
   );
 
-  const getRequestId = useCallback((event: Event): bigint | undefined => {
+  const getRequestId = useCallback((event: Event): string | undefined => {
     const part = (event as any)[Object.keys(event)[0]];
-    return part.requestId;
+    return part.requestId ? String(part.requestId) : undefined;
   }, []);
 
-  const fetchPage = useCallback(async () => {
-    try {
-      const eventCount = await eventCountPromise;
-      setFetchedPageCount(pageCount);
-      setMaxPages(Math.ceil(eventCount / eventsPerPage));
-
-      const minEventNumber =
-        BigInt(eventCount) - BigInt(pageCount * eventsPerPage);
-      console.log(minEventNumber, pageCount); /////
-      const events = unwrap(
-        await backend.getLogEvents(
-          minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
-          BigInt((pageCount - fetchedPageCount) * eventsPerPage),
-        ),
-      ).reverse();
-
-      const groups: Event[][] = [...eventGroups];
-      events.forEach((event) => {
-        const requestId = getRequestId(event);
-        if (groups.length && requestId) {
-          const previousGroup = groups[groups.length - 1];
-          const previousRequestId = getRequestId(previousGroup[0]);
-          if (requestId === previousRequestId) {
-            // Add to most recent group
-            previousGroup.unshift(event);
-            return;
-          }
-        }
-        // Create a new group by default
-        groups.push([event]);
-      });
-      console.log('Event groups:', events);
-      setEventGroups(groups);
-    } catch (err) {
-      handleError(err, 'Error while fetching history!');
+  useEffect(() => {
+    if (!user || fetchedPageCount >= pageCount) {
+      return;
     }
+    (async () => {
+      try {
+        const eventCount = await eventCountPromise;
+        setFetchedPageCount(pageCount);
+        setMaxPages(Math.ceil(eventCount / eventsPerPage));
+
+        const minEventNumber =
+          BigInt(eventCount) - BigInt(pageCount * eventsPerPage);
+        const events = unwrap(
+          await backend.getLogEvents(
+            minEventNumber < BigInt(0) ? BigInt(0) : minEventNumber,
+            BigInt((pageCount - fetchedPageCount) * eventsPerPage),
+          ),
+        ).reverse();
+
+        const groups: Event[][] = [...eventGroups];
+        console.log('Events:', events);
+        events.forEach((event) => {
+          const requestId = getRequestId(event);
+          if (groups.length && requestId) {
+            const previousGroup = groups[groups.length - 1];
+            const previousRequestId = getRequestId(previousGroup[0]);
+            if (requestId === previousRequestId) {
+              // Add to most recent group
+              previousGroup.unshift(event);
+              return;
+            }
+          }
+          // Create a new group by default
+          groups.push([event]);
+        });
+        setEventGroups(groups);
+      } catch (err) {
+        handleError(err, 'Error while fetching history!');
+      }
+    })();
   }, [
     eventCountPromise,
     eventGroups,
     fetchedPageCount,
     getRequestId,
     pageCount,
+    user,
   ]);
-
-  useEffect(() => {
-    if (user && fetchedPageCount < pageCount) {
-      fetchPage();
-    }
-  }, [eventGroups, fetchPage, fetchedPageCount, pageCount, user]);
 
   const events = useMemo(() => {
     const events: Event[] = [];
-    eventGroups.forEach((group) => events.push(...group));
+    // Hide earliest (possibly incomplete) group
+    eventGroups.slice(0, -1).forEach((group) => events.push(...group));
     return events;
   }, [eventGroups]);
 
@@ -213,6 +213,14 @@ export default function HistoryPage() {
         {events.map((event, i) => (
           <EventItem key={i} event={event} />
         ))}
+        {pageCount < maxPages && (
+          <div
+            tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+            onClick={() => setPageCount(pageCount + 1)}
+          >
+            Load More
+          </div>
+        )}
       </div>
     </>
   );
