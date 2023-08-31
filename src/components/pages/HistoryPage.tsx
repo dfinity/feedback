@@ -209,12 +209,12 @@ export default function HistoryPage() {
 
   return (
     <>
-      <ChartArea events={events} />
       {events.length === 0 && (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!
         </div>
       )}
+      <ChartArea events={events} />
       <div tw="flex flex-col mx-auto">
         {events.map((event, i) => (
           <EventItem key={i} event={event} />

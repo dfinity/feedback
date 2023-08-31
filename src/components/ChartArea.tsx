@@ -20,6 +20,7 @@ const months = [
   'Jul',
   'Aug',
   'Sept',
+  'Oct',
   'Nov',
   'Dec',
 ];
@@ -43,9 +44,12 @@ export default function ChartArea({ events }: ChartsAreaProps) {
   };
 
   events.forEach((e) => {
-    const createTime = (e as any)?.request?.createTopic?.time;
+    const createTime = (e as any)?.request?.request?.createTopic?.time;
+    if ((e as any)?.request?.request) {
+      console.log(e); ///
+    }
     if (createTime) {
-      console.log(createTime);
+      console.log(':::', createTime);
       const date = new Date(createTime);
       getBin(date.getFullYear(), date.getMonth()).created++;
     }
@@ -56,36 +60,33 @@ export default function ChartArea({ events }: ChartsAreaProps) {
   const now = new Date();
   let year = now.getFullYear();
   let month = now.getMonth();
-  const data = Array.from({ length: monthHistoryLength }).map(() => {
-    const bin = getBin(year, month);
-    month--;
-    if (month < 0) {
-      month += 12;
-      year--;
-    }
-    return { ...bin, name: months[month] };
-  });
+  const data = Array.from({ length: monthHistoryLength })
+    .map(() => {
+      const row = {
+        name: months[month],
+        ...getBin(year, month),
+      };
+      if (--month < 0) {
+        month += 12;
+        --year;
+      }
+      console.log(month);
+      return row;
+    })
+    .reverse();
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        width={500}
-        height={300}
-        data={data}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="created" fill="#8884d8" />
-      </BarChart>
-    </ResponsiveContainer>
+    <div tw="bg-[#FFFE] rounded-xl h-[300px] sm:h-[400px] p-10 pl-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart width={500} height={300} data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="created" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
