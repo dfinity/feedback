@@ -1,4 +1,11 @@
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
@@ -204,11 +211,12 @@ export default function HistoryPage() {
   }, [eventGroups, maxPages, pageCount]);
 
   if (!events) {
+    // TODO: refactor to use suspense logic
     return <Loading />;
   }
 
   return (
-    <>
+    <Suspense fallback={<Loading />}>
       {events.length === 0 && (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!
@@ -228,6 +236,6 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-    </>
+    </Suspense>
   );
 }
