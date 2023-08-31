@@ -80,7 +80,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
     }
   });
 
-  const monthHistoryLength = 12;
+  const monthHistoryLength = 6;
 
   const now = new Date();
   let year = now.getFullYear();
@@ -110,7 +110,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart width={500} height={300} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="Name" />
             <YAxis />
             <Tooltip />
             <Legend />
@@ -122,7 +122,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart width={500} height={300} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="Name" />
             <YAxis />
             <Tooltip />
             <Legend />
