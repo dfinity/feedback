@@ -136,8 +136,8 @@ export default function HistoryPage() {
 
   // Cache initial event count
   const eventCountPromise = useMemo(
-    async () => Number(unwrap(await backend.getLogEventCount())),
-    [],
+    async () => (user ? Number(unwrap(await backend.getLogEventCount())) : 0),
+    [user],
   );
 
   const getRequestId = useCallback((event: Event): string | undefined => {
