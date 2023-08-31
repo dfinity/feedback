@@ -9,7 +9,7 @@ import { unwrap } from '../../utils/unwrap';
 import Loading from '../Loading';
 
 // Defer loading chart libraries
-const ChartsArea = lazy(() => import('../ChartsArea'));
+const ChartArea = lazy(() => import('../ChartArea'));
 
 interface EventItemProps {
   event: Event;
@@ -209,7 +209,7 @@ export default function HistoryPage() {
 
   return (
     <>
-      <ChartsArea events={events} />
+      <ChartArea events={events} />
       {events.length === 0 && (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!

@@ -28,7 +28,7 @@ export interface ChartsAreaProps {
   events: Event[];
 }
 
-export default function ChartsArea({ events }: ChartsAreaProps) {
+export default function ChartArea({ events }: ChartsAreaProps) {
   type Bin = { created: number; activity: number };
   const monthBins: Record<string, Bin> = {};
   const getBin = (year: number, month: number): Bin => {
