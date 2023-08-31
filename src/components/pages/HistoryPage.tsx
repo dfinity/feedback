@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
@@ -204,8 +204,12 @@ export default function HistoryPage() {
     return <Loading />;
   }
 
+  // Defer loading chart libraries
+  const ChartsArea = lazy(() => import('../ChartsArea'));
+
   return (
     <>
+      <ChartsArea events={events} />
       {events.length === 0 && (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!
