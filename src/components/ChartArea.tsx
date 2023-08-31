@@ -11,18 +11,18 @@ import {
 import { Event } from '../declarations/backend/backend.did';
 
 const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
+  'January',
+  'February',
+  'March',
+  'April',
   'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sept',
-  'Oct',
-  'Nov',
-  'Dec',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export interface ChartsAreaProps {
@@ -90,7 +90,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
       const bins = getBin(year, month);
       const row = {
         Name: months[month],
-        Activity: bins.activity,
+        'Total Activity': bins.activity,
         Created: bins.created.size,
         Started: bins.started.size,
         Completed: bins.completed.size,
@@ -114,7 +114,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Activity" fill="#8884d8" />
+            <Bar dataKey="Total Activity" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
       </div>
