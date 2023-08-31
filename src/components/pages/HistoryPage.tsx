@@ -131,7 +131,8 @@ const ResponseEventCard = styled.div`
   }
 `;
 
-const eventsPerPage = 1000;
+// const eventsPerPage = 1000;
+const eventsPerPage = 50_000; // Temporary
 
 export default function HistoryPage() {
   const [pageCount, setPageCount] = useState(1);
