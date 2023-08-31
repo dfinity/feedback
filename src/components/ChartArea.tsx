@@ -44,14 +44,14 @@ export default function ChartArea({ events }: ChartsAreaProps) {
   };
 
   events.forEach((e) => {
-    const createTime = (e as any)?.request?.request?.createTopic?.time;
-    if ((e as any)?.request?.request) {
-      console.log(e); ///
-    }
-    if (createTime) {
-      console.log(':::', createTime);
-      const date = new Date(createTime);
-      getBin(date.getFullYear(), date.getMonth()).created++;
+    // TODO: filter unsuccessful requests
+    if ('request' in e) {
+      const date = new Date(Number(e.request.time) / 1e6);
+      const bin = getBin(date.getFullYear(), date.getMonth());
+      bin.activity++;
+      if ('createTopic' in e.request.request) {
+        bin.created++;
+      }
     }
   });
 
@@ -70,7 +70,6 @@ export default function ChartArea({ events }: ChartsAreaProps) {
         month += 12;
         --year;
       }
-      console.log(month);
       return row;
     })
     .reverse();

@@ -138,6 +138,7 @@ export default function HistoryPage() {
   const [fetchedPageCount, setFetchedPageCount] = useState(0);
   const [maxPages, setMaxPages] = useState(0);
   const [eventGroups, setEventGroups] = useState<Event[][]>([]);
+  const [isLogVisible, setLogVisible] = useState(false);
 
   const user = useIdentity();
 
@@ -216,25 +217,37 @@ export default function HistoryPage() {
   }
   return (
     <Suspense fallback={loading}>
-      {events.length === 0 && (
+      {events.length === 0 ? (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!
         </div>
+      ) : (
+        <div tw="space-y-5">
+          <ChartArea events={events} />
+          {isLogVisible ? (
+            <div tw="flex flex-col mx-auto">
+              {events.map((event, i) => (
+                <EventItem key={i} event={event} />
+              ))}
+              {pageCount < maxPages && (
+                <div
+                  tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+                  onClick={() => setPageCount(pageCount + 1)}
+                >
+                  Load More
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+              onClick={() => setLogVisible(true)}
+            >
+              View Activity Log
+            </div>
+          )}
+        </div>
       )}
-      <ChartArea events={events} />
-      <div tw="flex flex-col mx-auto">
-        {events.map((event, i) => (
-          <EventItem key={i} event={event} />
-        ))}
-        {pageCount < maxPages && (
-          <div
-            tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
-            onClick={() => setPageCount(pageCount + 1)}
-          >
-            Load More
-          </div>
-        )}
-      </div>
     </Suspense>
   );
 }
