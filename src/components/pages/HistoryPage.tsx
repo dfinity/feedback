@@ -8,6 +8,9 @@ import { handleError } from '../../utils/handlers';
 import { unwrap } from '../../utils/unwrap';
 import Loading from '../Loading';
 
+// Defer loading chart libraries
+const ChartsArea = lazy(() => import('../ChartsArea'));
+
 interface EventItemProps {
   event: Event;
 }
@@ -203,9 +206,6 @@ export default function HistoryPage() {
   if (!events) {
     return <Loading />;
   }
-
-  // Defer loading chart libraries
-  const ChartsArea = lazy(() => import('../ChartsArea'));
 
   return (
     <>
