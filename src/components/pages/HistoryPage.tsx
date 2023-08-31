@@ -219,7 +219,7 @@ export default function HistoryPage() {
     <Suspense fallback={loading}>
       {events.length === 0 ? (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
-          {user ? 'History is empty!' : 'Please sign in to view history.'}
+          {user ? 'Waiting for history...' : 'Please sign in to view history.'}
         </div>
       ) : (
         <div tw="space-y-5">
