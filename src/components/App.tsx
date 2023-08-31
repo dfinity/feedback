@@ -11,6 +11,7 @@ import SubmitPage from './pages/SubmitPage';
 import TopicPage from './pages/TopicPage';
 
 import 'react-toastify/dist/ReactToastify.css';
+import 'sweetalert2/dist/sweetalert2.css';
 import 'tippy.js/dist/tippy.css';
 import 'twin.macro';
 import '../styles/index.scss';
