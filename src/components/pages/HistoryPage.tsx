@@ -210,13 +210,12 @@ export default function HistoryPage() {
     return events;
   }, [eventGroups, maxPages, pageCount]);
 
+  const loading = <Loading />;
   if (!events) {
-    // TODO: refactor to use suspense logic
-    return <Loading />;
+    return loading;
   }
-
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={loading}>
       {events.length === 0 && (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
           History is empty!
