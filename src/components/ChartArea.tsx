@@ -126,8 +126,8 @@ export default function ChartArea({ events }: ChartsAreaProps) {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Created" stackId="a" fill="#FF6542" />
-            <Bar dataKey="Started" stackId="a" fill="#FFC145" />
+            <Bar dataKey="Created" stackId="a" fill="#ff6542" />
+            <Bar dataKey="Started" stackId="a" fill="#ffc145" />
             <Bar dataKey="Completed" stackId="a" fill="#02ca9d" />
             <Bar dataKey="Closed" stackId="a" fill="#297373" />
           </BarChart>
