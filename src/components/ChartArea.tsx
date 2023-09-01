@@ -105,7 +105,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
     .reverse();
 
   return (
-    <div tw="bg-[#FFFE] rounded-xl p-10 pl-0">
+    <div tw="bg-white rounded-xl p-10 pl-0">
       <div tw="h-[200px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart width={500} height={300} data={data}>
