@@ -3,7 +3,7 @@ import { TopicStatus } from '../stores/topicStore';
 import Tag from './Tag';
 import Tooltip from './Tooltip';
 
-export const statusColors: Record<TopicStatus, string> = {
+const statusColors: Record<TopicStatus, string> = {
   open: '#e8caf1',
   next: '#bcdbef',
   completed: '#c8ebd7',
