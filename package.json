@@ -36,6 +36,7 @@
     "react-router-dom": "^6.9.0",
     "react-select": "^5.7.2",
     "react-toastify": "^9.1.2",
+    "recharts": "^2.8.0",
     "styled-components": "^5.3.9",
     "sweetalert2": "^11.4.8",
     "turndown": "^7.1.2",
