@@ -66,7 +66,12 @@ export interface IdentityState {
 
 export const useIdentityStore = create<IdentityState>((set, get) => {
   const clientPromise = window.indexedDB
-    ? AuthClient.create()
+    ? AuthClient.create({
+        idleOptions: {
+          disableIdle: true,
+          disableDefaultIdleCallback: true,
+        },
+      })
     : Promise.resolve(undefined);
 
   const loginIC = async (
