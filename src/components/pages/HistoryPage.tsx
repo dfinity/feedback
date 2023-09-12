@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 import { backend } from '../../declarations/backend';
@@ -7,6 +14,9 @@ import useIdentity from '../../hooks/useIdentity';
 import { handleError } from '../../utils/handlers';
 import { unwrap } from '../../utils/unwrap';
 import Loading from '../Loading';
+
+// Defer loading chart libraries
+const ChartArea = lazy(() => import('../ChartArea'));
 
 interface EventItemProps {
   event: Event;
@@ -121,20 +131,22 @@ const ResponseEventCard = styled.div`
   }
 `;
 
-const eventsPerPage = 1000;
+// const eventsPerPage = 1000;
+const eventsPerPage = 50_000; // Temporary
 
 export default function HistoryPage() {
   const [pageCount, setPageCount] = useState(1);
   const [fetchedPageCount, setFetchedPageCount] = useState(0);
   const [maxPages, setMaxPages] = useState(0);
   const [eventGroups, setEventGroups] = useState<Event[][]>([]);
+  const [isLogVisible, setLogVisible] = useState(false);
 
   const user = useIdentity();
 
   // Cache initial event count
   const eventCountPromise = useMemo(
-    async () => Number(unwrap(await backend.getLogEventCount())),
-    [],
+    async () => (user ? Number(unwrap(await backend.getLogEventCount())) : 0),
+    [user],
   );
 
   const getRequestId = useCallback((event: Event): string | undefined => {
@@ -200,30 +212,43 @@ export default function HistoryPage() {
     return events;
   }, [eventGroups, maxPages, pageCount]);
 
+  const loading = <Loading />;
   if (!events) {
-    return <Loading />;
+    return loading;
   }
-
   return (
-    <>
-      {events.length === 0 && (
+    <Suspense fallback={loading}>
+      {events.length === 0 ? (
         <div tw="bg-gray-100 text-xl text-center px-2 py-5 rounded-xl text-gray-600 select-none">
-          History is empty!
+          {user ? 'Waiting for history...' : 'Please sign in to view history.'}
+        </div>
+      ) : (
+        <div tw="space-y-5">
+          <ChartArea events={events} />
+          {isLogVisible ? (
+            <div tw="flex flex-col mx-auto">
+              {events.map((event, i) => (
+                <EventItem key={i} event={event} />
+              ))}
+              {pageCount < maxPages && (
+                <div
+                  tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+                  onClick={() => setPageCount(pageCount + 1)}
+                >
+                  Load More
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
+              onClick={() => setLogVisible(true)}
+            >
+              View Activity Log
+            </div>
+          )}
         </div>
       )}
-      <div tw="flex flex-col mx-auto">
-        {events.map((event, i) => (
-          <EventItem key={i} event={event} />
-        ))}
-        {pageCount < maxPages && (
-          <div
-            tw="mt-3 p-3 text-lg bg-[#FFF2] text-white cursor-pointer select-none border-primary text-center rounded"
-            onClick={() => setPageCount(pageCount + 1)}
-          >
-            Load More
-          </div>
-        )}
-      </div>
-    </>
+    </Suspense>
   );
 }
