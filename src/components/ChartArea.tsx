@@ -80,7 +80,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
     }
   });
 
-  const monthHistoryLength = 4;
+  const monthHistoryLength = 5;
 
   const now = new Date();
   let year = now.getFullYear();
