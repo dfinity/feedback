@@ -9,6 +9,8 @@ import {
   YAxis,
 } from 'recharts';
 import { Event } from '../declarations/backend/backend.did';
+import { useState } from 'react';
+import 'twin.macro';
 
 const months = [
   'January',
@@ -29,7 +31,16 @@ export interface ChartsAreaProps {
   events: Event[];
 }
 
+const defaultFilterStates = {
+  Open: true,
+  Next: true,
+  Completed: true,
+  Closed: true,
+};
+
 export default function ChartArea({ events }: ChartsAreaProps) {
+  const [filterStates, setFilterStates] = useState(defaultFilterStates);
+
   type Bin = {
     activity: number;
     created: Set<string>;
@@ -91,8 +102,8 @@ export default function ChartArea({ events }: ChartsAreaProps) {
       const row = {
         Name: months[month],
         'Total Activity': bins.activity,
-        Created: bins.created.size,
-        Started: bins.started.size,
+        Open: bins.created.size,
+        Next: bins.started.size,
         Completed: bins.completed.size,
         Closed: bins.closed.size,
       };
@@ -105,34 +116,62 @@ export default function ChartArea({ events }: ChartsAreaProps) {
     .reverse();
 
   return (
-    <div tw="bg-white rounded-xl p-10 pl-0">
-      <div tw="h-[200px] sm:h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart width={500} height={300} data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="Name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="Total Activity" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
+    <>
+      <div tw="bg-white rounded-xl p-10 pl-0">
+        <div tw="h-[200px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart width={500} height={300} data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="Name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="Total Activity" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div tw="h-[200px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart width={500} height={300} data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="Name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {!!filterStates.Open && (
+                <Bar dataKey="Open" stackId="a" fill="#ffc145" />
+              )}
+              {!!filterStates.Next && (
+                <Bar dataKey="Next" stackId="a" fill="#8884d8" />
+              )}
+              {!!filterStates.Completed && (
+                <Bar dataKey="Completed" stackId="a" fill="#02ca9d" />
+              )}
+              {!!filterStates.Closed && (
+                <Bar dataKey="Closed" stackId="a" fill="#297373" />
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-      <div tw="h-[200px] sm:h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart width={500} height={300} data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="Name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="Created" stackId="a" fill="#ffc145" />
-            <Bar dataKey="Started" stackId="a" fill="#8884d8" />
-            <Bar dataKey="Completed" stackId="a" fill="#02ca9d" />
-            <Bar dataKey="Closed" stackId="a" fill="#297373" />
-          </BarChart>
-        </ResponsiveContainer>
+      <div tw="mt-5 flex justify-between sm:justify-center font-semibold sm:gap-4 text-white">
+        {(['Open', 'Next', 'Completed', 'Closed'] as const).map((status) => (
+          <label key={status} tw="select-none cursor-pointer whitespace-nowrap">
+            <input
+              tw="mr-2"
+              type="checkbox"
+              checked={!!filterStates[status]}
+              onChange={() =>
+                setFilterStates({
+                  ...filterStates,
+                  [status]: !filterStates[status],
+                })
+              }
+            />
+            {status}
+          </label>
+        ))}
       </div>
-    </div>
+    </>
   );
 }
