@@ -80,7 +80,7 @@ export default function ChartArea({ events }: ChartsAreaProps) {
     }
   });
 
-  const monthHistoryLength = 5;
+  const monthHistoryLength = 4;
 
   const now = new Date();
   let year = now.getFullYear();
@@ -91,8 +91,8 @@ export default function ChartArea({ events }: ChartsAreaProps) {
       const row = {
         Name: months[month],
         'Total Activity': bins.activity,
-        Created: bins.created.size,
-        Started: bins.started.size,
+        Open: bins.created.size,
+        Next: bins.started.size,
         Completed: bins.completed.size,
         Closed: bins.closed.size,
       };
@@ -126,8 +126,8 @@ export default function ChartArea({ events }: ChartsAreaProps) {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Created" stackId="a" fill="#ffc145" />
-            <Bar dataKey="Started" stackId="a" fill="#8884d8" />
+            <Bar dataKey="Open" stackId="a" fill="#ffc145" />
+            <Bar dataKey="Next" stackId="a" fill="#8884d8" />
             <Bar dataKey="Completed" stackId="a" fill="#02ca9d" />
             <Bar dataKey="Closed" stackId="a" fill="#297373" />
           </BarChart>
