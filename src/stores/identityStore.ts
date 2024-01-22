@@ -30,7 +30,7 @@ export type User = (
 };
 
 // TODO: refactor
-const applicationName = 'IC Feedback';
+const applicationName = 'ICP Developer Feedback';
 
 // TODO: refactor
 const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
