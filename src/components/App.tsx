@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'sweetalert2/dist/sweetalert2.css';
 import 'tippy.js/dist/tippy.css';
 import 'twin.macro';
+import '../setupApp';
 import '../styles/index.scss';
 
 export default function App() {

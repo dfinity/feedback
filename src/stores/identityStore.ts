@@ -9,6 +9,16 @@ import { backend } from '../declarations/backend';
 import { handleError } from '../utils/handlers';
 import { unwrap } from '../utils/unwrap';
 import { useTopicStore } from './topicStore';
+import { applicationName } from '../setupApp';
+import { isLocalNetwork } from '../utils/network';
+
+// Refresh moderator queue on focus browser tab
+window.addEventListener('focus', () => {
+  const user = useIdentityStore.getState().user;
+  if (user?.detail.isModerator) {
+    useTopicStore.getState().fetchModQueue();
+  }
+});
 
 export interface UserDetail {
   id: string;
@@ -20,32 +30,6 @@ export type User = {
   client: AuthClient;
   detail: UserDetail;
 };
-
-// TODO: refactor
-const applicationName = 'ICP Developer Feedback';
-
-// TODO: refactor
-const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
-  .agent as HttpAgent;
-if (import.meta.env.PROD) {
-  (agent as any)._host = 'https://icp0.io/';
-}
-
-// TODO: refactor
-if (
-  window.location.hostname.endsWith('.icp0.io') ||
-  window.location.hostname.endsWith('.ic0.app')
-) {
-  window.location.hostname = 'dx.internetcomputer.org';
-}
-
-// TODO: refactor
-window.addEventListener('focus', () => {
-  const user = useIdentityStore.getState().user;
-  if (user?.detail.isModerator) {
-    useTopicStore.getState().fetchModQueue();
-  }
-});
 
 const localIdentityProvider = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
 
@@ -156,9 +140,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     user: undefined,
     async loginInternetIdentity() {
       return loginIC({
-        identityProvider: import.meta.env.PROD
-          ? undefined
-          : localIdentityProvider,
+        identityProvider: isLocalNetwork() ? localIdentityProvider : undefined,
       });
     },
     async loginNFID() {
