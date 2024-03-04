@@ -87,11 +87,16 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
         Links
         {!info.links.some((link) => link.startsWith(developerForumBaseUrl)) && (
           <div>
-            Please link a{' '}
-            <a href={developerForumBaseUrl} target="_blank" rel="noreferrer">
-              developer forum
-            </a>{' '}
-            topic when relevant.
+            Please include a new or existing{' '}
+            <a
+              href={developerForumBaseUrl}
+              target="_blank"
+              rel="noreferrer"
+              tw="whitespace-nowrap"
+            >
+              developer forum topic
+            </a>
+            .
           </div>
         )}
         <div tw="flex flex-col gap-2">
