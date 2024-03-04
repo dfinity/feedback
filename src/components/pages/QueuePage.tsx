@@ -11,8 +11,6 @@ import { promptModMessage } from '../../utils/promptModMessage';
 const ModeratorButton = tw.div`flex items-center gap-2 font-bold px-3 py-3 text-xl rounded-full cursor-pointer border-2 bg-[#fffd] border-gray-300 hover:scale-105`;
 
 export default function QueuePage() {
-  // const [topics, setTopics] = useState<Topic[] | undefined>();
-
   const user = useIdentity();
   const topics = useTopicStore((state) => state.modQueue);
   const getModQueue = useTopicStore((state) => state.fetchModQueue);
@@ -20,11 +18,9 @@ export default function QueuePage() {
 
   useEffect(() => {
     if (user) {
-      getModQueue()
-        // .then((topics) => setTopics(topics))
-        .catch((err) =>
-          handleError(err, 'Error while fetching moderator queue!'),
-        );
+      getModQueue().catch((err) =>
+        handleError(err, 'Error while fetching moderator queue!'),
+      );
     }
   }, [getModQueue, user]);
 
@@ -37,9 +33,6 @@ export default function QueuePage() {
     promise.catch((err) => {
       handleError(err, 'Error while changing topic status!');
     });
-    // if (topics) {
-    //   setTopics(topics.filter((t) => t !== topic));
-    // }
   };
 
   if (!topics) {

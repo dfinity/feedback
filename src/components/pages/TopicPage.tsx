@@ -10,8 +10,6 @@ import TopicView from '../TopicView';
 let fetchId: string | undefined;
 
 export default function TopicPage() {
-  // const [topic, setTopic] = useState<Topic | undefined>();
-
   const user = useIdentity();
   const topicLookup = useTopicStore((state) => state.topicLookup);
   const find = useTopicStore((state) => state.find);
@@ -32,8 +30,6 @@ export default function TopicPage() {
           if (!topic) {
             handleError('Topic not found!');
             navigate('/');
-          } else {
-            // setTopic(topic);
           }
         } catch (err) {
           handleError(err, 'Error while loading topic!');

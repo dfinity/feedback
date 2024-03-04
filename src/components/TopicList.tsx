@@ -9,7 +9,6 @@ export interface TopicListProps {
 
 export default function TopicList({ topics, compact }: TopicListProps) {
   const [expandedId, setExpandedId] = useState<string | undefined>();
-  // const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <div tw="flex flex-col gap-4">
@@ -23,12 +22,6 @@ export default function TopicList({ topics, compact }: TopicListProps) {
               ? undefined
               : (expanded) => {
                   setExpandedId(expanded ? topic.id : undefined);
-                  // if (expanded) {
-                  //   setSearchParams({ topic: topic.id });
-                  // } else {
-                  //   searchParams.delete('topic');
-                  //   setSearchParams(searchParams);
-                  // }
                 }
           }
         />

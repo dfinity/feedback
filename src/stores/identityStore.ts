@@ -1,4 +1,3 @@
-import { type User as Auth0User } from '@auth0/auth0-react';
 import { HttpAgent } from '@dfinity/agent';
 import {
   AuthClient,
@@ -10,44 +9,10 @@ import { backend } from '../declarations/backend';
 import { handleError } from '../utils/handlers';
 import { unwrap } from '../utils/unwrap';
 import { useTopicStore } from './topicStore';
+import { applicationName } from '../setupApp';
+import { isLocalNetwork } from '../utils/network';
 
-export interface UserDetail {
-  id: string;
-  isModerator: boolean;
-}
-
-export type User = (
-  | {
-      type: 'ic';
-      client: AuthClient;
-    }
-  | {
-      type: 'auth0';
-      auth0: Auth0User;
-    }
-) & {
-  detail: UserDetail;
-};
-
-// TODO: refactor
-const applicationName = 'ICP Developer Feedback';
-
-// TODO: refactor
-const agent = (backend as any)[Symbol.for('ic-agent-metadata')].config
-  .agent as HttpAgent;
-if (import.meta.env.PROD) {
-  (agent as any)._host = 'https://icp0.io/';
-}
-
-// TODO: refactor
-if (
-  window.location.hostname.endsWith('.icp0.io') ||
-  window.location.hostname.endsWith('.ic0.app')
-) {
-  window.location.hostname = 'dx.internetcomputer.org';
-}
-
-// TODO: refactor
+// Refresh moderator queue on focus browser tab
 window.addEventListener('focus', () => {
   const user = useIdentityStore.getState().user;
   if (user?.detail.isModerator) {
@@ -55,7 +20,18 @@ window.addEventListener('focus', () => {
   }
 });
 
-const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
+export interface UserDetail {
+  id: string;
+  isModerator: boolean;
+}
+
+export type User = {
+  type: 'ic';
+  client: AuthClient;
+  detail: UserDetail;
+};
+
+const localIdentityProvider = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
 
 export interface IdentityState {
   user: User | null | undefined;
@@ -164,9 +140,7 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
     user: undefined,
     async loginInternetIdentity() {
       return loginIC({
-        identityProvider: import.meta.env.PROD
-          ? undefined
-          : localIdentityProvider,
+        identityProvider: isLocalNetwork() ? localIdentityProvider : undefined,
       });
     },
     async loginNFID() {
@@ -174,10 +148,6 @@ export const useIdentityStore = create<IdentityState>((set, get) => {
         identityProvider: `https://nfid.one/authenticate/?applicationName=${encodeURIComponent(
           applicationName,
         )}`,
-        // windowOpenerFeatures:
-        //   `left=${window.screen.width / 2 - 525 / 2},` +
-        //   `top=${window.screen.height / 2 - 705 / 2},` +
-        //   'toolbar=0,location=0,menubar=0,width=525,height=705',
       });
     },
     async logout() {

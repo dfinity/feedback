@@ -313,7 +313,6 @@ export default function TopicView({
                         {topic.modStatus !== 'approved' && (
                           <Tooltip content="Approve">
                             <ToolbarButton
-                              // css={{ background: statusColors.next }}
                               onClick={() => setModStatus(topic, 'approved')}
                             >
                               <FaCheck tw="text-green-500" />
@@ -323,7 +322,6 @@ export default function TopicView({
                         {topic.modStatus !== 'rejected' && (
                           <Tooltip content="Hide">
                             <ToolbarButton
-                              // css={{ background: statusColors.next }}
                               onClick={() =>
                                 handlePromise(
                                   promptModMessage(topic, 'rejected'),
@@ -343,7 +341,6 @@ export default function TopicView({
                       <div tw="flex gap-2">
                         {topic.status === 'open' && (
                           <ToolbarButton
-                            // css={{ background: statusColors.next }}
                             onClick={() => onChangeStatus(topic, 'next')}
                           >
                             <FaRegPlayCircle />
@@ -352,7 +349,6 @@ export default function TopicView({
                         )}
                         {topic.status === 'next' && (
                           <ToolbarButton
-                            // css={{ background: statusColors.completed }}
                             onClick={() => onChangeStatus(topic, 'completed')}
                           >
                             <FaRegCheckCircle />
@@ -362,7 +358,6 @@ export default function TopicView({
                         {(topic.status === 'open' ||
                           topic.status === 'next') && (
                           <ToolbarButton
-                            // css={{ background: statusColors.closed }}
                             onClick={() => onChangeStatus(topic, 'closed')}
                           >
                             <FaRegTimesCircle />
@@ -372,7 +367,6 @@ export default function TopicView({
                         {(topic.status === 'completed' ||
                           topic.status === 'closed') && (
                           <ToolbarButton
-                            // css={{ background: statusColors.open }}
                             onClick={() => onChangeStatus(topic, 'open')}
                           >
                             <FaRegDotCircle />
