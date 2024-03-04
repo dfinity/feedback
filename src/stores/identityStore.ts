@@ -1,4 +1,3 @@
-import { type User as Auth0User } from '@auth0/auth0-react';
 import { HttpAgent } from '@dfinity/agent';
 import {
   AuthClient,
@@ -16,16 +15,9 @@ export interface UserDetail {
   isModerator: boolean;
 }
 
-export type User = (
-  | {
-      type: 'ic';
-      client: AuthClient;
-    }
-  | {
-      type: 'auth0';
-      auth0: Auth0User;
-    }
-) & {
+export type User = {
+  type: 'ic';
+  client: AuthClient;
   detail: UserDetail;
 };
 
@@ -55,7 +47,7 @@ window.addEventListener('focus', () => {
   }
 });
 
-const localIdentityProvider = `http://localhost:4943?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`;
+const localIdentityProvider = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
 
 export interface IdentityState {
   user: User | null | undefined;

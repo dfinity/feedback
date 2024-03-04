@@ -12,17 +12,8 @@ export interface LoginAreaProps {
 }
 
 export default function LoginArea({ label }: LoginAreaProps) {
-  /* const { user: auth0User } = useAuth0(); */
   const loginII = useIdentityStore((state) => state.loginInternetIdentity);
   const loginNFID = useIdentityStore((state) => state.loginNFID);
-
-  /* useEffect(() => {
-    if (auth0User) {
-      console.log(auth0User);
-
-      useIdentityStore.setState({ user: { type: 'auth0', auth0: auth0User } });
-    }
-  }); */
 
   const wrapLogin = (promise: Promise<any>) => {
     return handlePromise(
@@ -54,18 +45,6 @@ export default function LoginArea({ label }: LoginAreaProps) {
           <img src={nfidLogo} alt="NFID" />
         </LoginAreaButton>
       </Tooltip>
-      {/* <Tooltip
-        content="Social Login"
-      >
-        <LoginAreaButton
-          tw="flex gap-1 items-center"
-          onClick={() => loginWithRedirect().catch(handleError)}
-        >
-          <FaGoogle />
-          <FaGithub />
-          <FaTwitter />
-        </LoginAreaButton>
-      </Tooltip> */}
     </div>
   );
 }

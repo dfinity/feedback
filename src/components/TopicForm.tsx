@@ -37,11 +37,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
         tags: [],
       },
   );
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors },
-  // } = useForm();
 
   const tags = useTopicStore((state) => state.tags);
 
@@ -51,8 +46,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
 
   const patch = (partialInfo: Partial<TopicInfo>) =>
     setInfo({ ...info, ...partialInfo });
-
-  // TODO: add client-side form validation
 
   return (
     <Form
@@ -84,11 +77,6 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
           onChange={(e) => patch({ description: e.target.value })}
         />
       </label>
-      {/* {!!info.description && (
-        <div tw="p-3 border-2 rounded-xl">
-          <Markdown>{info.description}</Markdown>
-        </div>
-      )} */}
       <label>
         Links
         <div tw="flex flex-col gap-2">
