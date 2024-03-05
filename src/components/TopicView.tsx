@@ -7,6 +7,7 @@ import {
   FaEdit,
   FaFlag,
   FaGithub,
+  FaInfinity,
   FaJira,
   FaRegCheckCircle,
   FaRegDotCircle,
@@ -227,6 +228,9 @@ export default function TopicView({
                       )}
                       {!!link.startsWith('https://github.com/') && (
                         <FaGithub tw="text-black" />
+                      )}
+                      {!!link.startsWith('https://forum.dfinity.org/') && (
+                        <FaInfinity tw="text-purple-500" />
                       )}
                       <a
                         tw="text-blue-500 text-ellipsis overflow-hidden whitespace-nowrap"

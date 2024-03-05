@@ -8,6 +8,10 @@ import { defaultTagColor } from './Tag';
 const Form = styled.form`
   ${tw`w-full flex flex-col gap-3`}
 
+  a {
+    ${tw`text-blue-500`}
+  }
+
   label {
     ${tw`flex flex-col gap-1 w-full text-xl font-semibold`}
     > * {
@@ -20,6 +24,8 @@ const Form = styled.form`
     ${tw`w-full border-2 p-2 rounded-lg`}
   }
 `;
+
+const developerForumBaseUrl = 'https://forum.dfinity.org/';
 
 export interface TopicFormProps {
   initial?: TopicInfo;
@@ -79,6 +85,20 @@ export default function TopicForm({ initial, onSubmit }: TopicFormProps) {
       </label>
       <label>
         Links
+        {!info.links.some((link) => link.startsWith(developerForumBaseUrl)) && (
+          <div>
+            Please include a new or existing{' '}
+            <a
+              href={developerForumBaseUrl}
+              target="_blank"
+              rel="noreferrer"
+              tw="whitespace-nowrap"
+            >
+              developer forum topic
+            </a>
+            .
+          </div>
+        )}
         <div tw="flex flex-col gap-2">
           {[...info.links, ''].map((link, i) => (
             <div key={i}>
