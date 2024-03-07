@@ -31,7 +31,7 @@ export type User = {
   detail: UserDetail;
 };
 
-const localIdentityProvider = `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
+const localIdentityProvider = `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`;
 
 export interface IdentityState {
   user: User | null | undefined;
