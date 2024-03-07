@@ -1,5 +1,5 @@
 export function getNetwork(): string | undefined {
-  return import.meta.env.DFX_NETWORK;
+  return process.env.DFX_NETWORK;
 }
 
 export function isLocalNetwork(): boolean {
