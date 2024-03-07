@@ -1,7 +1,6 @@
 import Types "Types";
 import Relate "Relate";
 
-import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 
 module {
@@ -69,7 +68,7 @@ module {
     userTopicVotes : TernRel<UserId, TopicId, UserVote>;
   };
 
-  public func init(installer : Principal) : State {
+  public func init(_installer : Principal) : State {
     {
       users = Relate.Stable.emptyMap();
       var nextUserId = 1;
