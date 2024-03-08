@@ -1,22 +1,16 @@
-import P "mo:base/Prelude";
 import Nat "mo:base/Nat";
 import Int "mo:base/Int";
-import List "mo:base/List";
-import Hash "mo:base/Hash";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
-import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
 import Array "mo:base/Array";
 import Order "mo:base/Order";
 import Option "mo:base/Option";
-import Error "mo:base/Error";
 
 import Types "Types";
 import State "State";
 import History "History";
 import Snapshot "Snapshot";
-import Relate "Relate";
 import Validate "Validate";
 import RateLimit "RateLimit";
 import System "System";
@@ -87,18 +81,6 @@ module {
         case (?user) {
           log.internal(#callerIsUser user);
           ?user;
-        };
-      };
-    };
-
-    func assertCallerOwnsTopic(log : ReqLog, caller : Principal, topic : Types.Topic.Id) : ?() {
-      do ? {
-        let user = assertCallerIsUser(log, caller)!;
-        let a = #callerOwnsTopic { user; topic };
-        if (state.userOwnsTopic.has(user, topic)) {
-          log.internal(#okAccess a);
-        } else {
-          log.errAccess(a)!;
         };
       };
     };

@@ -1,5 +1,5 @@
 # Motoko dependencies (https://mops.one/)
 
 [dependencies]
+base = "0.11.0"
 sequence = "https://github.com/matthewhammer/motoko-sequence#366c419"
-base = "https://github.com/dfinity/motoko-base#moc-0.8.5"
