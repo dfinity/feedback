@@ -201,7 +201,11 @@ module {
         let log = logger.Begin(caller, #setUserIsModerator { user = #user id; isMod });
         assertCallerIsModerator(log, caller)!;
         assertUserExists(log, #user id)!;
-        state.userIsModerator.put(#user id);
+        if (isMod) {
+          state.userIsModerator.put(#user id);
+        } else {
+          state.userIsModerator.remove(#user id);
+        };
         log.ok()!;
       };
     };
