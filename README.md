@@ -1,6 +1,6 @@
-# DX Feedback Board
+# Developer Experience Feedback Board
 
-> #### An IC developer feedback dapp powered by Motoko.
+> #### An ICP developer feedback dapp powered by Motoko.
 
 ---
 
