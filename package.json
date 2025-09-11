@@ -53,7 +53,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
     "@types/turndown": "^5.0.1",
-    "@vitejs/plugin-react": "^3.1.0",
+    "@vitejs/plugin-react": "^5.0.2",
     "autoprefixer": "^10.4.14",
     "babel-plugin-twin": "^1.1.0",
     "cross-env": "^7.0.3",
@@ -72,9 +72,9 @@
     "prettier-plugin-motoko": "^0.5.2",
     "sass": "^1.59.3",
     "tailwindcss": "^3.2.7",
-    "vite": "^4.5.14",
+    "vite": "^7.1.5",
     "vite-imagetools": "^4.0.18",
-    "vitest": "^0.29.7",
+    "vitest": "^3.2.4",
     "web-vitals": "^3.3.0"
   },
   "lint-staged": {
